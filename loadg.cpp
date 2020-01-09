@@ -1,5 +1,9 @@
 #include "DxLib.h"
 
+#ifdef WIN32
+#define strcasecmp _stricmp
+#endif
+
 extern int ma, t, tt;
 extern SDL_Surface *grap[161][8];
 extern SDL_Surface *mgrap[51];
