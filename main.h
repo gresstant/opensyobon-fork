@@ -45,7 +45,7 @@ int stageonoff = 0;
 
 
 //メインプログラム
-void Mainprogram();
+void mainProgram();
 void rpaint();
 int maint;
 

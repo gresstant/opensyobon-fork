@@ -1,7 +1,5 @@
 #include "main.h"
 
-// プログラムは WinMain から始まります
-//Changed to ansi c++ main()
 int main(int argc, char *argv[]) {
     parseArgs(argc, argv);
     if (DxLib_Init() == -1)
@@ -10,16 +8,15 @@ int main(int argc, char *argv[]) {
     //全ロード
     loadg();
 
-    //フォント
+    // Font
     SetFontSize(16);
     //SetFontThickness(4) ;
 
-    //ループ
-    //for (maint=0;maint<=2;maint++){
+    // Game main loop
     while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0) {
         UpdateKeys();
         maint = 0;
-        Mainprogram();
+        mainProgram();
         if (maint == 3)
             break;
     }
@@ -396,11 +393,9 @@ void rpaint() {
                 xx[9] = 0;
                 if (stagecolor == 2) {
                     xx[9] = 30;
-                }
-                if (stagecolor == 4) {
+                } else if (stagecolor == 4) {
                     xx[9] = 60;
-                }
-                if (stagecolor == 5) {
+                } else if (stagecolor == 5) {
                     xx[9] = 90;
                 }
 
@@ -410,30 +405,17 @@ void rpaint() {
                 }
 
                 if (txtype[t] != 10) {
-
-                    if (ttype[t] == 100 || ttype[t] == 101
-                            || ttype[t] == 102
-                            || ttype[t] == 103
-                            || (ttype[t] == 104 && txtype[t] == 1)
-                            || (ttype[t] == 114 && txtype[t] == 1)
-                            || ttype[t] == 116) {
+                    if (ttype[t] == 100 || ttype[t] == 101 || ttype[t] == 102 || ttype[t] == 103
+                            || (ttype[t] == 104 && txtype[t] == 1) || (ttype[t] == 114 && txtype[t] == 1) || ttype[t] == 116) {
                         xx[6] = 2 + xx[9];
-                        drawimage(grap[xx[6]][1],
-                                  xx[0] / 100, xx[1] / 100);
-                    }
-
-                    if (ttype[t] == 112 || (ttype[t] == 104 && txtype[t] == 0) || (ttype[t] == 115 && txtype[t] == 1)) {
+                        drawimage(grap[xx[6]][1], xx[0] / 100, xx[1] / 100);
+                    } else if (ttype[t] == 112 || (ttype[t] == 104 && txtype[t] == 0) || (ttype[t] == 115 && txtype[t] == 1)) {
                         xx[6] = 1 + xx[9];
                         drawimage(grap[xx[6]][1], xx[0] / 100, xx[1] / 100);
-                    }
-
-                    if (ttype[t] == 111 || ttype[t] == 113
-                            || (ttype[t] == 115 && txtype[t] == 0)
-                            || ttype[t] == 124) {
+                    } else if (ttype[t] == 111 || ttype[t] == 113 || (ttype[t] == 115 && txtype[t] == 0) || ttype[t] == 124) {
                         xx[6] = 3 + xx[9];
                         drawimage(grap[xx[6]][1], xx[0] / 100, xx[1] / 100);
                     }
-
                 }
 
                 if (ttype[t] == 117 && txtype[t] == 1) {
@@ -488,216 +470,103 @@ void rpaint() {
 
                 if (stype[t] == 0) {
                     setcolor(40, 200, 40);
-                    fillrect((sa[t] - fx) / 100 + fma,
-                             (sb[t] - fy) / 100 + fmb,
-                             sc[t] / 100, sd[t] / 100);
-                    drawrect((sa[t] - fx) / 100 + fma,
-                             (sb[t] - fy) / 100 + fmb,
-                             sc[t] / 100, sd[t] / 100);
-                }
-//土管
-                if (stype[t] == 1) {
+                    fillrect((sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb, sc[t] / 100, sd[t] / 100);
+                    drawrect((sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb, sc[t] / 100, sd[t] / 100);
+                } else if (stype[t] == 1) {  // 土管  Tube
                     setcolor(0, 230, 0);
-                    fillrect((sa[t] - fx) / 100 + fma,
-                             (sb[t] - fy) / 100 + fmb,
-                             sc[t] / 100, sd[t] / 100);
+                    fillrect((sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb, sc[t] / 100, sd[t] / 100);
                     setc0();
-                    drawrect((sa[t] - fx) / 100 + fma,
-                             (sb[t] - fy) / 100 + fmb,
-                             sc[t] / 100, sd[t] / 100);
-                }
-//土管(下)
-                if (stype[t] == 2) {
+                    drawrect((sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb, sc[t] / 100, sd[t] / 100);
+                } else if (stype[t] == 2) {  // 土管(下)  Tube (Downwards)
                     setcolor(0, 230, 0);
-                    fillrect((sa[t] - fx) / 100 + fma,
-                             (sb[t] - fy) / 100 + fmb + 1,
-                             sc[t] / 100, sd[t] / 100);
+                    fillrect((sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb + 1, sc[t] / 100, sd[t] / 100);
                     setc0();
-                    drawline((sa[t] - fx) / 100 + fma,
-                             (sb[t] - fy) / 100 + fmb,
-                             (sa[t] - fx) / 100 + fma,
-                             (sb[t] - fy) / 100 + fmb + sd[t] / 100);
-                    drawline((sa[t] - fx) / 100 + fma +
-                             sc[t] / 100,
-                             (sb[t] - fy) / 100 + fmb,
-                             (sa[t] - fx) / 100 + fma +
-                             sc[t] / 100,
-                             (sb[t] - fy) / 100 + fmb + sd[t] / 100);
-                }
-//土管(横)
-                if (stype[t] == 5) {
+                    drawline((sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb, (sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb + sd[t] / 100);
+                    drawline((sa[t] - fx) / 100 + fma + sc[t] / 100, (sb[t] - fy) / 100 + fmb, (sa[t] - fx) / 100 + fma + sc[t] / 100, (sb[t] - fy) / 100 + fmb + sd[t] / 100);
+                } else if (stype[t] == 5) {  // 土管(横)  Tube (Horizontal)
                     setcolor(0, 230, 0);
-                    fillrect((sa[t] - fx) / 100 + fma,
-                             (sb[t] - fy) / 100 + fmb + 1,
-                             sc[t] / 100, sd[t] / 100);
+                    fillrect((sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb + 1, sc[t] / 100, sd[t] / 100);
                     setc0();
-                    drawline((sa[t] - fx) / 100 + fma,
-                             (sb[t] - fy) / 100 + fmb,
-                             (sa[t] - fx) / 100 + fma +
-                             sc[t] / 100, (sb[t] - fy) / 100 + fmb);
-                    drawline((sa[t] - fx) / 100 + fma,
-                             (sb[t] - fy) / 100 + fmb +
-                             sd[t] / 100,
-                             (sa[t] - fx) / 100 + fma +
-                             sc[t] / 100,
-                             (sb[t] - fy) / 100 + fmb + sd[t] / 100);
-                }
-//落ちてくるブロック
-                if (stype[t] == 51) {
+                    drawline((sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb, (sa[t] - fx) / 100 + fma + sc[t] / 100, (sb[t] - fy) / 100 + fmb);
+                    drawline((sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb + sd[t] / 100, (sa[t] - fx) / 100 + fma + sc[t] / 100, (sb[t] - fy) / 100 + fmb + sd[t] / 100);
+                } else if (stype[t] == 51) {  // 落ちてくるブロック  Falling Block
                     if (sxtype[t] == 0) {
                         for (t3 = 0; t3 <= sc[t] / 3000; t3++) {
-                            drawimage(grap[1][1],
-                                      (sa[t] -
-                                       fx) / 100 +
-                                      fma + 29 * t3,
-                                      (sb[t] - fy) / 100 + fmb);
+                            drawimage(grap[1][1], (sa[t] -  fx) / 100 + fma + 29 * t3, (sb[t] - fy) / 100 + fmb);
                         }
-                    }
-                    if (sxtype[t] == 1 || sxtype[t] == 2) {
+                    } else if (sxtype[t] == 1 || sxtype[t] == 2) {
                         for (t3 = 0; t3 <= sc[t] / 3000; t3++) {
-                            drawimage(grap[31][1],
-                                      (sa[t] -
-                                       fx) / 100 +
-                                      fma + 29 * t3,
-                                      (sb[t] - fy) / 100 + fmb);
+                            drawimage(grap[31][1], (sa[t] -  fx) / 100 + fma + 29 * t3, (sb[t] - fy) / 100 + fmb);
                         }
-                    }
-                    if (sxtype[t] == 3 || sxtype[t] == 4) {
+                    } else if (sxtype[t] == 3 || sxtype[t] == 4) {
                         for (t3 = 0; t3 <= sc[t] / 3000; t3++) {
                             for (t2 = 0; t2 <= sd[t] / 3000; t2++) {
-                                drawimage(grap[65]
-                                          [1], (sa[t]
-                                                -
-                                                fx) /
-                                               100 + fma + 29 * t3, (sb[t]
-                                                                     -
-                                                                     fy) /
-                                                                    100 + 29 * t2 + fmb);
+                                drawimage(grap[65][1], (sa[t] - fx) / 100 + fma + 29 * t3, (sb[t] - fy) / 100 + 29 * t2 + fmb);
                             }
                         }
-                    }
-
-                    if (sxtype[t] == 10) {
+                    } else if (sxtype[t] == 10) {
                         for (t3 = 0; t3 <= sc[t] / 3000; t3++) {
-                            drawimage(grap[65][1],
-                                      (sa[t] -
-                                       fx) / 100 +
-                                      fma + 29 * t3,
-                                      (sb[t] - fy) / 100 + fmb);
+                            drawimage(grap[65][1], (sa[t] - fx) / 100 + fma + 29 * t3, (sb[t] - fy) / 100 + fmb);
                         }
                     }
-
-                }        //51
-
-//落ちるやつ
-                if (stype[t] == 52) {
+                } else if (stype[t] == 52) {  // 落ちるやつ
                     xx[29] = 0;
                     if (stagecolor == 2) {
                         xx[29] = 30;
-                    }
-                    if (stagecolor == 4) {
+                    } else if (stagecolor == 4) {
                         xx[29] = 60;
-                    }
-                    if (stagecolor == 5) {
+                    } else if (stagecolor == 5) {
                         xx[29] = 90;
                     }
 
                     for (t3 = 0; t3 <= sc[t] / 3000; t3++) {
                         if (sxtype[t] == 0) {
-                            drawimage(grap
-                                      [5 +
-                                       xx[29]][1],
-                                      (sa[t] -
-                                       fx) / 100 +
-                                      fma + 29 * t3,
-                                      (sb[t] - fy) / 100 + fmb);
+                            drawimage(grap[5 + xx[29]][1], (sa[t] - fx) / 100 + fma + 29 * t3, (sb[t] - fy) / 100 + fmb);
                             if (stagecolor != 4) {
-                                drawimage(grap[6 + xx[29]]
-                                          [1], (sa[t]
-                                                -
-                                                fx) /
-                                               100 + fma + 29 * t3, (sb[t]
-                                                                     -
-                                                                     fy) /
-                                                                    100 + fmb + 29);
+                                drawimage(grap[6 + xx[29]][1], (sa[t] - fx) / 100 + fma + 29 * t3, (sb[t] - fy) / 100 + fmb + 29);
                             } else {
-                                drawimage(grap[5 + xx[29]]
-                                          [1], (sa[t]
-                                                -
-                                                fx) /
-                                               100 + fma + 29 * t3, (sb[t]
-                                                                     -
-                                                                     fy) /
-                                                                    100 + fmb + 29);
+                                drawimage(grap[5 + xx[29]][1], (sa[t] - fx) / 100 + fma + 29 * t3, (sb[t] - fy) / 100 + fmb + 29);
                             }
-                        }
-                        if (sxtype[t] == 1) {
+                        } else if (sxtype[t] == 1) {
                             for (t2 = 0; t2 <= sd[t] / 3000; t2++) {
-                                drawimage(grap[1 + xx[29]]
-                                          [1], (sa[t]
-                                                -
-                                                fx) /
-                                               100 + fma + 29 * t3, (sb[t]
-                                                                     -
-                                                                     fy) /
-                                                                    100 + fmb + 29 * t2);
+                                drawimage(grap[1 + xx[29]][1], (sa[t] - fx) / 100 + fma + 29 * t3, (sb[t] - fy) / 100 + fmb + 29 * t2);
                             }
-                        }
-
-                        if (sxtype[t] == 2) {
+                        } else if (sxtype[t] == 2) {
                             for (t2 = 0; t2 <= sd[t] / 3000; t2++) {
-                                drawimage(grap[5 + xx[29]]
-                                          [1], (sa[t]
-                                                -
-                                                fx) /
-                                               100 + fma + 29 * t3, (sb[t]
-                                                                     -
-                                                                     fy) /
-                                                                    100 + fmb + 29 * t2);
+                                drawimage(grap[5 + xx[29]][1], (sa[t] - fx) / 100 + fma + 29 * t3, (sb[t] - fy) / 100 + fmb + 29 * t2);
                             }
                         }
 
                     }
                 }
-//ステージトラップ
-                if (trap == 1) {
+
+                if (trap == 1) {  // ステージトラップ
                     if (stype[t] >= 100 && stype[t] <= 299) {
-                        if (stagecolor == 1
-                            || stagecolor == 3 || stagecolor == 5)
+                        if (stagecolor == 1 || stagecolor == 3 || stagecolor == 5)
                             setc0();
                         if (stagecolor == 2 || stagecolor == 4)
                             setc1();
-                        drawrect((sa[t] - fx) / 100 +
-                                 fma,
-                                 (sb[t] - fy) / 100 +
-                                 fmb, sc[t] / 100, sd[t] / 100);
+                        drawrect((sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb, sc[t] / 100, sd[t] / 100);
                     }
                 }
-//ゴール
-                if (stype[t] == 300) {
+
+                if (stype[t] == 300) {  // ゴール
                     setc1();
-                    fillrect((sa[t] - fx) / 100 + 10,
-                             (sb[t] - fy) / 100, 10, sd[t] / 100 - 8);
+                    fillrect((sa[t] - fx) / 100 + 10, (sb[t] - fy) / 100, 10, sd[t] / 100 - 8);
                     setc0();
-                    drawrect((sa[t] - fx) / 100 + 10,
-                             (sb[t] - fy) / 100, 10, sd[t] / 100 - 8);
+                    drawrect((sa[t] - fx) / 100 + 10, (sb[t] - fy) / 100, 10, sd[t] / 100 - 8);
                     setcolor(250, 250, 0);
-                    fillarc((sa[t] - fx) / 100 + 15 - 1,
-                            (sb[t] - fy) / 100, 10, 10);
+                    fillarc((sa[t] - fx) / 100 + 15 - 1, (sb[t] - fy) / 100, 10, 10);
                     setc0();
-                    drawarc((sa[t] - fx) / 100 + 15 - 1,
-                            (sb[t] - fy) / 100, 10, 10);
-                }
-//中間
-                if (stype[t] == 500) {
-                    drawimage(grap[20][4],
-                              (sa[t] - fx) / 100, (sb[t] - fy) / 100);
+                    drawarc((sa[t] - fx) / 100 + 15 - 1, (sb[t] - fy) / 100, 10, 10);
+                } else if (stype[t] == 500) {  // 中間
+                    drawimage(grap[20][4], (sa[t] - fx) / 100, (sb[t] - fy) / 100);
                 }
             }
         }            //t
 
 //描画上書き(土管)
-        for (t = 0; t < smax; t++) {
+        for (t = 0; t < smax; t++) {  // TODO merge smax loop
             if (sa[t] - fx + sc[t] >= -10 && sa[t] - fx <= fxmax + 1100) {
 
 //入る土管(右)
@@ -751,8 +620,8 @@ void rpaint() {
             }
         }            //t
 
-//ファイアバー
-        for (t = 0; t < amax; t++) {
+        // ファイアバー  Fireball
+        for (t = 0; t < amax; t++) {  // TODO merge this with the previous for loop of amax
 
             xx[0] = aa[t] - fx;
             xx[1] = ab[t] - fy;
@@ -772,21 +641,13 @@ void rpaint() {
                         setcolor(230, 120, 0);
                         xx[23] = 8;
                         if (atype[t] == 87) {
-                            fillarc(xx[0] / 100 +
-                                    xx[24],
-                                    xx[1] / 100 + xx[25], xx[23], xx[23]);
+                            fillarc(xx[0] / 100 + xx[24], xx[1] / 100 + xx[25], xx[23], xx[23]);
                             setcolor(0, 0, 0);
-                            drawarc(xx[0] / 100 +
-                                    xx[24],
-                                    xx[1] / 100 + xx[25], xx[23], xx[23]);
+                            drawarc(xx[0] / 100 + xx[24], xx[1] / 100 + xx[25], xx[23], xx[23]);
                         } else {
-                            fillarc(xx[0] / 100 -
-                                    xx[24],
-                                    xx[1] / 100 + xx[25], xx[23], xx[23]);
+                            fillarc(xx[0] / 100 - xx[24], xx[1] / 100 + xx[25], xx[23], xx[23]);
                             setcolor(0, 0, 0);
-                            drawarc(xx[0] / 100 -
-                                    xx[24],
-                                    xx[1] / 100 + xx[25], xx[23], xx[23]);
+                            drawarc(xx[0] / 100 - xx[24], xx[1] / 100 + xx[25], xx[23], xx[23]);
                         }
                     }
 
@@ -794,7 +655,7 @@ void rpaint() {
             }
         }
 
-//プレイヤーのメッセージ
+        //プレイヤーのメッセージ
         setc0();
         if (mmsgtm >= 1) {
             mmsgtm--;
@@ -831,7 +692,7 @@ void rpaint() {
 
         }            //mmsgtm
 
-//敵キャラのメッセージ
+        //敵キャラのメッセージ
         setc0();
         for (t = 0; t < amax; t++) {
             if (amsgtm[t] >= 1) {
@@ -954,7 +815,7 @@ void rpaint() {
             }            //amsgtm
         }            //amax
 
-//メッセージブロック
+        //メッセージブロック
         if (tmsgtm > 0) {
             ttmsg();
             if (tmsgtype == 1) {
@@ -985,23 +846,18 @@ void rpaint() {
             tmsgtm--;
         }            //tmsgtm
 
-//メッセージ
+        //メッセージ
         if (mainmsgtype >= 1) {
             setfont(20, 4);
             if (mainmsgtype == 1) {
-                DrawFormatString(126, 100,
-                                 GetColor(255, 255, 255),
-                                 "WELCOME TO OWATA ZONE");
-            }
-            if (mainmsgtype == 1) {
+                DrawFormatString(126, 100, GetColor(255, 255, 255), "WELCOME TO OWATA ZONE");
                 for (t2 = 0; t2 <= 2; t2++)
-                    DrawFormatString(88 + t2 * 143, 210,
-                                     GetColor(255, 255, 255), "1");
+                    DrawFormatString(88 + t2 * 143, 210, GetColor(255, 255, 255), "1");
             }
             setfont(20, 5);
         }            //mainmsgtype>=1
 
-//画面黒
+        //画面黒
         if (blacktm > 0) {
             blacktm--;
             fillrect(0, 0, fxmax, fymax);
@@ -1083,7 +939,7 @@ void rpaint() {
 }                //rpaint()
 
 //メインプログラム
-void Mainprogram() {
+void mainProgram() {
 
     stime = long(GetNowCount());
 
@@ -4445,7 +4301,7 @@ if (atype[t]==133){msoubi=4;}
 
 //wait(20);
 
-}                //Mainprogram()
+}                //mainProgram()
 
 void tekizimen() {
 
@@ -4833,7 +4689,7 @@ void stagecls() {
         stype[t] = 0;
         sxtype[t] = 0;
     }
-//for (t=0;t<spmax;t++){spa[t]=-9000000;szyunni[t]=t;spb[t]=1;spc[t]=1;spd[t]=1;sptype[t]=0;spgtype[t]=0;}
+    //for (t=0;t<spmax;t++){spa[t]=-9000000;szyunni[t]=t;spb[t]=1;spc[t]=1;spd[t]=1;sptype[t]=0;spgtype[t]=0;}
     for (t = 0; t < tmax; t++) {
         ta[t] = -9000000;
         tb[t] = 1;
@@ -4857,9 +4713,9 @@ void stagecls() {
         srmovep[t] = 0;
         srsp[t] = 0;
     }
-//for (t=0;t<sqmax;t++){sqa[t]=-9000000;sqb[t]=1;sqc[t]=1;sqd[t]=1;sqgtype[t]=0;sqtype[t]=0;}
-//for (t=0;t<kmax;t++){ka[t]=-9000000;kmuki[t]=0;ksoka[t]=0;ksokb[t]=0;kxsoka[t]=0;kxsokb[t]=0;}
-//for (t=0;t<imax;t++){ia[t]=-9000000;ib[t]=1;ic[t]=1;id[t]=1;}
+    //for (t=0;t<sqmax;t++){sqa[t]=-9000000;sqb[t]=1;sqc[t]=1;sqd[t]=1;sqgtype[t]=0;sqtype[t]=0;}
+    //for (t=0;t<kmax;t++){ka[t]=-9000000;kmuki[t]=0;ksoka[t]=0;ksokb[t]=0;kxsoka[t]=0;kxsokb[t]=0;}
+    //for (t=0;t<imax;t++){ia[t]=-9000000;ib[t]=1;ic[t]=1;id[t]=1;}
     for (t = 0; t < amax; t++) {
         aa[t] = -9000000;
         ab[t] = 1;
@@ -4899,9 +4755,9 @@ void stagecls() {
         ng[t] = 0;
         ntype[t] = 0;
     }
-//for (t=0;t<cmax;t++){ca[t]=-9000000;cb[t]=1;contm[t]=0;ctype[t]=0;ce[t]=0;cf[t]=0;}
-//for (t=0;t<vmax;t++){va[t]=-9000000;vtype[t]=0;vb[t]=0;vc[t]=1;vd[t]=1;}
-//for (t=0;t<gmax;t++){ga[t]=-9000000;gx[t]=0;gstring[t]="";}
+    //for (t=0;t<cmax;t++){ca[t]=-9000000;cb[t]=1;contm[t]=0;ctype[t]=0;ce[t]=0;cf[t]=0;}
+    //for (t=0;t<vmax;t++){va[t]=-9000000;vtype[t]=0;vb[t]=0;vc[t]=1;vd[t]=1;}
+    //for (t=0;t<gmax;t++){ga[t]=-9000000;gx[t]=0;gstring[t]="";}
 
     sco = 0;
     tco = 0;
@@ -4909,34 +4765,41 @@ void stagecls() {
     bco = 0;
     eco = 0;
     nco = 0;
-//haikeitouroku();
+    //haikeitouroku();
 }                //stagecls()
 
 //ステージロード
 void stage() {
 
-//fzx=6000*100;
+    //fzx=6000*100;
     scrollx = 3600 * 100;
 
-//byte stagedate[16][801];
-//byte stagedate2[16][801];
+    //byte stagedate[16][801];
+    //byte stagedate2[16][801];
 
-//1-レンガ,2-コイン,3-空,4-土台//5-6地面//7-隠し//
+    //1-レンガ,2-コイン,3-空,4-土台//5-6地面//7-隠し//
 
     stagep();
 
-    for (tt = 0; tt <= 1000; tt++) {
-        for (t = 0; t <= 16; t++) {
-            xx[10] = 0;
+    for (int i = 0; i <= 1000; i++) {
+        tt = i;
+        for (int j = 0; j <= 16; j++) {
+            t = j;
+
+            xx[10] = 0;  // TODO stop assigning xx[...] if they really have no special meaning.
             if (stagedate[t][tt] >= 1 && stagedate[t][tt] <= 255)
                 xx[10] = (int) stagedate[t][tt];
-            xx[21] = tt * 29;
-            xx[22] = t * 29 - 12;
+            xx[21] = i * 29;
+            xx[22] = j * 29 - 12;
             xx[23] = xx[10];
-            if (xx[10] >= 1 && xx[10] <= 19 && xx[10] != 9) {
-                tyobi(tt * 29, t * 29 - 12, xx[10]);
-            }
-            if (xx[10] >= 20 && xx[10] <= 29) {
+
+            int value = xx[10];
+            int x = xx[21];
+            int y = xx[22];
+
+            if (value >= 1 && value != 9 && value <= 19) {
+                tyobi(tt * 29, t * 29 - 12, value);
+            } else if (value >= 20 && value <= 29) {
                 sra[srco] = xx[21] * 100;
                 srb[srco] = xx[22] * 100;
                 src[srco] = 3000;
@@ -4944,8 +4807,7 @@ void stage() {
                 srco++;
                 if (srco >= srmax)
                     srco = 0;
-            }
-            if (xx[10] == 30) {
+            } else if (value == 30) {
                 sa[sco] = xx[21] * 100;
                 sb[sco] = xx[22] * 100;
                 sc[sco] = 3000;
@@ -4954,8 +4816,7 @@ void stage() {
                 sco++;
                 if (sco >= smax)
                     sco = 0;
-            }
-            if (xx[10] == 40) {
+            } else if (value == 40) {
                 sa[sco] = xx[21] * 100;
                 sb[sco] = xx[22] * 100;
                 sc[sco] = 6000;
@@ -4964,8 +4825,7 @@ void stage() {
                 sco++;
                 if (sco >= smax)
                     sco = 0;
-            }
-            if (xx[10] == 41) {
+            } else if (value == 41) {
                 sa[sco] = xx[21] * 100 + 500;
                 sb[sco] = xx[22] * 100;
                 sc[sco] = 5000;
@@ -4974,9 +4834,7 @@ void stage() {
                 sco++;
                 if (sco >= smax)
                     sco = 0;
-            }
-
-            if (xx[10] == 43) {
+            } else if (value == 43) {
                 sa[sco] = xx[21] * 100;
                 sb[sco] = xx[22] * 100 + 500;
                 sc[sco] = 2900;
@@ -4985,8 +4843,7 @@ void stage() {
                 sco++;
                 if (sco >= smax)
                     sco = 0;
-            }
-            if (xx[10] == 44) {
+            } else if (value == 44) {
                 sa[sco] = xx[21] * 100;
                 sb[sco] = xx[22] * 100 + 700;
                 sc[sco] = 3900;
@@ -4995,30 +4852,24 @@ void stage() {
                 sco++;
                 if (sco >= smax)
                     sco = 0;
-            }
-//これなぜかバグの原因ｗ
-            if (xx[10] >= 50 && xx[10] <= 79) {
+            } else if (value >= 50 && value <= 79) {  //これなぜかバグの原因ｗ
+                // the original author says there are some bugs ...
                 ba[bco] = xx[21] * 100;
                 bb[bco] = xx[22] * 100;
-                btype[bco] = xx[23] - 50;
+                btype[bco] = value - 50;
                 bco++;
                 if (bco >= bmax)
                     bco = 0;
-            }
-
-            if (xx[10] >= 80 && xx[10] <= 89) {
+            } else if (value >= 80 && value <= 89) {
                 na[nco] = xx[21] * 100;
                 nb[nco] = xx[22] * 100;
-                ntype[nco] = xx[23] - 80;
+                ntype[nco] = value - 80;
                 nco++;
                 if (nco >= nmax)
                     nco = 0;
-            }
-//コイン
-            if (xx[10] == 9) {
+            } else if (value == 9) {  // コイン Coin
                 tyobi(tt * 29, t * 29 - 12, 800);
-            }
-            if (xx[10] == 99) {
+            } else if (value == 99) {
                 sa[sco] = xx[21] * 100;
                 sb[sco] = xx[22] * 100;
                 sc[sco] = 3000;
@@ -5069,7 +4920,7 @@ void stagep() {
 
         //new byte stagedate[16][801]={
 
-        byte stagedatex[17][1001] = {
+        byte stagedatex[17][1001] = {  //   9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,98, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
