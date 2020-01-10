@@ -49,7 +49,7 @@ void paint() {
     //: Clear screen
     FillScreen();
 
-    if (gameScene == IN_GAME && zxon >= 1) {
+    if (gameScene == GameScene::IN_GAME && zxon >= 1) {
         for (int i = 0; i < nmax; i++) {
             paintBgItem(i);
         }
@@ -478,7 +478,7 @@ void paint() {
         }            //blacktm
     }
 
-    if (gameScene == ALL_STAGE_CLEAR) {
+    if (gameScene == GameScene::ALL_STAGE_CLEAR) {
 
         setcolor(255, 255, 255);
         str("制作・プレイに関わった方々",
@@ -508,7 +508,7 @@ void paint() {
         str("プレイしていただき　ありがとうございました〜", 240 - 22 * 20 / 2, xx[30] / 100);
     }
 //Showing lives
-    if (gameScene == LIFE_SPLASH) {
+    if (gameScene == GameScene::LIFE_SPLASH) {
 
         setc0();
         FillScreen();
@@ -517,11 +517,11 @@ void paint() {
 
         drawimage(grap[0][0], 190, 190);
         DrawFormatString(230, 200, GetColor(255, 255, 255), " × %d",
-                         nokori);
+                         marioLife);
 
     }
 //タイトル
-    if (gameScene == TITLE) {
+    if (gameScene == GameScene::TITLE) {
 
         setcolor(160, 180, 250);
         fillrect(0, 0, fxmax, fymax);
@@ -561,7 +561,12 @@ void paintMario() {
     if (mmuki == 0)
         mirror = 1;
 
-    if (marioType != _200 && marioType != _1) {
+    char buffer[50];
+    sprintf_s(buffer, "atktm = %d, marioSpeedX = %d", atktm, marioSpeedX);
+    SDL_WM_SetCaption(buffer, nullptr);
+    printf("%s\n", buffer);
+
+    if (marioType != MarioType::DYING && marioType != MarioType::HUGE) {
         if (marioOnGround) {
             if (marioActImg == 0) {  // 読みこんだグラフィックを拡大描画
                 drawimage(grap[0][0], marioX / 100, marioY / 100);
@@ -571,9 +576,9 @@ void paintMario() {
         } else {
             drawimage(grap[2][0], marioX / 100, marioY / 100);
         }
-    } else if (marioType == _1) {  // 巨大化
+    } else if (marioType == MarioType::HUGE) {  // 巨大化
         drawimage(grap[41][0], marioX / 100, marioY / 100);
-    } else if (marioType == _200) {  // dying
+    } else if (marioType == MarioType::DYING) {  // dying
         drawimage(grap[3][0], marioX / 100, marioY / 100);
     }
 
@@ -901,11 +906,11 @@ void mainProgram() {
     stime = long(GetNowCount());
 
     if (ending == 1)
-        gameScene = ALL_STAGE_CLEAR;
+        gameScene = GameScene::ALL_STAGE_CLEAR;
 
     //キー
 
-    if (gameScene == IN_GAME && tmsgtype == 0) {
+    if (gameScene == GameScene::IN_GAME && tmsgtype == 0) {
 
         if (zxon == 0) {
             zxon = 1;
@@ -921,7 +926,7 @@ void mainProgram() {
             marioWidth = 3000;
             marioHeight = 3600;
 
-            marioType = _0;
+            marioType = MarioType::NORMAL;
 
             fx = 0;
             fy = 0;
@@ -997,7 +1002,7 @@ void mainProgram() {
         }
         //if (CheckHitKey(KEY_INPUT_F1)==1){end();}
         if (CheckHitKey(KEY_INPUT_F1) == 1) {
-            gameScene = TITLE;
+            gameScene = GameScene::TITLE;
         }
         //if (CheckHitKey(KEY_INPUT_Q)==1){mkeytm=0;}
         if (CheckHitKey(KEY_INPUT_O) == 1) {
@@ -1166,14 +1171,14 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
         if (marioHP <= 0 && marioHP >= -9) {
             mkeytm = 12;
             marioHP = -20;
-            marioType = _200;
+            marioType = MarioType::DYING;
             mtm = 0;
             Mix_HaltChannel(-1);
             Mix_HaltMusic();
             ot(oto[12]);StopSoundMem(oto[16]);
         }            //marioHP
 //if (marioHP<=-10){
-        if (marioType == _200) {
+        if (marioType == MarioType::DYING) {
             if (mtm <= 11) {
                 marioSpeedX = 0;
                 marioSpeedY = 0;
@@ -1186,17 +1191,17 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
             }
             if (mtm >= 100 || fast == 1) {
                 zxon = 0;
-                gameScene = LIFE_SPLASH;
+                gameScene = GameScene::LIFE_SPLASH;
                 mtm = 0;
                 mkeytm = 0;
-                nokori--;
+                marioLife--;
                 if (fast == 1)
-                    marioType = _0;
+                    marioType = MarioType::NORMAL;
             }            //mtm>=100
         }            //marioType==200
 
 //音符によるワープ
-        if (marioType == _2) {
+        if (marioType == MarioType::AFTER_ORANGE_NOTE) {
             mtm++;
 
             mkeytm = 2;
@@ -1208,13 +1213,13 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
                 stagerr = 0;
                 Mix_HaltMusic();
                 mtm = 0;
-                marioType = _0;
+                marioType = MarioType::NORMAL;
                 mkeytm = -1;
             }
         }            //2
 
 //ジャンプ台アウト
-        if (marioType == _3) {
+        if (marioType == MarioType::AFTER_SPRING) {
             marioSpeedY = -2400;
             if (marioY <= -6000) {
                 marioY = -80000000;
@@ -1222,11 +1227,11 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
             }
         }
 //mtypeによる特殊的な移動
-        if (marioType >= 100) {
+        if (int(marioType) >= 100) {
             mtm++;
 
 //普通の土管
-            if (marioType == _100) {
+            if (marioType == MarioType::IN_PIPE) {
                 if (marioXType == 0) {
                     marioSpeedX = 0;
                     marioSpeedY = 0;
@@ -1266,7 +1271,7 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
                             mzz = 1600;
                     }
                     if (mtm == 160) {
-                        marioType = _0;
+                        marioType = MarioType::NORMAL;
                         marioHP--;
                     }
 
@@ -1288,7 +1293,7 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
                         mmuki = 0;
                     }
                     if (mtm >= 48) {
-                        marioType = _0;
+                        marioType = MarioType::NORMAL;
                         marioHP--;
                     }
 
@@ -1303,14 +1308,14 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
                     }
                     if (mtm == 19 && marioXType == 2) {
                         marioHP = 0;
-                        marioType = _2000;
+                        marioType = MarioType::_2000;
                         mtm = 0;
                         mmsgtm = 30;
                         mmsgtype = 51;
                     }
                     if (mtm == 19 && marioXType == 5) {
                         marioHP = 0;
-                        marioType = _2000;
+                        marioType = MarioType::_2000;
                         mtm = 0;
                         mmsgtm = 30;
                         mmsgtype = 52;
@@ -1331,7 +1336,7 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
                 }
             }            //00
 
-            if (marioType == _300) {
+            if (marioType == MarioType::_300) {
                 mkeytm = 3;
                 if (mtm <= 1) {
                     marioSpeedX = 0;
@@ -1353,12 +1358,12 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
                     stc = 0;
                     zxon = 0;
                     tyuukan = 0;
-                    gameScene = LIFE_SPLASH;
+                    gameScene = GameScene::LIFE_SPLASH;
                     gameSceneTimer = 0;
                 }
             }            //marioType==300
 
-            if (marioType == _301 || marioType == _302) {
+            if (marioType == MarioType::WIN_SWORD || marioType == MarioType::WIN_AUTO) {
                 mkeytm = 3;
 
                 if (mtm <= 1) {
@@ -1367,15 +1372,15 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
                 }
 
                 if (mtm >= 2
-                    && (marioType == _301 && mtm <= 102
-                        || marioType == _302 && mtm <= 60)) {
+                    && (marioType == MarioType::WIN_SWORD && mtm <= 102
+                        || marioType == MarioType::WIN_AUTO && mtm <= 60)) {
                     xx[5] = 500;
                     marioX -= xx[5];
                     fx += xx[5];
                     fzx += xx[5];
                 }
 
-                if ((marioType == _301 || marioType == _302) && mtm >= 2
+                if ((marioType == MarioType::WIN_SWORD || marioType == MarioType::WIN_AUTO) && mtm >= 2
                     && mtm <= 100) {
                     marioSpeedX = 250;
                     mmuki = 1;
@@ -1383,7 +1388,7 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
 
                 if (mtm == 200) {
                     ot(oto[17]);
-                    if (marioType == _301) {
+                    if (marioType == MarioType::WIN_SWORD) {
                         na[nco] = 117 * 29 * 100 - 1100;
                         nb[nco] = 4 * 29 * 100;
                         ntype[nco] = 101;
@@ -1414,7 +1419,7 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
 //スタッフロールへ
 
                 if (mtm == 440) {
-                    if (marioType == _301) {
+                    if (marioType == MarioType::WIN_SWORD) {
                         ending = 1;
                     } else {
                         sta++;
@@ -1422,7 +1427,7 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
                         stc = 0;
                         zxon = 0;
                         tyuukan = 0;
-                        gameScene = LIFE_SPLASH;
+                        gameScene = GameScene::LIFE_SPLASH;
                         gameSceneTimer = 0;
                     }
                 }
@@ -1449,12 +1454,12 @@ if (mtm==250)end();
         if (marioSpeedX >= 0)
             mactp += marioSpeedX;
 
-        if (marioType <= 9 || marioType == _200 || marioType == _300 || marioType == _301
-            || marioType == _302)
+        if (int(marioType) <= 9 || marioType == MarioType::DYING || marioType == MarioType::_300 || marioType == MarioType::WIN_SWORD
+            || marioType == MarioType::WIN_AUTO)
             marioSpeedY += 100;
 
 //走る際の最大値
-        if (marioType == _0) {
+        if (marioType == MarioType::NORMAL) {
             xx[0] = 800;
             xx[1] = 1600;
             if (marioSpeedX > xx[0] && marioSpeedX < xx[0] + 200) {
@@ -1476,8 +1481,8 @@ if (mtm==250)end();
 //プレイヤー
 //地面の摩擦
         if (marioOnGround && actaon[0] != 3) {
-            if ((marioType <= 9) || marioType == _300 || marioType == _301
-                || marioType == _302) {
+            if ((int(marioType) <= 9) || marioType == MarioType::_300 || marioType == MarioType::WIN_SWORD
+                || marioType == MarioType::WIN_AUTO) {
                 if (mrzimen == 0) {
                     xx[2] = 30;
                     xx[1] = 60;
@@ -1512,7 +1517,7 @@ if (mtm==250)end();
         marioOnGround = false;
 
 //場外
-        if (marioType <= 9 && marioHP >= 1) {
+        if (int(marioType) <= 9 && marioHP >= 1) {
             if (marioX < 100) {
                 marioX = 100;
                 marioSpeedX = 0;
@@ -1545,7 +1550,7 @@ if (mtm==250)end();
             xx[8] = blockX[t] - fx;
             xx[9] = blockY[t] - fy;    //xx[15]=0;
             if (blockX[t] - fx + xx[1] >= -10 - xx[3] && blockX[t] - fx <= fxmax + 12000 + xx[3]) {
-                if (marioType != 200 && marioType != 1 && marioType != 2) {
+                if (marioType != MarioType::DYING && marioType != MarioType::HUGE && marioType != MarioType::AFTER_ORANGE_NOTE) {
                     if (blockType[t] < 1000 && blockType[t] != 800 && blockType[t] != 140 && blockType[t] != 141) {    // && blockType[t]!=5){
                         //if (!(mztm>=1 && mztype==1 && actaon[3]==1)){
                         if (!(mztype == 1)) {
@@ -1588,10 +1593,10 @@ if (mtm==250)end();
                                     else if (blockType[t] == 117) {
                                         ot(oto[14]);
                                         marioSpeedY = -1500;
-                                        marioType = _2;
+                                        marioType = MarioType::AFTER_ORANGE_NOTE;
                                         mtm = 0;
-                                        if (blockXType[t] >= 2 && marioType == _2) {
-                                            marioType = _0;
+                                        if (blockXType[t] >= 2 && marioType == MarioType::AFTER_ORANGE_NOTE) {
+                                            marioType = MarioType::NORMAL;
                                             marioSpeedY = -1600;
                                             blockXType[t] = 3;
                                         }
@@ -1602,7 +1607,7 @@ if (mtm==250)end();
                                     else if (blockType[t] == 120) {
                                         //blockXType[t]=0;
                                         marioSpeedY = -2400;
-                                        marioType = _3;
+                                        marioType = MarioType::AFTER_SPRING;
                                         mtm = 0;
                                     }
 
@@ -1622,7 +1627,7 @@ if (mtm==250)end();
                             for (t3 = 0; t3 <= 1; t3++) {
 
                                 //下
-                                if (t3 == xx[21] && marioType != 100 && blockType[t] != 117) {    // && xx[12]==0){
+                                if (t3 == xx[21] && marioType != MarioType::IN_PIPE && blockType[t] != 117) {    // && xx[12]==0){
                                     if (marioX + marioWidth > xx[8] + xx[0] * 2 + 800 && marioX < xx[8] + xx[1] - xx[0] * 2 - 800 &&
                                         marioY > xx[9] - xx[0] * 2 && marioY < xx[9] + xx[1] - xx[0] * 2 && marioSpeedY <= 0) {
                                         xx[16] = 1;
@@ -1739,7 +1744,7 @@ if (mtm==250)end();
                             sracttype[20] = 1;
                             sron[20] = 1;
                             Mix_HaltMusic();
-                            marioType = _301;
+                            marioType = MarioType::WIN_SWORD;
                             mtm = 0;
                             ot(oto[16]);
 
@@ -2021,7 +2026,7 @@ if (mtm==250)end();
                         }
                     }        //300
 
-                } else if (marioType == _1) {
+                } else if (marioType == MarioType::HUGE) {
                     if (marioX + marioWidth > xx[8]
                         && marioX < xx[8] + xx[1]
                         && marioY + marioHeight > xx[9]
@@ -2076,7 +2081,7 @@ if (mtm==250)end();
                 xx[8] = sa[t] - fx;
                 xx[9] = sb[t] - fy;
                 if ((stype[t] <= 99 || stype[t] == 200)
-                    && marioType < 10) {
+                    && int(marioType) < 10) {
 
 //おちるブロック
                     if (stype[t] == 51) {
@@ -2212,37 +2217,37 @@ if (mtm==250)end();
                             && marioY + marioHeight <
                                xx[9] + xx[1] + 3000
                             && marioOnGround
-                            && actaon[3] == 1 && marioType == _0) {
+                            && actaon[3] == 1 && marioType == MarioType::NORMAL) {
 //飛び出し
                             if (sxtype[t] == 0) {
-                                marioType = _100;
+                                marioType = MarioType::IN_PIPE;
                                 mtm = 0;
                                 ot(oto[7]);
                                 marioXType = 0;
                             }
 //普通
                             if (sxtype[t] == 1) {
-                                marioType = _100;
+                                marioType = MarioType::IN_PIPE;
                                 mtm = 0;
                                 ot(oto[7]);
                                 marioXType = 1;
                             }
 //普通
                             if (sxtype[t] == 2) {
-                                marioType = _100;
+                                marioType = MarioType::IN_PIPE;
                                 mtm = 0;
                                 ot(oto[7]);
                                 marioXType = 2;
                             }
                             if (sxtype[t] == 5) {
-                                marioType = _100;
+                                marioType = MarioType::IN_PIPE;
                                 mtm = 0;
                                 ot(oto[7]);
                                 marioXType = 5;
                             }
 // ループ
                             if (sxtype[t] == 6) {
-                                marioType = _100;
+                                marioType = MarioType::IN_PIPE;
                                 mtm = 0;
                                 ot(oto[7]);
                                 marioXType = 6;
@@ -2254,13 +2259,13 @@ if (mtm==250)end();
                     if (stype[t] == 40) {
                         if (marioX + marioWidth > xx[8] - 300 && marioX < xx[8] + sc[t] - 1000 && marioY > xx[9] + 1000 &&
                             marioY + marioHeight < xx[9] + xx[1] + 4000 && marioOnGround && actaon[4] == 1 &&
-                            marioType == _0) {    //end();
+                            marioType == MarioType::NORMAL) {    //end();
 //飛び出し
                             if (sxtype[t] == 0) {
-                                marioType = _500;
+                                marioType = MarioType::_500;
                                 mtm = 0;
                                 ot(oto[7]);    //marioXType=1;
-                                marioType = _100;
+                                marioType = MarioType::IN_PIPE;
                                 marioXType = 10;
                             }
 
@@ -2268,11 +2273,11 @@ if (mtm==250)end();
                                 marioXType = 3;
                                 mtm = 0;
                                 ot(oto[7]);    //marioXType=1;
-                                marioType = _100;
+                                marioType = MarioType::IN_PIPE;
                             }
 // ループ
                             if (sxtype[t] == 6) {
-                                marioType = _3;
+                                marioType = MarioType::AFTER_SPRING;
                                 mtm = 0;
                                 ot(oto[7]);
                                 marioXType = 6;
@@ -2368,7 +2373,7 @@ if (mtm==250)end();
                                 sa[t] = -80000000;
                                 marioSpeedY = 0;
                                 Mix_HaltMusic();
-                                marioType = _302;
+                                marioType = MarioType::WIN_AUTO;
                                 mtm = 0;
                                 ot(oto[16]);
                             }
@@ -2427,18 +2432,16 @@ if (mtm==250)end();
                                 sa[t] = -8000000;
                         }
 
-                        if (stype[t] == 300
-                            && marioType == _0
-                            && marioY <
-                               xx[9] + sd[t] + xx[0] - 3000 && marioHP >= 1) {
+                        if (stype[t] == 300 && marioType == MarioType::NORMAL
+                                && marioY < xx[9] + sd[t] + xx[0] - 3000 && marioHP >= 1) {
                             Mix_HaltMusic();
-                            marioType = _300;
+                            marioType = MarioType::_300;
                             mtm = 0;
                             marioX = sa[t] - fx - 2000;
                             ot(oto[11]);
                         }
 //中間ゲート
-                        if (stype[t] == 500 && marioType == _0 && marioHP >= 1) {
+                        if (stype[t] == 500 && marioType == MarioType::NORMAL && marioHP >= 1) {
                             tyuukan += 1;
                             sa[t] = -80000000;
                         }
@@ -2926,7 +2929,7 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                                 if (atm[t] <= 19) {
                                     marioX = xx[0];
                                     marioY = xx[1] - 3000;
-                                    marioType = _0;
+                                    marioType = MarioType::NORMAL;
                                 }
                                 xx[10] = 0;
                                 if (atm[t] == 20) {
@@ -2972,8 +2975,8 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                                       10 * 3000 - 1500,
                                       0, 0, 0, 0, 1000,
                                       10 * 3000 - 1200, 4, 20);
-                                if (marioType == _300) {
-                                    marioType = _0;StopSoundMem(oto[11]);
+                                if (marioType == MarioType::_300) {
+                                    marioType = MarioType::NORMAL;StopSoundMem(oto[11]);
                                     bgmchange(otom[1]);
                                 }
                                 for (t1 = 0; t1 < smax; t1++) {
@@ -3587,7 +3590,7 @@ break;
                     && (mmutekitm <= 0 || marioSpeedY >= 100)
                     && abrocktm[t] <= 0) {
                     if (atype[t] != 4 && atype[t] != 9 && atype[t] != 10 && (atype[t] <= 78 || atype[t] == 85) &&
-                        !marioOnGround && marioType != _200) {    // && atype[t]!=4 && atype[t]!=7){
+                        !marioOnGround && marioType != MarioType::DYING) {    // && atype[t]!=4 && atype[t]!=7){
 
                         if (atype[t] == 0) {
                             if (axtype[t] == 0)
@@ -3688,7 +3691,7 @@ break;
                     }
                     if (mmutekitm <= 0
                         && (atype[t] <= 99 || atype[t] >= 200)) {
-                        if (mmutekion != 1 && marioType != 200) {
+                        if (mmutekion != 1 && marioType != MarioType::DYING) {
 //if (mmutekitm<=0)
 
 //ダメージ
@@ -3862,7 +3865,7 @@ break;
                             ot(oto[9]);
                             marioX -= 1100;
                             marioY -= 4000;
-                            marioType = _1;
+                            marioType = MarioType::HUGE;
                             marioHP = 50000000;
                         }
 
@@ -3974,7 +3977,7 @@ if (atype[t]==133){msoubi=4;}
     }                //if (gameScene==1){
 
 //スタッフロール
-    if (gameScene == ALL_STAGE_CLEAR) {
+    if (gameScene == GameScene::ALL_STAGE_CLEAR) {
         gameSceneTimer++;
 
         xx[7] = 46;
@@ -4032,28 +4035,28 @@ if (atype[t]==133){msoubi=4;}
             bgmchange(otom[5]);
         }
         if (xx[30] <= -400) {
-            gameScene = TITLE;
-            nokori = 2;
+            gameScene = GameScene::TITLE;
+            marioLife = 2;
             gameSceneTimer = 0;
             ending = 0;
         }
 
     }                //gameScene==2
 
-    if (gameScene == LIFE_SPLASH) {
+    if (gameScene == GameScene::LIFE_SPLASH) {
         gameSceneTimer++;
 
         if (fast == 1)
             gameSceneTimer += 2;
         if (gameSceneTimer >= 30) {
             gameSceneTimer = 0;
-            gameScene = IN_GAME;
+            gameScene = GameScene::IN_GAME;
             zxon = 0;
         }
     }                //if (gameScene==10){
 
 //タイトル
-    if (gameScene == TITLE) {
+    if (gameScene == GameScene::TITLE) {
         gameSceneTimer++;
         xx[0] = 0;
         if (gameSceneTimer <= 10) {
@@ -4123,10 +4126,10 @@ if (atype[t]==133){msoubi=4;}
         }
 
         if (xx[0] == 1) {
-            gameScene = LIFE_SPLASH;
+            gameScene = GameScene::LIFE_SPLASH;
             zxon = 0;
             gameSceneTimer = 0;
-            nokori = 2;
+            marioLife = 2;
 
             fast = 0;
             trap = 0;

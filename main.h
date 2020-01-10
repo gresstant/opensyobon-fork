@@ -15,11 +15,11 @@ void parseArgs(int argc, char* argv[]);
 
 // region game scene
 
-enum GameScene {
+enum class GameScene : int {
     IN_GAME = 1, ALL_STAGE_CLEAR = 2, LIFE_SPLASH = 10, TITLE = 100
 };
 
-GameScene gameScene = TITLE;
+GameScene gameScene = GameScene::TITLE;
 int gameSceneTimer = 0;
 
 // endregion
@@ -121,14 +121,13 @@ int sgtype[smax];
 
 int mainmsgtype;
 int marioX, marioY, marioWidth, marioHeight, marioHP;
-int marioSpeedX, marioSpeedY, atktm, nokori = 3, mactp, marioActImg;
+int marioSpeedX, marioSpeedY, atktm, marioLife = 3, mactp, marioActImg;
 
-enum MarioType {
-    _0 = 0, _1 = 1, _2 = 2, _3 = 3,
-    _100 = 100, _200 = 200,
-    _300 = 300, _301 = 301, _302 = 302,
-    _500 = 500,
-    _2000 = 2000
+enum class MarioType : int {
+    NORMAL = 0, HUGE = 1, AFTER_ORANGE_NOTE = 2, AFTER_SPRING = 3,
+    IN_PIPE = 100, DYING = 200,
+    _300 = 300, WIN_SWORD = 301, WIN_AUTO = 302,
+    _500 = 500, _2000 = 2000
 };
 
 MarioType marioType;
