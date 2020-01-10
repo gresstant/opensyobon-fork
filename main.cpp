@@ -1,4 +1,5 @@
 #include "main.h"
+#include "entities/mario.h"
 
 int main(int argc, char *argv[]) {
     parseArgs(argc, argv);
@@ -49,7 +50,7 @@ void paint() {
     //: Clear screen
     FillScreen();
 
-    if (gameScene == GameScene::IN_GAME && zxon >= 1) {
+    if (gameScene == GameScene::IN_GAME && initialized) {
         for (int i = 0; i < nmax; i++) {
             paintBgItem(i);
         }
@@ -471,7 +472,7 @@ void paint() {
             fillrect(0, 0, fxmax, fymax);
             if (blacktm == 0) {
                 if (blackx == 1) {
-                    zxon = 0;
+                    initialized = false;
                 }
             }
 
@@ -545,45 +546,6 @@ void paint() {
     ScreenFlip();
 
 }                //paint()
-
-// プレイヤー描画
-void paintMario() {
-    setcolor(0, 0, 255);
-
-    if (mactp >= 2000) {
-        mactp -= 2000;
-        if (marioActImg == 0) {
-            marioActImg = 1;
-        } else {
-            marioActImg = 0;
-        }
-    }
-    if (mmuki == 0)
-        mirror = 1;
-
-    char buffer[50];
-    sprintf_s(buffer, "atktm = %d, marioSpeedX = %d", atktm, marioSpeedX);
-    SDL_WM_SetCaption(buffer, nullptr);
-    printf("%s\n", buffer);
-
-    if (marioType != MarioType::DYING && marioType != MarioType::HUGE) {
-        if (marioOnGround) {
-            if (marioActImg == 0) {  // 読みこんだグラフィックを拡大描画
-                drawimage(grap[0][0], marioX / 100, marioY / 100);
-            } else if (marioActImg == 1) {
-                drawimage(grap[1][0], marioX / 100, marioY / 100);
-            }
-        } else {
-            drawimage(grap[2][0], marioX / 100, marioY / 100);
-        }
-    } else if (marioType == MarioType::HUGE) {  // 巨大化
-        drawimage(grap[41][0], marioX / 100, marioY / 100);
-    } else if (marioType == MarioType::DYING) {  // dying
-        drawimage(grap[3][0], marioX / 100, marioY / 100);
-    }
-
-    mirror = 0;
-}
 
 // 背景
 void paintBgItem(int index) {
@@ -899,152 +861,172 @@ void paintBlock(int index) {
 
 //メインプログラム
 void mainProgram() {
-//    char buffer[20];
-//    itoa(marioSpeedY, buffer, 10);
-//    SDL_WM_SetCaption(buffer, nullptr);
 
     stime = long(GetNowCount());
 
     if (ending == 1)
         gameScene = GameScene::ALL_STAGE_CLEAR;
 
-    //キー
 
-    if (gameScene == GameScene::IN_GAME && tmsgtype == 0) {
+    if (gameScene == GameScene::IN_GAME && tmsgtype == 0) {  // キー
+        processSceneInGame();
+    } else if (gameScene == GameScene::ALL_STAGE_CLEAR) {  // スタッフロール
+        processSceneAllStageClear();
+    } else if (gameScene == GameScene::LIFE_SPLASH) {
+        processSceneLifeSplash();
+    } else if (gameScene == GameScene::TITLE) {  // タイトル
+        processSceneTitle();
+    }
 
-        if (zxon == 0) {
-            zxon = 1;
-            mainmsgtype = 0;
+    //描画
+    paint();
 
-            stagecolor = 1;
-            marioX = 5600;
-            marioY = 32000;
+    //30-fps
+    xx[0] = 30;
+    if (CheckHitKey(KEY_INPUT_SPACE) == 1) {
+        xx[0] = 60;
+    }
+    wait2(stime, long(GetNowCount()), 1000 / xx[0]);
+
+//wait(20);
+
+}                //mainProgram()
+
+void processSceneInGame() {
+
+    if (!initialized) {
+        initialized = true;
+        mainmsgtype = 0;
+
+        stagecolor = 1;
+        marioX = 5600;
+        marioY = 32000;
+        mmuki = 1;
+        marioHP = 1;
+        marioSpeedX = 0;
+        marioSpeedY = 0;
+        marioWidth = 3000;
+        marioHeight = 3600;
+
+        marioType = MarioType::NORMAL;
+
+        fx = 0;
+        fy = 0;
+        fzx = 0;
+        stageonoff = 0;
+
+        //チーターマン　入れ
+        bgmchange(otom[1]);
+
+        stagecls();
+
+        stage();
+
+        //ランダムにさせる
+        if (over == 1) {
+            for (int i = 0; i < T_MAX; i++) {
+                if (rand(3) <= 1) {
+                    blockX[i] = (rand(500) - 1) * 29 * 100;
+                    blockY[i] = rand(14) * 100 * 29 - 1200;
+                    blockType[i] = rand(142);
+                    if (blockType[i] >= 9 && blockType[i] <= 99) {
+                        blockType[i] = rand(8);
+                    }
+                    blockXType[i] = rand(4);
+                }
+            }
+            for (int i = 0; i < bmax; i++) {
+                if (rand(2) <= 1) {
+                    ba[i] = (rand(500) - 1) * 29 * 100;
+                    bb[i] = rand(15) * 100 * 29 - 1200 - 3000;
+                    if (rand(6) == 0) {
+                        btype[i] = rand(9);
+                    }
+                }
+            }
+
+            srco = 0;
+            t = srco;
+            sra[t] = marioX + fx;
+            srb[t] = (13 * 29 - 12) * 100;
+            src[t] = 30 * 100;
+            srtype[t] = 0;
+            sracttype[t] = 0;
+            sre[t] = 0;
+            srsp[t] = 0;
+            srco++;
+
+            if (rand(4) == 0)
+                stagecolor = rand(5);
+        }
+
+    }
+
+    // region player
+    //プレイヤーの移動
+    xx[0] = 0;
+    actaon[2] = 0;
+    actaon[3] = 0;
+    if (mkeytm <= 0) {
+        if (CheckHitKey(KEY_INPUT_LEFT) && keytm <= 0) {
+            actaon[0] = -1;
+            mmuki = 0;
+            actaon[4] = -1;
+        }
+        if (CheckHitKey(KEY_INPUT_RIGHT) && keytm <= 0) {
+            actaon[0] = 1;
             mmuki = 1;
-            marioHP = 1;
-            marioSpeedX = 0;
-            marioSpeedY = 0;
-            marioWidth = 3000;
-            marioHeight = 3600;
-
-            marioType = MarioType::NORMAL;
-
-            fx = 0;
-            fy = 0;
-            fzx = 0;
-            stageonoff = 0;
-
-            //チーターマン　入れ
-            bgmchange(otom[1]);
-
-            stagecls();
-
-            stage();
-
-            //ランダムにさせる
-            if (over == 1) {
-                for (int i = 0; i < T_MAX; i++) {
-                    if (rand(3) <= 1) {
-                        blockX[i] = (rand(500) - 1) * 29 * 100;
-                        blockY[i] = rand(14) * 100 * 29 - 1200;
-                        blockType[i] = rand(142);
-                        if (blockType[i] >= 9 && blockType[i] <= 99) {
-                            blockType[i] = rand(8);
-                        }
-                        blockXType[i] = rand(4);
-                    }
-                }
-                for (int i = 0; i < bmax; i++) {
-                    if (rand(2) <= 1) {
-                        ba[i] = (rand(500) - 1) * 29 * 100;
-                        bb[i] = rand(15) * 100 * 29 - 1200 - 3000;
-                        if (rand(6) == 0) {
-                            btype[i] = rand(9);
-                        }
-                    }
-                }
-
-                srco = 0;
-                t = srco;
-                sra[t] = marioX + fx;
-                srb[t] = (13 * 29 - 12) * 100;
-                src[t] = 30 * 100;
-                srtype[t] = 0;
-                sracttype[t] = 0;
-                sre[t] = 0;
-                srsp[t] = 0;
-                srco++;
-
-                if (rand(4) == 0)
-                    stagecolor = rand(5);
-            }
-
-        }            //zxon
-
-        // region player
-        //プレイヤーの移動
-        xx[0] = 0;
-        actaon[2] = 0;
-        actaon[3] = 0;
-        if (mkeytm <= 0) {
-            if (CheckHitKey(KEY_INPUT_LEFT) && keytm <= 0) {
-                actaon[0] = -1;
-                mmuki = 0;
-                actaon[4] = -1;
-            }
-            if (CheckHitKey(KEY_INPUT_RIGHT) && keytm <= 0) {
-                actaon[0] = 1;
-                mmuki = 1;
-                actaon[4] = 1;
-            }
-            if (CheckHitKey(KEY_INPUT_DOWN)) {
-                actaon[3] = 1;
-            }
+            actaon[4] = 1;
         }
-        //if (CheckHitKey(KEY_INPUT_F1)==1){end();}
-        if (CheckHitKey(KEY_INPUT_F1) == 1) {
-            gameScene = GameScene::TITLE;
+        if (CheckHitKey(KEY_INPUT_DOWN)) {
+            actaon[3] = 1;
         }
-        //if (CheckHitKey(KEY_INPUT_Q)==1){mkeytm=0;}
-        if (CheckHitKey(KEY_INPUT_O) == 1) {
-            if (marioHP >= 1)
-                marioHP = 0;
-            if (stc >= 5) {
-                stc = 0;
-                stagepoint = 0;
-            }
+    }
+    //if (CheckHitKey(KEY_INPUT_F1)==1){end();}
+    if (CheckHitKey(KEY_INPUT_F1) == 1) {
+        gameScene = GameScene::TITLE;
+    }
+    //if (CheckHitKey(KEY_INPUT_Q)==1){mkeytm=0;}
+    if (CheckHitKey(KEY_INPUT_O) == 1) {
+        if (marioHP >= 1)
+            marioHP = 0;
+        if (stc >= 5) {
+            stc = 0;
+            stagepoint = 0;
         }
+    }
 
-        if (mkeytm <= 0) {
-            if (CheckHitKey(KEY_INPUT_Z) == 1 || CheckHitKey(KEY_INPUT_UP) == 1
-                    || SDL_JoystickGetButton(joystick, JOYSTICK_JUMP)) {
-                if (actaon[1] == 10) {
-                    actaon[1] = 1;
-                    xx[0] = 1;
-                }
-                actaon[2] = 1;
-            }
-        }
-
+    if (mkeytm <= 0) {
         if (CheckHitKey(KEY_INPUT_Z) == 1 || CheckHitKey(KEY_INPUT_UP) == 1
-                || SDL_JoystickGetButton(joystick, JOYSTICK_JUMP)) {
-            if (mjumptm == 8 && marioSpeedY >= -900) {
-                marioSpeedY = -1300;
-                //ダッシュ中
-                xx[22] = 200;
-                if (marioSpeedX >= xx[22] || marioSpeedX <= -xx[22]) {
-                    marioSpeedY = -1400;
-                }
-                xx[22] = 600;
-                if (marioSpeedX >= xx[22] || marioSpeedX <= -xx[22]) {
-                    marioSpeedY = -1500;
-                }
+            || SDL_JoystickGetButton(joystick, JOYSTICK_JUMP)) {
+            if (actaon[1] == 10) {
+                actaon[1] = 1;
+                xx[0] = 1;
             }
+            actaon[2] = 1;
+        }
+    }
+
+    if (CheckHitKey(KEY_INPUT_Z) == 1 || CheckHitKey(KEY_INPUT_UP) == 1
+        || SDL_JoystickGetButton(joystick, JOYSTICK_JUMP)) {
+        if (mjumptm == 8 && marioSpeedY >= -900) {
+            marioSpeedY = -1300;
+            //ダッシュ中
+            xx[22] = 200;
+            if (marioSpeedX >= xx[22] || marioSpeedX <= -xx[22]) {
+                marioSpeedY = -1400;
+            }
+            xx[22] = 600;
+            if (marioSpeedX >= xx[22] || marioSpeedX <= -xx[22]) {
+                marioSpeedY = -1500;
+            }
+        }
 // && xx[0]==0 && marioSpeedY<=-10
 
 //if (mjumptm==7 && marioSpeedY>=-900){}
-            if (xx[0] == 0)
-                actaon[1] = 10;
-        }
+        if (xx[0] == 0)
+            actaon[1] = 10;
+    }
 //if (( key & PAD_INPUT_UP) && keytm<=0){actaon[0]=-1;mmuki=0;}
 
 //xx[0]=200;
@@ -1052,88 +1034,88 @@ void mainProgram() {
 //if (actaon[0]==1){marioX+=xx[0];}
 
 //加速による移動
-        xx[0] = 40;
-        xx[1] = 700;
-        xx[8] = 500;
-        xx[9] = 700;
-        xx[12] = 1;
-        xx[13] = 2;
+    xx[0] = 40;
+    xx[1] = 700;
+    xx[8] = 500;
+    xx[9] = 700;
+    xx[12] = 1;
+    xx[13] = 2;
 
 //すべり補正
-        if (mrzimen == 1) {
-            xx[0] = 20;
-            xx[12] = 9;
-            xx[13] = 10;
-        }
+    if (mrzimen == 1) {
+        xx[0] = 20;
+        xx[12] = 9;
+        xx[13] = 10;
+    }
 //if (marioOnGround==0){xx[0]-=15;}
-        if (actaon[0] == -1) {
-            if (!(!marioOnGround && marioSpeedX < -xx[8])) {
-                if (marioSpeedX >= -xx[9]) {
-                    marioSpeedX -= xx[0];
-                    if (marioSpeedX < -xx[9]) {
-                        marioSpeedX = -xx[9] - 1;
-                    }
+    if (actaon[0] == -1) {
+        if (!(!marioOnGround && marioSpeedX < -xx[8])) {
+            if (marioSpeedX >= -xx[9]) {
+                marioSpeedX -= xx[0];
+                if (marioSpeedX < -xx[9]) {
+                    marioSpeedX = -xx[9] - 1;
                 }
-                if (marioSpeedX < -xx[9] && atktm <= 0)
-                    marioSpeedX -= xx[0] / 10;
             }
-            if (mrzimen != 1) {
-                if (marioSpeedX > 100 && !marioOnGround) {
-                    marioSpeedX -= xx[0] * 2 / 3;
-                }
-                if (marioSpeedX > 100 && marioOnGround) {
-                    marioSpeedX -= xx[0];
-                    if (marioOnGround) {
-                        marioSpeedX -= xx[0] * 1 / 2;
-                    }
-                }
-                actaon[0] = 3;
-                mkasok += 1;
-            }
+            if (marioSpeedX < -xx[9] && atktm <= 0)
+                marioSpeedX -= xx[0] / 10;
         }
+        if (mrzimen != 1) {
+            if (marioSpeedX > 100 && !marioOnGround) {
+                marioSpeedX -= xx[0] * 2 / 3;
+            }
+            if (marioSpeedX > 100 && marioOnGround) {
+                marioSpeedX -= xx[0];
+                if (marioOnGround) {
+                    marioSpeedX -= xx[0] * 1 / 2;
+                }
+            }
+            actaon[0] = 3;
+            mkasok += 1;
+        }
+    }
 
-        if (actaon[0] == 1) {
-            if (!(!marioOnGround && marioSpeedX > xx[8])) {
-                if (marioSpeedX <= xx[9]) {
-                    marioSpeedX += xx[0];
-                    if (marioSpeedX > xx[9]) {
-                        marioSpeedX = xx[9] + 1;
-                    }
+    if (actaon[0] == 1) {
+        if (!(!marioOnGround && marioSpeedX > xx[8])) {
+            if (marioSpeedX <= xx[9]) {
+                marioSpeedX += xx[0];
+                if (marioSpeedX > xx[9]) {
+                    marioSpeedX = xx[9] + 1;
                 }
-                if (marioSpeedX > xx[9] && atktm <= 0)
-                    marioSpeedX += xx[0] / 10;
             }
-            if (mrzimen != 1) {
-                if (marioSpeedX < -100 && !marioOnGround) {
-                    marioSpeedX += xx[0] * 2 / 3;
-                }
-                if (marioSpeedX < -100 && marioOnGround) {
-                    marioSpeedX += xx[0];
-                    if (marioOnGround) {
-                        marioSpeedX += xx[0] * 1 / 2;
-                    }
-                }
-                actaon[0] = 3;
-                mkasok += 1;
+            if (marioSpeedX > xx[9] && atktm <= 0)
+                marioSpeedX += xx[0] / 10;
+        }
+        if (mrzimen != 1) {
+            if (marioSpeedX < -100 && !marioOnGround) {
+                marioSpeedX += xx[0] * 2 / 3;
             }
+            if (marioSpeedX < -100 && marioOnGround) {
+                marioSpeedX += xx[0];
+                if (marioOnGround) {
+                    marioSpeedX += xx[0] * 1 / 2;
+                }
+            }
+            actaon[0] = 3;
+            mkasok += 1;
         }
-        if (actaon[0] == 0 && mkasok > 0) {
-            mkasok -= 2;
-        }
-        if (mkasok > 8) {
-            mkasok = 8;
-        }
+    }
+    if (actaon[0] == 0 && mkasok > 0) {
+        mkasok -= 2;
+    }
+    if (mkasok > 8) {
+        mkasok = 8;
+    }
 //すべり補正初期化
-        if (!marioOnGround)
-            mrzimen = 0;
+    if (!marioOnGround)
+        mrzimen = 0;
 
 //ジャンプ
-        if (mjumptm >= 0)
-            mjumptm--;
-        if (actaon[1] == 1 && marioOnGround) {
-            marioY -= 400;
-            marioSpeedY = -1200;
-            mjumptm = 10;
+    if (mjumptm >= 0)
+        mjumptm--;
+    if (actaon[1] == 1 && marioOnGround) {
+        marioY -= 400;
+        marioSpeedY = -1200;
+        mjumptm = 10;
 
 //PlaySound( "jump.mp3" , DX_PLAYTYPE_NORMAL ) ;
 
@@ -1142,7 +1124,7 @@ void mainProgram() {
 //PlaySoundMem( oto[1], DX_PLAYTYPE_NORMAL ) ;
 
 //PlaySoundMem( oto[1], DX_PLAYTYPE_BACK) ;
-            ot(oto[1]);
+        ot(oto[1]);
 
 /*
 marioSpeedY=-1040;
@@ -1154,283 +1136,283 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
 }
 */
 
-            marioOnGround = false;
+        marioOnGround = false;
 
-        }
-        if (actaon[1] <= 9)
-            actaon[1] = 0;
+    }
+    if (actaon[1] <= 9)
+        actaon[1] = 0;
 
 //if (actaon[1]==1){my+=xx[1];actaon[1]=0;}
 
 //}//陸地
 
-        if (mmutekitm >= -1)
-            mmutekitm--;
+    if (mmutekitm >= -1)
+        mmutekitm--;
 
 //HPがなくなったとき
-        if (marioHP <= 0 && marioHP >= -9) {
-            mkeytm = 12;
-            marioHP = -20;
-            marioType = MarioType::DYING;
-            mtm = 0;
-            Mix_HaltChannel(-1);
-            Mix_HaltMusic();
-            ot(oto[12]);StopSoundMem(oto[16]);
-        }            //marioHP
+    if (marioHP <= 0 && marioHP >= -9) {
+        mkeytm = 12;
+        marioHP = -20;
+        marioType = MarioType::DYING;
+        mtm = 0;
+        Mix_HaltChannel(-1);
+        Mix_HaltMusic();
+        ot(oto[12]);StopSoundMem(oto[16]);
+    }            //marioHP
 //if (marioHP<=-10){
-        if (marioType == MarioType::DYING) {
-            if (mtm <= 11) {
+    if (marioType == MarioType::DYING) {
+        if (mtm <= 11) {
+            marioSpeedX = 0;
+            marioSpeedY = 0;
+        }
+        if (mtm == 12) {
+            marioSpeedY = -1200;
+        }
+        if (mtm >= 12) {
+            marioSpeedX = 0;
+        }
+        if (mtm >= 100 || fast == 1) {
+            initialized = false;
+            gameScene = GameScene::LIFE_SPLASH;
+            mtm = 0;
+            mkeytm = 0;
+            marioLife--;
+            if (fast == 1)
+                marioType = MarioType::NORMAL;
+        }            //mtm>=100
+    }            //marioType==200
+
+//音符によるワープ
+    if (marioType == MarioType::AFTER_ORANGE_NOTE) {
+        mtm++;
+
+        mkeytm = 2;
+        marioSpeedY = -1500;
+        if (marioY <= -6000) {
+            blackx = 1;
+            blacktm = 20;
+            stc += 5;
+            stagerr = 0;
+            Mix_HaltMusic();
+            mtm = 0;
+            marioType = MarioType::NORMAL;
+            mkeytm = -1;
+        }
+    }            //2
+
+//ジャンプ台アウト
+    if (marioType == MarioType::AFTER_SPRING) {
+        marioSpeedY = -2400;
+        if (marioY <= -6000) {
+            marioY = -80000000;
+            marioHP = 0;
+        }
+    }
+//mtypeによる特殊的な移動
+    if (int(marioType) >= 100) {
+        mtm++;
+
+//普通の土管
+        if (marioType == MarioType::IN_PIPE) {
+            if (marioXType == 0) {
+                marioSpeedX = 0;
+                marioSpeedY = 0;
+                t = 28;
+                if (mtm <= 16) {
+                    marioY += 240;
+                    mzz = 100;
+                }
+                if (mtm == 17) {
+                    marioY = -80000000;
+                }
+                if (mtm == 23) {
+                    sa[t] -= 100;
+                }
+                if (mtm >= 44 && mtm <= 60) {
+                    if (mtm % 2 == 0)
+                        sa[t] += 200;
+                    if (mtm % 2 == 1)
+                        sa[t] -= 200;
+                }
+                if (mtm >= 61 && mtm <= 77) {
+                    if (mtm % 2 == 0)
+                        sa[t] += 400;
+                    if (mtm % 2 == 1)
+                        sa[t] -= 400;
+                }
+                if (mtm >= 78 && mtm <= 78 + 16) {
+                    if (mtm % 2 == 0)
+                        sa[t] += 600;
+                    if (mtm % 2 == 1)
+                        sa[t] -= 600;
+                }
+                if (mtm >= 110) {
+                    sb[t] -= mzz;
+                    mzz += 80;
+                    if (mzz > 1600)
+                        mzz = 1600;
+                }
+                if (mtm == 160) {
+                    marioType = MarioType::NORMAL;
+                    marioHP--;
+                }
+
+            }
+//ふっとばし
+            else if (marioXType == 10) {
+                marioSpeedX = 0;
+                marioSpeedY = 0;
+                if (mtm <= 16) {
+                    marioX += 240;
+                }        //mzz=100;}
+                if (mtm == 16)
+                    marioY -= 1100;
+                if (mtm == 20)
+                    ot(oto[10]);
+
+                if (mtm >= 24) {
+                    marioX -= 2000;
+                    mmuki = 0;
+                }
+                if (mtm >= 48) {
+                    marioType = MarioType::NORMAL;
+                    marioHP--;
+                }
+
+            } else {
+                marioSpeedX = 0;
+                marioSpeedY = 0;
+                if (mtm <= 16 && marioXType != 3) {
+                    marioY += 240;
+                }        //mzz=100;}
+                if (mtm <= 16 && marioXType == 3) {
+                    marioX += 240;
+                }
+                if (mtm == 19 && marioXType == 2) {
+                    marioHP = 0;
+                    marioType = MarioType::_2000;
+                    mtm = 0;
+                    mmsgtm = 30;
+                    mmsgtype = 51;
+                }
+                if (mtm == 19 && marioXType == 5) {
+                    marioHP = 0;
+                    marioType = MarioType::_2000;
+                    mtm = 0;
+                    mmsgtm = 30;
+                    mmsgtype = 52;
+                }
+                if (mtm == 20) {
+                    if (marioXType == 6) {
+                        stc += 10;
+                    } else {
+                        stc++;
+                    }
+                    marioY = -80000000;
+                    marioXType = 0;
+                    blackx = 1;
+                    blacktm = 20;
+                    stagerr = 0;
+                    Mix_HaltMusic();
+                }
+            }
+        }            //00
+
+        if (marioType == MarioType::_300) {
+            mkeytm = 3;
+            if (mtm <= 1) {
                 marioSpeedX = 0;
                 marioSpeedY = 0;
             }
-            if (mtm == 12) {
-                marioSpeedY = -1200;
+            if (mtm >= 2 && mtm <= 42) {
+                marioSpeedY = 600;
+                mmuki = 1;
             }
-            if (mtm >= 12) {
+            if (mtm > 43 && mtm <= 108) {
+                marioSpeedX = 300;
+            }
+            if (mtm == 110) {
+                marioY = -80000000;
                 marioSpeedX = 0;
             }
-            if (mtm >= 100 || fast == 1) {
-                zxon = 0;
+            if (mtm == 250) {
+                stb++;
+                stc = 0;
+                initialized = false;
+                tyuukan = 0;
                 gameScene = GameScene::LIFE_SPLASH;
-                mtm = 0;
-                mkeytm = 0;
-                marioLife--;
-                if (fast == 1)
-                    marioType = MarioType::NORMAL;
-            }            //mtm>=100
-        }            //marioType==200
-
-//音符によるワープ
-        if (marioType == MarioType::AFTER_ORANGE_NOTE) {
-            mtm++;
-
-            mkeytm = 2;
-            marioSpeedY = -1500;
-            if (marioY <= -6000) {
-                blackx = 1;
-                blacktm = 20;
-                stc += 5;
-                stagerr = 0;
-                Mix_HaltMusic();
-                mtm = 0;
-                marioType = MarioType::NORMAL;
-                mkeytm = -1;
+                gameSceneTimer = 0;
             }
-        }            //2
+        }            //marioType==300
 
-//ジャンプ台アウト
-        if (marioType == MarioType::AFTER_SPRING) {
-            marioSpeedY = -2400;
-            if (marioY <= -6000) {
-                marioY = -80000000;
-                marioHP = 0;
+        if (marioType == MarioType::WIN_SWORD || marioType == MarioType::WIN_AUTO) {
+            mkeytm = 3;
+
+            if (mtm <= 1) {
+                marioSpeedX = 0;
+                marioSpeedY = 0;
             }
-        }
-//mtypeによる特殊的な移動
-        if (int(marioType) >= 100) {
-            mtm++;
 
-//普通の土管
-            if (marioType == MarioType::IN_PIPE) {
-                if (marioXType == 0) {
-                    marioSpeedX = 0;
-                    marioSpeedY = 0;
-                    t = 28;
-                    if (mtm <= 16) {
-                        marioY += 240;
-                        mzz = 100;
-                    }
-                    if (mtm == 17) {
-                        marioY = -80000000;
-                    }
-                    if (mtm == 23) {
-                        sa[t] -= 100;
-                    }
-                    if (mtm >= 44 && mtm <= 60) {
-                        if (mtm % 2 == 0)
-                            sa[t] += 200;
-                        if (mtm % 2 == 1)
-                            sa[t] -= 200;
-                    }
-                    if (mtm >= 61 && mtm <= 77) {
-                        if (mtm % 2 == 0)
-                            sa[t] += 400;
-                        if (mtm % 2 == 1)
-                            sa[t] -= 400;
-                    }
-                    if (mtm >= 78 && mtm <= 78 + 16) {
-                        if (mtm % 2 == 0)
-                            sa[t] += 600;
-                        if (mtm % 2 == 1)
-                            sa[t] -= 600;
-                    }
-                    if (mtm >= 110) {
-                        sb[t] -= mzz;
-                        mzz += 80;
-                        if (mzz > 1600)
-                            mzz = 1600;
-                    }
-                    if (mtm == 160) {
-                        marioType = MarioType::NORMAL;
-                        marioHP--;
-                    }
+            if (mtm >= 2
+                && (marioType == MarioType::WIN_SWORD && mtm <= 102
+                    || marioType == MarioType::WIN_AUTO && mtm <= 60)) {
+                xx[5] = 500;
+                marioX -= xx[5];
+                fx += xx[5];
+                fzx += xx[5];
+            }
 
-                }
-//ふっとばし
-                else if (marioXType == 10) {
-                    marioSpeedX = 0;
-                    marioSpeedY = 0;
-                    if (mtm <= 16) {
-                        marioX += 240;
-                    }        //mzz=100;}
-                    if (mtm == 16)
-                        marioY -= 1100;
-                    if (mtm == 20)
-                        ot(oto[10]);
+            if ((marioType == MarioType::WIN_SWORD || marioType == MarioType::WIN_AUTO) && mtm >= 2
+                && mtm <= 100) {
+                marioSpeedX = 250;
+                mmuki = 1;
+            }
 
-                    if (mtm >= 24) {
-                        marioX -= 2000;
-                        mmuki = 0;
-                    }
-                    if (mtm >= 48) {
-                        marioType = MarioType::NORMAL;
-                        marioHP--;
-                    }
-
+            if (mtm == 200) {
+                ot(oto[17]);
+                if (marioType == MarioType::WIN_SWORD) {
+                    na[nco] = 117 * 29 * 100 - 1100;
+                    nb[nco] = 4 * 29 * 100;
+                    ntype[nco] = 101;
+                    nco++;
+                    if (nco >= nmax)
+                        nco = 0;
+                    na[nco] = 115 * 29 * 100 - 1100;
+                    nb[nco] = 6 * 29 * 100;
+                    ntype[nco] = 102;
+                    nco++;
+                    if (nco >= nmax)
+                        nco = 0;
                 } else {
-                    marioSpeedX = 0;
-                    marioSpeedY = 0;
-                    if (mtm <= 16 && marioXType != 3) {
-                        marioY += 240;
-                    }        //mzz=100;}
-                    if (mtm <= 16 && marioXType == 3) {
-                        marioX += 240;
-                    }
-                    if (mtm == 19 && marioXType == 2) {
-                        marioHP = 0;
-                        marioType = MarioType::_2000;
-                        mtm = 0;
-                        mmsgtm = 30;
-                        mmsgtype = 51;
-                    }
-                    if (mtm == 19 && marioXType == 5) {
-                        marioHP = 0;
-                        marioType = MarioType::_2000;
-                        mtm = 0;
-                        mmsgtm = 30;
-                        mmsgtype = 52;
-                    }
-                    if (mtm == 20) {
-                        if (marioXType == 6) {
-                            stc += 10;
-                        } else {
-                            stc++;
-                        }
-                        marioY = -80000000;
-                        marioXType = 0;
-                        blackx = 1;
-                        blacktm = 20;
-                        stagerr = 0;
-                        Mix_HaltMusic();
-                    }
+                    na[nco] = 157 * 29 * 100 - 1100;
+                    nb[nco] = 4 * 29 * 100;
+                    ntype[nco] = 101;
+                    nco++;
+                    if (nco >= nmax)
+                        nco = 0;
+                    na[nco] = 155 * 29 * 100 - 1100;
+                    nb[nco] = 6 * 29 * 100;
+                    ntype[nco] = 102;
+                    nco++;
+                    if (nco >= nmax)
+                        nco = 0;
                 }
-            }            //00
+            }
+//スタッフロールへ
 
-            if (marioType == MarioType::_300) {
-                mkeytm = 3;
-                if (mtm <= 1) {
-                    marioSpeedX = 0;
-                    marioSpeedY = 0;
-                }
-                if (mtm >= 2 && mtm <= 42) {
-                    marioSpeedY = 600;
-                    mmuki = 1;
-                }
-                if (mtm > 43 && mtm <= 108) {
-                    marioSpeedX = 300;
-                }
-                if (mtm == 110) {
-                    marioY = -80000000;
-                    marioSpeedX = 0;
-                }
-                if (mtm == 250) {
-                    stb++;
+            if (mtm == 440) {
+                if (marioType == MarioType::WIN_SWORD) {
+                    ending = 1;
+                } else {
+                    sta++;
+                    stb = 1;
                     stc = 0;
-                    zxon = 0;
+                    initialized = false;
                     tyuukan = 0;
                     gameScene = GameScene::LIFE_SPLASH;
                     gameSceneTimer = 0;
                 }
-            }            //marioType==300
-
-            if (marioType == MarioType::WIN_SWORD || marioType == MarioType::WIN_AUTO) {
-                mkeytm = 3;
-
-                if (mtm <= 1) {
-                    marioSpeedX = 0;
-                    marioSpeedY = 0;
-                }
-
-                if (mtm >= 2
-                    && (marioType == MarioType::WIN_SWORD && mtm <= 102
-                        || marioType == MarioType::WIN_AUTO && mtm <= 60)) {
-                    xx[5] = 500;
-                    marioX -= xx[5];
-                    fx += xx[5];
-                    fzx += xx[5];
-                }
-
-                if ((marioType == MarioType::WIN_SWORD || marioType == MarioType::WIN_AUTO) && mtm >= 2
-                    && mtm <= 100) {
-                    marioSpeedX = 250;
-                    mmuki = 1;
-                }
-
-                if (mtm == 200) {
-                    ot(oto[17]);
-                    if (marioType == MarioType::WIN_SWORD) {
-                        na[nco] = 117 * 29 * 100 - 1100;
-                        nb[nco] = 4 * 29 * 100;
-                        ntype[nco] = 101;
-                        nco++;
-                        if (nco >= nmax)
-                            nco = 0;
-                        na[nco] = 115 * 29 * 100 - 1100;
-                        nb[nco] = 6 * 29 * 100;
-                        ntype[nco] = 102;
-                        nco++;
-                        if (nco >= nmax)
-                            nco = 0;
-                    } else {
-                        na[nco] = 157 * 29 * 100 - 1100;
-                        nb[nco] = 4 * 29 * 100;
-                        ntype[nco] = 101;
-                        nco++;
-                        if (nco >= nmax)
-                            nco = 0;
-                        na[nco] = 155 * 29 * 100 - 1100;
-                        nb[nco] = 6 * 29 * 100;
-                        ntype[nco] = 102;
-                        nco++;
-                        if (nco >= nmax)
-                            nco = 0;
-                    }
-                }
-//スタッフロールへ
-
-                if (mtm == 440) {
-                    if (marioType == MarioType::WIN_SWORD) {
-                        ending = 1;
-                    } else {
-                        sta++;
-                        stb = 1;
-                        stc = 0;
-                        zxon = 0;
-                        tyuukan = 0;
-                        gameScene = GameScene::LIFE_SPLASH;
-                        gameSceneTimer = 0;
-                    }
-                }
+            }
 
 /*
 if (mtm<=1){marioSpeedX=0;marioSpeedY=0;}
@@ -1439,137 +1421,205 @@ if (mtm>43 && mtm<=108){marioSpeedX=300;}
 if (mtm==110){marioY=-80000000;marioSpeedX=0;}
 if (mtm==250)end();
 */
-            }            //marioType==301
+        }            //marioType==301
 
-        }            //marioType>=100
+    }            //marioType>=100
 
 //移動
-        if (mkeytm >= 1) {
-            mkeytm--;
-        }            //marioSpeedX=0;}
-        marioX += marioSpeedX;
-        marioY += marioSpeedY;
-        if (marioSpeedX < 0)
-            mactp += (-marioSpeedX);
-        if (marioSpeedX >= 0)
-            mactp += marioSpeedX;
+    if (mkeytm >= 1) {
+        mkeytm--;
+    }            //marioSpeedX=0;}
+    marioX += marioSpeedX;
+    marioY += marioSpeedY;
+    if (marioSpeedX < 0)
+        mactp += (-marioSpeedX);
+    if (marioSpeedX >= 0)
+        mactp += marioSpeedX;
 
-        if (int(marioType) <= 9 || marioType == MarioType::DYING || marioType == MarioType::_300 || marioType == MarioType::WIN_SWORD
-            || marioType == MarioType::WIN_AUTO)
-            marioSpeedY += 100;
+    if (int(marioType) <= 9 || marioType == MarioType::DYING || marioType == MarioType::_300 || marioType == MarioType::WIN_SWORD
+        || marioType == MarioType::WIN_AUTO)
+        marioSpeedY += 100;
 
 //走る際の最大値
-        if (marioType == MarioType::NORMAL) {
-            xx[0] = 800;
-            xx[1] = 1600;
-            if (marioSpeedX > xx[0] && marioSpeedX < xx[0] + 200) {
-                marioSpeedX = xx[0];
-            }
-            if (marioSpeedX > xx[0] + 200) {
-                marioSpeedX -= 200;
-            }
-            if (marioSpeedX < -xx[0] && marioSpeedX > -xx[0] - 200) {
-                marioSpeedX = -xx[0];
-            }
-            if (marioSpeedX < -xx[0] - 200) {
-                marioSpeedX += 200;
-            }
-            if (marioSpeedY > xx[1]) {
-                marioSpeedY = xx[1];
-            }
+    if (marioType == MarioType::NORMAL) {
+        xx[0] = 800;
+        xx[1] = 1600;
+        if (marioSpeedX > xx[0] && marioSpeedX < xx[0] + 200) {
+            marioSpeedX = xx[0];
         }
+        if (marioSpeedX > xx[0] + 200) {
+            marioSpeedX -= 200;
+        }
+        if (marioSpeedX < -xx[0] && marioSpeedX > -xx[0] - 200) {
+            marioSpeedX = -xx[0];
+        }
+        if (marioSpeedX < -xx[0] - 200) {
+            marioSpeedX += 200;
+        }
+        if (marioSpeedY > xx[1]) {
+            marioSpeedY = xx[1];
+        }
+    }
 //プレイヤー
 //地面の摩擦
-        if (marioOnGround && actaon[0] != 3) {
-            if ((int(marioType) <= 9) || marioType == MarioType::_300 || marioType == MarioType::WIN_SWORD
-                || marioType == MarioType::WIN_AUTO) {
-                if (mrzimen == 0) {
-                    xx[2] = 30;
-                    xx[1] = 60;
-                    xx[3] = 30;
-                    if (marioSpeedX >= -xx[3] && marioSpeedX <= xx[3]) {
-                        marioSpeedX = 0;
-                    }
-                    if (marioSpeedX >= xx[2]) {
-                        marioSpeedX -= xx[1];
-                    }
-                    if (marioSpeedX <= -xx[2]) {
-                        marioSpeedX += xx[1];
-                    }
+    if (marioOnGround && actaon[0] != 3) {
+        if ((int(marioType) <= 9) || marioType == MarioType::_300 || marioType == MarioType::WIN_SWORD
+            || marioType == MarioType::WIN_AUTO) {
+            if (mrzimen == 0) {
+                xx[2] = 30;
+                xx[1] = 60;
+                xx[3] = 30;
+                if (marioSpeedX >= -xx[3] && marioSpeedX <= xx[3]) {
+                    marioSpeedX = 0;
                 }
-                if (mrzimen == 1) {
-                    xx[2] = 5;
-                    xx[1] = 10;
-                    xx[3] = 5;
-                    if (marioSpeedX >= -xx[3] && marioSpeedX <= xx[3]) {
-                        marioSpeedX = 0;
-                    }
-                    if (marioSpeedX >= xx[2]) {
-                        marioSpeedX -= xx[1];
-                    }
-                    if (marioSpeedX <= -xx[2]) {
-                        marioSpeedX += xx[1];
-                    }
+                if (marioSpeedX >= xx[2]) {
+                    marioSpeedX -= xx[1];
+                }
+                if (marioSpeedX <= -xx[2]) {
+                    marioSpeedX += xx[1];
+                }
+            }
+            if (mrzimen == 1) {
+                xx[2] = 5;
+                xx[1] = 10;
+                xx[3] = 5;
+                if (marioSpeedX >= -xx[3] && marioSpeedX <= xx[3]) {
+                    marioSpeedX = 0;
+                }
+                if (marioSpeedX >= xx[2]) {
+                    marioSpeedX -= xx[1];
+                }
+                if (marioSpeedX <= -xx[2]) {
+                    marioSpeedX += xx[1];
                 }
             }
         }
+    }
 //地面判定初期化
-        marioOnGround = false;
+    marioOnGround = false;
 
 //場外
-        if (int(marioType) <= 9 && marioHP >= 1) {
-            if (marioX < 100) {
-                marioX = 100;
-                marioSpeedX = 0;
-            }
-            if (marioX + marioWidth > fxmax) {
-                marioX = fxmax - marioWidth;
-                marioSpeedX = 0;
-            }
+    if (int(marioType) <= 9 && marioHP >= 1) {
+        if (marioX < 100) {
+            marioX = 100;
+            marioSpeedX = 0;
         }
+        if (marioX + marioWidth > fxmax) {
+            marioX = fxmax - marioWidth;
+            marioSpeedX = 0;
+        }
+    }
 //if (marioY>=42000){marioY=42000;marioOnGround=1;}
-        if (marioY >= 38000 && marioHP >= 0 && stagecolor == 4) {
-            marioHP = -2;
-            mmsgtm = 30;
-            mmsgtype = 55;
-        }
-        if (marioY >= 52000 && marioHP >= 0) {
-            marioHP = -2;
-        }
-        // endregion player
+    if (marioY >= 38000 && marioHP >= 0 && stagecolor == 4) {
+        marioHP = -2;
+        mmsgtm = 30;
+        mmsgtype = 55;
+    }
+    if (marioY >= 52000 && marioHP >= 0) {
+        marioHP = -2;
+    }
+    // endregion player
 
 //ブロック
 //1-れんが、コイン、無し、土台、7-隠し
 
-        xx[15] = 0;
-        for (t = 0; t < T_MAX; t++) {
-            xx[0] = 200;
-            xx[1] = 3000;
-            xx[2] = 1000;
-            xx[3] = 3000;    //xx[2]=1000
-            xx[8] = blockX[t] - fx;
-            xx[9] = blockY[t] - fy;    //xx[15]=0;
-            if (blockX[t] - fx + xx[1] >= -10 - xx[3] && blockX[t] - fx <= fxmax + 12000 + xx[3]) {
-                if (marioType != MarioType::DYING && marioType != MarioType::HUGE && marioType != MarioType::AFTER_ORANGE_NOTE) {
-                    if (blockType[t] < 1000 && blockType[t] != 800 && blockType[t] != 140 && blockType[t] != 141) {    // && blockType[t]!=5){
-                        //if (!(mztm>=1 && mztype==1 && actaon[3]==1)){
-                        if (!(mztype == 1)) {
-                            xx[16] = 0;
-                            xx[17] = 0;
+    xx[15] = 0;
+    for (t = 0; t < T_MAX; t++) {
+        xx[0] = 200;
+        xx[1] = 3000;
+        xx[2] = 1000;
+        xx[3] = 3000;    //xx[2]=1000
+        xx[8] = blockX[t] - fx;
+        xx[9] = blockY[t] - fy;    //xx[15]=0;
+        if (blockX[t] - fx + xx[1] >= -10 - xx[3] && blockX[t] - fx <= fxmax + 12000 + xx[3]) {
+            if (marioType != MarioType::DYING && marioType != MarioType::HUGE && marioType != MarioType::AFTER_ORANGE_NOTE) {
+                if (blockType[t] < 1000 && blockType[t] != 800 && blockType[t] != 140 && blockType[t] != 141) {    // && blockType[t]!=5){
+                    //if (!(mztm>=1 && mztype==1 && actaon[3]==1)){
+                    if (!(mztype == 1)) {
+                        xx[16] = 0;
+                        xx[17] = 0;
 
-                            //上
-                            if (blockType[t] != 7 && blockType[t] != 110 && !(blockType[t] == 114)) {
-                                if (marioX + marioWidth > xx[8] + xx[0] * 2 + 100 && marioX < xx[8] + xx[1] - xx[0] * 2 - 100 &&
-                                    marioY + marioHeight > xx[9] && marioY + marioHeight < xx[9] + xx[1] && marioSpeedY >= -100) {
-                                    if (blockType[t] != 115 && blockType[t] != 400
-                                        && blockType[t] != 117
-                                        && blockType[t] != 118
-                                        && blockType[t] != 120) {
-                                        marioY = xx[9] - marioHeight + 100;
-                                        marioSpeedY = 0;
-                                        marioOnGround = true;
-                                        xx[16] = 1;
-                                    } else if (blockType[t] == 115) {
+                        //上
+                        if (blockType[t] != 7 && blockType[t] != 110 && !(blockType[t] == 114)) {
+                            if (marioX + marioWidth > xx[8] + xx[0] * 2 + 100 && marioX < xx[8] + xx[1] - xx[0] * 2 - 100 &&
+                                marioY + marioHeight > xx[9] && marioY + marioHeight < xx[9] + xx[1] && marioSpeedY >= -100) {
+                                if (blockType[t] != 115 && blockType[t] != 400
+                                    && blockType[t] != 117
+                                    && blockType[t] != 118
+                                    && blockType[t] != 120) {
+                                    marioY = xx[9] - marioHeight + 100;
+                                    marioSpeedY = 0;
+                                    marioOnGround = true;
+                                    xx[16] = 1;
+                                } else if (blockType[t] == 115) {
+                                    ot(oto[3]);
+                                    eyobi(blockX[t] + 1200, blockY[t] + 1200, 300, -1000, 0, 160, 1000, 1000, 1, 120);
+                                    eyobi(blockX[t] + 1200, blockY[t] + 1200, -300, -1000, 0, 160, 1000, 1000, 1, 120);
+                                    eyobi(blockX[t] + 1200, blockY[t] + 1200, 240, -1400, 0, 160, 1000, 1000, 1, 120);
+                                    eyobi(blockX[t] + 1200, blockY[t] + 1200, -240, -1400, 0, 160, 1000, 1000, 1, 120);
+                                    brockbreak(t);
+                                }
+                                    //Pスイッチ
+                                else if (blockType[t] == 400) {
+                                    marioSpeedY = 0;
+                                    blockX[t] = -8000000;
+                                    ot(oto[13]);
+                                    for (tt = 0; tt < T_MAX; tt++) {
+                                        if (blockType[tt] != 7) {
+                                            blockType[tt] = 800;
+                                        }
+                                    }
+                                    Mix_HaltMusic();
+                                }
+                                    //音符+
+                                else if (blockType[t] == 117) {
+                                    ot(oto[14]);
+                                    marioSpeedY = -1500;
+                                    marioType = MarioType::AFTER_ORANGE_NOTE;
+                                    mtm = 0;
+                                    if (blockXType[t] >= 2 && marioType == MarioType::AFTER_ORANGE_NOTE) {
+                                        marioType = MarioType::NORMAL;
+                                        marioSpeedY = -1600;
+                                        blockXType[t] = 3;
+                                    }
+                                    if (blockXType[t] == 0)
+                                        blockXType[t] = 1;
+                                }
+                                    //ジャンプ台
+                                else if (blockType[t] == 120) {
+                                    //blockXType[t]=0;
+                                    marioSpeedY = -2400;
+                                    marioType = MarioType::AFTER_SPRING;
+                                    mtm = 0;
+                                }
+
+                            }
+                        }
+                    }    //!
+
+                    //sstr=""+mjumptm;
+                    //ブロック判定の入れ替え
+                    if (!(mztm >= 1 && mztype == 1)) {
+                        xx[21] = 0;
+                        xx[22] = 1;    //xx[12]=0;
+                        if (marioOnGround || mjumptm >= 10) {
+                            xx[21] = 3;
+                            xx[22] = 0;
+                        }
+                        for (t3 = 0; t3 <= 1; t3++) {
+
+                            //下
+                            if (t3 == xx[21] && marioType != MarioType::IN_PIPE && blockType[t] != 117) {    // && xx[12]==0){
+                                if (marioX + marioWidth > xx[8] + xx[0] * 2 + 800 && marioX < xx[8] + xx[1] - xx[0] * 2 - 800 &&
+                                    marioY > xx[9] - xx[0] * 2 && marioY < xx[9] + xx[1] - xx[0] * 2 && marioSpeedY <= 0) {
+                                    xx[16] = 1;
+                                    xx[17] = 1;
+                                    marioY = xx[9] + xx[1] + xx[0];
+                                    if (marioSpeedY < 0) {
+                                        marioSpeedY = -marioSpeedY * 2 / 3;
+                                    }    //}
+                                    //壊れる
+                                    if (blockType[t] == 1 && !marioOnGround) {
                                         ot(oto[3]);
                                         eyobi(blockX[t] + 1200, blockY[t] + 1200, 300, -1000, 0, 160, 1000, 1000, 1, 120);
                                         eyobi(blockX[t] + 1200, blockY[t] + 1200, -300, -1000, 0, 160, 1000, 1000, 1, 120);
@@ -1577,942 +1627,874 @@ if (mtm==250)end();
                                         eyobi(blockX[t] + 1200, blockY[t] + 1200, -240, -1400, 0, 160, 1000, 1000, 1, 120);
                                         brockbreak(t);
                                     }
-                                    //Pスイッチ
-                                    else if (blockType[t] == 400) {
-                                        marioSpeedY = 0;
-                                        blockX[t] = -8000000;
-                                        ot(oto[13]);
-                                        for (tt = 0; tt < T_MAX; tt++) {
-                                            if (blockType[tt] != 7) {
-                                                blockType[tt] = 800;
-                                            }
-                                        }
-                                        Mix_HaltMusic();
+//コイン
+                                    if (blockType[t] == 2 && !marioOnGround) {
+                                        ot(oto[4]);
+                                        eyobi(blockX[t] + 10, blockY [t], 0, -800, 0, 40, 3000, 3000, 0, 16);
+                                        blockType[t] = 3;
                                     }
-                                    //音符+
-                                    else if (blockType[t] == 117) {
-                                        ot(oto[14]);
-                                        marioSpeedY = -1500;
-                                        marioType = MarioType::AFTER_ORANGE_NOTE;
-                                        mtm = 0;
-                                        if (blockXType[t] >= 2 && marioType == MarioType::AFTER_ORANGE_NOTE) {
-                                            marioType = MarioType::NORMAL;
-                                            marioSpeedY = -1600;
-                                            blockXType[t] = 3;
-                                        }
-                                        if (blockXType[t] == 0)
-                                            blockXType[t] = 1;
-                                    }
-                                    //ジャンプ台
-                                    else if (blockType[t] == 120) {
-                                        //blockXType[t]=0;
-                                        marioSpeedY = -2400;
-                                        marioType = MarioType::AFTER_SPRING;
-                                        mtm = 0;
-                                    }
-
-                                }
-                            }
-                        }    //!
-
-                        //sstr=""+mjumptm;
-                        //ブロック判定の入れ替え
-                        if (!(mztm >= 1 && mztype == 1)) {
-                            xx[21] = 0;
-                            xx[22] = 1;    //xx[12]=0;
-                            if (marioOnGround || mjumptm >= 10) {
-                                xx[21] = 3;
-                                xx[22] = 0;
-                            }
-                            for (t3 = 0; t3 <= 1; t3++) {
-
-                                //下
-                                if (t3 == xx[21] && marioType != MarioType::IN_PIPE && blockType[t] != 117) {    // && xx[12]==0){
-                                    if (marioX + marioWidth > xx[8] + xx[0] * 2 + 800 && marioX < xx[8] + xx[1] - xx[0] * 2 - 800 &&
-                                        marioY > xx[9] - xx[0] * 2 && marioY < xx[9] + xx[1] - xx[0] * 2 && marioSpeedY <= 0) {
-                                        xx[16] = 1;
-                                        xx[17] = 1;
+//隠し
+                                    if (blockType[t] == 7) {
+                                        ot(oto[4]);
+                                        eyobi(blockX[t] + 10, blockY [t], 0, -800, 0, 40, 3000, 3000, 0, 16);
                                         marioY = xx[9] + xx[1] + xx[0];
+                                        blockType[t] = 3;
                                         if (marioSpeedY < 0) {
                                             marioSpeedY = -marioSpeedY * 2 / 3;
-                                        }    //}
-                                        //壊れる
-                                        if (blockType[t] == 1 && !marioOnGround) {
-                                            ot(oto[3]);
-                                            eyobi(blockX[t] + 1200, blockY[t] + 1200, 300, -1000, 0, 160, 1000, 1000, 1, 120);
-                                            eyobi(blockX[t] + 1200, blockY[t] + 1200, -300, -1000, 0, 160, 1000, 1000, 1, 120);
-                                            eyobi(blockX[t] + 1200, blockY[t] + 1200, 240, -1400, 0, 160, 1000, 1000, 1, 120);
-                                            eyobi(blockX[t] + 1200, blockY[t] + 1200, -240, -1400, 0, 160, 1000, 1000, 1, 120);
-                                            brockbreak(t);
-                                        }
-//コイン
-                                        if (blockType[t] == 2 && !marioOnGround) {
-                                            ot(oto[4]);
-                                            eyobi(blockX[t] + 10, blockY [t], 0, -800, 0, 40, 3000, 3000, 0, 16);
-                                            blockType[t] = 3;
-                                        }
-//隠し
-                                        if (blockType[t] == 7) {
-                                            ot(oto[4]);
-                                            eyobi(blockX[t] + 10, blockY [t], 0, -800, 0, 40, 3000, 3000, 0, 16);
-                                            marioY = xx[9] + xx[1] + xx[0];
-                                            blockType[t] = 3;
-                                            if (marioSpeedY < 0) {
-                                                marioSpeedY = -marioSpeedY * 2 / 3;
-                                            }
-                                        }
-// トゲ
-                                        if (blockType[t] == 10) {
-                                            mmsgtm = 30;
-                                            mmsgtype = 3;
-                                            marioHP--;
                                         }
                                     }
+// トゲ
+                                    if (blockType[t] == 10) {
+                                        mmsgtm = 30;
+                                        mmsgtype = 3;
+                                        marioHP--;
+                                    }
                                 }
+                            }
 //左右
-                                if (t3 == xx[22]
-                                    && xx[15] == 0) {
-                                    if (blockType[t] != 7 && blockType[t] != 110
-                                        && blockType[t] != 117) {
-                                        if (!(blockType[t] == 114)) {    // && blockXType[t]==1)){
-                                            if (blockX[t] >= -20000) {
+                            if (t3 == xx[22]
+                                && xx[15] == 0) {
+                                if (blockType[t] != 7 && blockType[t] != 110
+                                    && blockType[t] != 117) {
+                                    if (!(blockType[t] == 114)) {    // && blockXType[t]==1)){
+                                        if (blockX[t] >= -20000) {
 //if (marioX+marioWidth>xx[8] && marioX<xx[8]+xx[2] && marioY+marioHeight>xx[9]+xx[1]/2-xx[0] &&){
-                                                if (marioX + marioWidth > xx[8]
-                                                    && marioX < xx[8]
-                                                                + xx[2]
-                                                    && marioY + marioHeight > xx[9]
-                                                                              + xx[1]
-                                                                       / 2 - xx[0]
-                                                    && marioY < xx[9]
-                                                                + xx[2]
-                                                    && marioSpeedX >= 0) {
-                                                    marioX = xx[8] - marioWidth;
-                                                    marioSpeedX = 0;
-                                                    xx[16] = 1;
+                                            if (marioX + marioWidth > xx[8]
+                                                && marioX < xx[8]
+                                                            + xx[2]
+                                                && marioY + marioHeight > xx[9]
+                                                                          + xx[1]
+                                                                            / 2 - xx[0]
+                                                && marioY < xx[9]
+                                                            + xx[2]
+                                                && marioSpeedX >= 0) {
+                                                marioX = xx[8] - marioWidth;
+                                                marioSpeedX = 0;
+                                                xx[16] = 1;
 //if (blockType[t]!=4){marioX=xx[8]-marioWidth;marioSpeedX=0;xx[16]=1;}
 //if (blockType[t]==4){marioX=xx[8]-marioWidth;marioSpeedX=-marioSpeedX*4/4;}
-                                                }
-                                                if (marioX + marioWidth >
-                                                    xx[8] + xx[2]
-                                                    && marioX < xx[8]
-                                                                + xx[1]
-                                                    && marioY + marioHeight > xx[9]
-                                                                              + xx[1]
-                                                                       / 2 - xx[0]
-                                                    && marioY < xx[9]
-                                                                + xx[2]
-                                                    && marioSpeedX <= 0) {
-                                                    marioX = xx[8] + xx[1];
-                                                    marioSpeedX = 0;
-                                                    xx[16] = 1;    //end();
+                                            }
+                                            if (marioX + marioWidth >
+                                                xx[8] + xx[2]
+                                                && marioX < xx[8]
+                                                            + xx[1]
+                                                && marioY + marioHeight > xx[9]
+                                                                          + xx[1]
+                                                                            / 2 - xx[0]
+                                                && marioY < xx[9]
+                                                            + xx[2]
+                                                && marioSpeedX <= 0) {
+                                                marioX = xx[8] + xx[1];
+                                                marioSpeedX = 0;
+                                                xx[16] = 1;    //end();
 //if (blockType[t]!=4){marioX=xx[8]+xx[1];marioSpeedX=0;xx[16]=1;}
 //if (blockType[t]==4){marioX=xx[8]+xx[1];marioSpeedX=-marioSpeedX*4/4;}
-                                                }
                                             }
                                         }
                                     }
                                 }
+                            }
 
-                            }    //t3
-                        }    //!
+                        }    //t3
+                    }    //!
 
-                    }        // && blockType[t]<50
+                }        // && blockType[t]<50
 
-                    if (blockType[t] == 800) {
+                if (blockType[t] == 800) {
 //if (xx[0]+xx[2]>=-xx[14] && xx[0]<=fxmax+xx[14] && xx[1]+xx[3]>=-10-9000 && xx[1]<=fymax+10000){
-                        if (marioY >
-                            xx[9] - xx[0] * 2 - 2000
-                            && marioY <
-                               xx[9] + xx[1] - xx[0] * 2 +
-                               2000
-                            && marioX + marioWidth > xx[8] - 400
-                            && marioX < xx[8] + xx[1]) {
-                            blockX[t] = -800000;
-                            ot(oto[4]);
-                        }
+                    if (marioY >
+                        xx[9] - xx[0] * 2 - 2000
+                        && marioY <
+                           xx[9] + xx[1] - xx[0] * 2 +
+                           2000
+                        && marioX + marioWidth > xx[8] - 400
+                        && marioX < xx[8] + xx[1]) {
+                        blockX[t] = -800000;
+                        ot(oto[4]);
                     }
+                }
 //剣とってクリア
-                    if (blockType[t] == 140) {
-                        if (marioY >
-                            xx[9] - xx[0] * 2 - 2000
-                            && marioY <
-                               xx[9] + xx[1] - xx[0] * 2 +
-                               2000
-                            && marioX + marioWidth > xx[8] - 400
-                            && marioX < xx[8] + xx[1]) {
-                            blockX[t] = -800000;    //ot(oto[4]);
-                            sracttype[20] = 1;
-                            sron[20] = 1;
-                            Mix_HaltMusic();
-                            marioType = MarioType::WIN_SWORD;
-                            mtm = 0;
-                            ot(oto[16]);
+                if (blockType[t] == 140) {
+                    if (marioY >
+                        xx[9] - xx[0] * 2 - 2000
+                        && marioY <
+                           xx[9] + xx[1] - xx[0] * 2 +
+                           2000
+                        && marioX + marioWidth > xx[8] - 400
+                        && marioX < xx[8] + xx[1]) {
+                        blockX[t] = -800000;    //ot(oto[4]);
+                        sracttype[20] = 1;
+                        sron[20] = 1;
+                        Mix_HaltMusic();
+                        marioType = MarioType::WIN_SWORD;
+                        mtm = 0;
+                        ot(oto[16]);
 
-                        }
                     }
+                }
 //特殊的
-                    if (blockType[t] == 100) {    //xx[9]+xx[1]+3000<marioY && // && marioY>xx[9]-xx[0]*2
-                        if (marioY >
-                            xx[9] - xx[0] * 2 - 2000
-                            && marioY <
-                               xx[9] + xx[1] - xx[0] * 2 +
-                               2000
-                            && marioX + marioWidth > xx[8] - 400
-                            && marioX < xx[8] + xx[1]
-                            && marioSpeedY <= 0) {
-                            if (blockXType[t] == 0)
-                                blockY[t] = marioY + fy - 1200 - xx[1];
-                        }
+                if (blockType[t] == 100) {    //xx[9]+xx[1]+3000<marioY && // && marioY>xx[9]-xx[0]*2
+                    if (marioY >
+                        xx[9] - xx[0] * 2 - 2000
+                        && marioY <
+                           xx[9] + xx[1] - xx[0] * 2 +
+                           2000
+                        && marioX + marioWidth > xx[8] - 400
+                        && marioX < xx[8] + xx[1]
+                        && marioSpeedY <= 0) {
+                        if (blockXType[t] == 0)
+                            blockY[t] = marioY + fy - 1200 - xx[1];
+                    }
 
-                        if (blockXType[t] == 1) {
-                            if (xx[17] == 1) {
-                                if (marioX +
-                                    marioWidth >
-                                    xx[8] - 400
-                                    && marioX < xx[8] + xx[1] / 2 - 1500) {
-                                    blockX[t] += 3000;
-                                } else if (marioX + marioWidth >= xx[8]
-                                                                  + xx[1]
-                                                            / 2 - 1500 && marioX < xx[8]
-                                                                                   + xx[1]) {
-                                    blockX[t] -= 3000;
-                                }
+                    if (blockXType[t] == 1) {
+                        if (xx[17] == 1) {
+                            if (marioX +
+                                marioWidth >
+                                xx[8] - 400
+                                && marioX < xx[8] + xx[1] / 2 - 1500) {
+                                blockX[t] += 3000;
+                            } else if (marioX + marioWidth >= xx[8]
+                                                              + xx[1]
+                                                                / 2 - 1500 && marioX < xx[8]
+                                                                                       + xx[1]) {
+                                blockX[t] -= 3000;
                             }
                         }
+                    }
 
-                        if (xx[17] == 1 && blockXType[t] == 0) {
-                            ot(oto[4]);
-                            eyobi(blockX[t] + 10, blockY[t],
-                                  0, -800, 0, 40, 3000, 3000, 0, 16);
-                            blockType[t] = 3;
-                        }
-                    }        //100
+                    if (xx[17] == 1 && blockXType[t] == 0) {
+                        ot(oto[4]);
+                        eyobi(blockX[t] + 10, blockY[t],
+                              0, -800, 0, 40, 3000, 3000, 0, 16);
+                        blockType[t] = 3;
+                    }
+                }        //100
 
 //敵出現
-                    if (blockType[t] == 101) {    //xx[9]+xx[1]+3000<marioY && // && marioY>xx[9]-xx[0]*2
-                        if (xx[17] == 1) {
-                            ot(oto[8]);
-                            blockType[t] = 3;
-                            abrocktm[aco] = 16;
-                            if (blockXType[t] == 0)
-                                ayobi(blockX[t], blockY[t], 0, 0, 0, 0, 0);
-                            if (blockXType[t] == 1)
-                                ayobi(blockX[t], blockY[t], 0, 0, 0, 4, 0);
-                            if (blockXType[t] == 3)
-                                ayobi(blockX[t], blockY[t], 0, 0, 0, 101, 0);
-                            if (blockXType[t] == 4) {
-                                abrocktm[aco] = 20;
-                                ayobi(blockX[t] -
-                                      400, blockY[t] - 1600, 0, 0, 0, 6, 0);
-                            }
-                            if (blockXType[t] == 10)
-                                ayobi(blockX[t], blockY[t], 0, 0, 0, 101, 0);
+                if (blockType[t] == 101) {    //xx[9]+xx[1]+3000<marioY && // && marioY>xx[9]-xx[0]*2
+                    if (xx[17] == 1) {
+                        ot(oto[8]);
+                        blockType[t] = 3;
+                        abrocktm[aco] = 16;
+                        if (blockXType[t] == 0)
+                            ayobi(blockX[t], blockY[t], 0, 0, 0, 0, 0);
+                        if (blockXType[t] == 1)
+                            ayobi(blockX[t], blockY[t], 0, 0, 0, 4, 0);
+                        if (blockXType[t] == 3)
+                            ayobi(blockX[t], blockY[t], 0, 0, 0, 101, 0);
+                        if (blockXType[t] == 4) {
+                            abrocktm[aco] = 20;
+                            ayobi(blockX[t] -
+                                  400, blockY[t] - 1600, 0, 0, 0, 6, 0);
                         }
-                    }        //101
+                        if (blockXType[t] == 10)
+                            ayobi(blockX[t], blockY[t], 0, 0, 0, 101, 0);
+                    }
+                }        //101
 
 //おいしいきのこ出現
-                    if (blockType[t] == 102) {
-                        if (xx[17] == 1) {
-                            ot(oto[8]);
-                            blockType[t] = 3;
-                            abrocktm[aco] = 16;
-                            if (blockXType[t] == 0)
-                                ayobi(blockX[t], blockY[t], 0, 0, 0, 100, 0);
-                            if (blockXType[t] == 2)
-                                ayobi(blockX[t], blockY[t], 0, 0, 0, 100, 2);
-                            if (blockXType[t] == 3)
-                                ayobi(blockX[t], blockY[t], 0, 0, 0, 102, 1);
-                        }
-                    }        //102
+                if (blockType[t] == 102) {
+                    if (xx[17] == 1) {
+                        ot(oto[8]);
+                        blockType[t] = 3;
+                        abrocktm[aco] = 16;
+                        if (blockXType[t] == 0)
+                            ayobi(blockX[t], blockY[t], 0, 0, 0, 100, 0);
+                        if (blockXType[t] == 2)
+                            ayobi(blockX[t], blockY[t], 0, 0, 0, 100, 2);
+                        if (blockXType[t] == 3)
+                            ayobi(blockX[t], blockY[t], 0, 0, 0, 102, 1);
+                    }
+                }        //102
 
 //まずいきのこ出現
-                    if (blockType[t] == 103) {
-                        if (xx[17] == 1) {
-                            ot(oto[8]);
-                            blockType[t] = 3;
-                            abrocktm[aco] = 16;
-                            ayobi(blockX[t], blockY[t], 0, 0, 0, 100, 1);
-                        }
-                    }        //103
+                if (blockType[t] == 103) {
+                    if (xx[17] == 1) {
+                        ot(oto[8]);
+                        blockType[t] = 3;
+                        abrocktm[aco] = 16;
+                        ayobi(blockX[t], blockY[t], 0, 0, 0, 100, 1);
+                    }
+                }        //103
 
 //悪スター出し
-                    if (blockType[t] == 104) {
-                        if (xx[17] == 1) {
-                            ot(oto[8]);
-                            blockType[t] = 3;
-                            abrocktm[aco] = 16;
-                            ayobi(blockX[t], blockY[t], 0, 0, 0, 110, 0);
-                        }
-                    }        //104
+                if (blockType[t] == 104) {
+                    if (xx[17] == 1) {
+                        ot(oto[8]);
+                        blockType[t] = 3;
+                        abrocktm[aco] = 16;
+                        ayobi(blockX[t], blockY[t], 0, 0, 0, 110, 0);
+                    }
+                }        //104
 
 //毒きのこ量産
-                    if (blockType[t] == 110) {
-                        if (xx[17] == 1) {
-                            blockType[t] = 111;
-                            thp[t] = 999;
-                        }
-                    }        //110
-                    if (blockType[t] == 111 && blockX[t] - fx >= 0) {
+                if (blockType[t] == 110) {
+                    if (xx[17] == 1) {
+                        blockType[t] = 111;
+                        thp[t] = 999;
+                    }
+                }        //110
+                if (blockType[t] == 111 && blockX[t] - fx >= 0) {
+                    thp[t]++;
+                    if (thp[t] >= 16) {
+                        thp[t] = 0;
+                        ot(oto[8]);
+                        abrocktm[aco] = 16;
+                        ayobi(blockX[t], blockY[t], 0, 0, 0, 102, 1);
+                    }
+                }
+//コイン量産
+                if (blockType[t] == 112) {
+                    if (xx[17] == 1) {
+                        blockType[t] = 113;
+                        thp[t] = 999;
+                        titem[t] = 0;
+                    }
+                }        //110
+                if (blockType[t] == 113 && blockX[t] - fx >= 0) {
+                    if (titem[t] <= 19)
                         thp[t]++;
-                        if (thp[t] >= 16) {
-                            thp[t] = 0;
+                    if (thp[t] >= 3) {
+                        thp[t] = 0;
+                        titem[t]++;
+                        ot(oto[4]);
+                        eyobi(blockX[t] + 10, blockY[t], 0, -800, 0, 40, 3000, 3000, 0, 16);
+//blockType[t]=3;
+                    }
+                }
+//隠し毒きのこ
+                if (blockType[t] == 114) {
+                    if (xx[17] == 1) {
+                        if (blockXType[t] == 0) {
                             ot(oto[8]);
+                            blockType[t] = 3;
                             abrocktm[aco] = 16;
                             ayobi(blockX[t], blockY[t], 0, 0, 0, 102, 1);
                         }
-                    }
-//コイン量産
-                    if (blockType[t] == 112) {
-                        if (xx[17] == 1) {
-                            blockType[t] = 113;
-                            thp[t] = 999;
-                            titem[t] = 0;
-                        }
-                    }        //110
-                    if (blockType[t] == 113 && blockX[t] - fx >= 0) {
-                        if (titem[t] <= 19)
-                            thp[t]++;
-                        if (thp[t] >= 3) {
-                            thp[t] = 0;
-                            titem[t]++;
+                        if (blockXType[t] == 2) {
                             ot(oto[4]);
-                            eyobi(blockX[t] + 10, blockY[t], 0, -800, 0, 40, 3000, 3000, 0, 16);
-//blockType[t]=3;
+                            eyobi(blockX[t] +
+                                  10, blockY[t],
+                                  0, -800, 0, 40, 3000, 3000, 0, 16);
+                            blockType[t] = 115;
+                            blockXType[t] = 0;
                         }
-                    }
-//隠し毒きのこ
-                    if (blockType[t] == 114) {
-                        if (xx[17] == 1) {
-                            if (blockXType[t] == 0) {
-                                ot(oto[8]);
-                                blockType[t] = 3;
-                                abrocktm[aco] = 16;
-                                ayobi(blockX[t], blockY[t], 0, 0, 0, 102, 1);
-                            }
-                            if (blockXType[t] == 2) {
-                                ot(oto[4]);
-                                eyobi(blockX[t] +
-                                      10, blockY[t],
-                                      0, -800, 0, 40, 3000, 3000, 0, 16);
-                                blockType[t] = 115;
-                                blockXType[t] = 0;
-                            }
-                            if (blockXType[t] == 10) {
-                                if (stageonoff == 1) {
-                                    blockType[t]
-                                            = 130;
-                                    stageonoff = 0;
-                                    ot(oto[13]);
-                                    blockXType[t]
-                                            = 2;
-                                    for (t = 0; t < amax; t++) {
-                                        if (atype[t] == 87
-                                            || atype[t] == 88) {
-                                            if (axtype[t] == 105) {
-                                                axtype[t]
-                                                        = 110;
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    ot(oto[4]);
-                                    eyobi(blockX[t]
-                                          +
-                                          10,
-                                          blockY
-                                          [t],
-                                          0,
-                                          -800, 0, 40, 3000, 3000, 0, 16);
-                                    blockType[t]
-                                            = 3;
-                                }
-                            }
-
-                        }
-                    }        //114
-
-//もろいブロック
-                    if (blockType[t] == 115) {
-
-                    }        //115
-
-//Pスイッチ
-                    if (blockType[t] == 116) {
-                        if (xx[17] == 1) {
-                            ot(oto[8]);
-//ot(oto[13]);
-                            blockType[t] = 3;    //abrocktm[aco]=18;ayobi(blockX[t],blockY[t],0,0,0,104,1);
-                            tyobi(blockX[t] / 100, (blockY[t] / 100) - 29, 400);
-                        }
-                    }        //116
-
-//ファイアバー強化
-                    if (blockType[t] == 124) {
-                        if (xx[17] == 1) {
-                            ot(oto[13]);
-                            for (t = 0; t < amax; t++) {
-                                if (atype[t] == 87 || atype[t]
-                                                      == 88) {
-                                    if (axtype[t] == 101) {
-                                        axtype[t]
-                                                = 120;
-                                    }
-                                }
-                            }
-                            blockType[t] = 3;
-                        }
-                    }
-//ONスイッチ
-                    if (blockType[t] == 130) {
-                        if (xx[17] == 1) {
-                            if (blockXType[t] != 1) {
+                        if (blockXType[t] == 10) {
+                            if (stageonoff == 1) {
+                                blockType[t]
+                                        = 130;
                                 stageonoff = 0;
                                 ot(oto[13]);
-                            }
-                        }
-                    } else if (blockType[t] == 131) {
-                        if (xx[17] == 1 && blockXType[t] != 2) {
-                            stageonoff = 1;
-                            ot(oto[13]);
-                            if (blockXType[t] == 1) {
+                                blockXType[t]
+                                        = 2;
                                 for (t = 0; t < amax; t++) {
-                                    if (atype[t] == 87 || atype[t] == 88) {
+                                    if (atype[t] == 87
+                                        || atype[t] == 88) {
                                         if (axtype[t] == 105) {
                                             axtype[t]
                                                     = 110;
                                         }
                                     }
                                 }
-                                bxtype[3] = 105;
+                            } else {
+                                ot(oto[4]);
+                                eyobi(blockX[t]
+                                      +
+                                      10,
+                                      blockY
+                                      [t],
+                                      0,
+                                      -800, 0, 40, 3000, 3000, 0, 16);
+                                blockType[t]
+                                        = 3;
                             }
                         }
-                    }
-//ヒント
-                    if (blockType[t] == 300) {
-                        if (xx[17] == 1) {
-                            ot(oto[15]);
-                            if (blockXType[t] <= 100) {
-                                tmsgtype = 1;
-                                tmsgtm = 15;
-                                tmsgy = 300 + (blockXType[t] - 1);
-                                tmsg = (blockXType[t]);
-                            }
-                            if (blockXType[t] == 540) {
-                                tmsgtype = 1;
-                                tmsgtm = 15;
-                                tmsgy = 400;
-                                tmsg = 100;
-                                blockXType[t] = 541;
-                            }
-                        }
-                    }        //300
-
-                    if (blockType[t] == 301) {
-                        if (xx[17] == 1) {
-                            ot(oto[3]);
-                            eyobi(blockX[t] + 1200,
-                                  blockY[t] + 1200, 300,
-                                  -1000, 0, 160, 1000, 1000, 1, 120);
-                            eyobi(blockX[t] + 1200,
-                                  blockY[t] + 1200,
-                                  -300, -1000, 0, 160, 1000, 1000, 1, 120);
-                            eyobi(blockX[t] + 1200,
-                                  blockY[t] + 1200, 240,
-                                  -1400, 0, 160, 1000, 1000, 1, 120);
-                            eyobi(blockX[t] + 1200,
-                                  blockY[t] + 1200,
-                                  -240, -1400, 0, 160, 1000, 1000, 1, 120);
-                            brockbreak(t);
-                        }
-                    }        //300
-
-                } else if (marioType == MarioType::HUGE) {
-                    if (marioX + marioWidth > xx[8]
-                        && marioX < xx[8] + xx[1]
-                        && marioY + marioHeight > xx[9]
-                        && marioY < xx[9] + xx[1]) {
-
-                        ot(oto[3]);
-                        eyobi(blockX[t] + 1200,
-                              blockY[t] + 1200, 300, -1000,
-                              0, 160, 1000, 1000, 1, 120);
-                        eyobi(blockX[t] + 1200,
-                              blockY[t] + 1200, -300, -1000,
-                              0, 160, 1000, 1000, 1, 120);
-                        eyobi(blockX[t] + 1200,
-                              blockY[t] + 1200, 240, -1400,
-                              0, 160, 1000, 1000, 1, 120);
-                        eyobi(blockX[t] + 1200,
-                              blockY[t] + 1200, -240, -1400,
-                              0, 160, 1000, 1000, 1, 120);
-                        brockbreak(t);
 
                     }
+                }        //114
+
+//もろいブロック
+                if (blockType[t] == 115) {
+
+                }        //115
+
+//Pスイッチ
+                if (blockType[t] == 116) {
+                    if (xx[17] == 1) {
+                        ot(oto[8]);
+//ot(oto[13]);
+                        blockType[t] = 3;    //abrocktm[aco]=18;ayobi(blockX[t],blockY[t],0,0,0,104,1);
+                        tyobi(blockX[t] / 100, (blockY[t] / 100) - 29, 400);
+                    }
+                }        //116
+
+//ファイアバー強化
+                if (blockType[t] == 124) {
+                    if (xx[17] == 1) {
+                        ot(oto[13]);
+                        for (t = 0; t < amax; t++) {
+                            if (atype[t] == 87 || atype[t]
+                                                  == 88) {
+                                if (axtype[t] == 101) {
+                                    axtype[t]
+                                            = 120;
+                                }
+                            }
+                        }
+                        blockType[t] = 3;
+                    }
                 }
-//ONOFF
-                if (blockType[t] == 130 && stageonoff == 0) {
-                    blockType[t] = 131;
-                }
-                if (blockType[t] == 131 && stageonoff == 1) {
-                    blockType[t] = 130;
+//ONスイッチ
+                if (blockType[t] == 130) {
+                    if (xx[17] == 1) {
+                        if (blockXType[t] != 1) {
+                            stageonoff = 0;
+                            ot(oto[13]);
+                        }
+                    }
+                } else if (blockType[t] == 131) {
+                    if (xx[17] == 1 && blockXType[t] != 2) {
+                        stageonoff = 1;
+                        ot(oto[13]);
+                        if (blockXType[t] == 1) {
+                            for (t = 0; t < amax; t++) {
+                                if (atype[t] == 87 || atype[t] == 88) {
+                                    if (axtype[t] == 105) {
+                                        axtype[t]
+                                                = 110;
+                                    }
+                                }
+                            }
+                            bxtype[3] = 105;
+                        }
+                    }
                 }
 //ヒント
                 if (blockType[t] == 300) {
-                    if (blockXType[t] >= 500 && blockX[t] >= -6000) {    // && blockX[t]>=-6000){
-                        if (blockXType[t] <= 539)
-                            blockXType[t]++;
-                        if (blockXType[t] >= 540) {
-                            blockX[t] -= 500;
+                    if (xx[17] == 1) {
+                        ot(oto[15]);
+                        if (blockXType[t] <= 100) {
+                            tmsgtype = 1;
+                            tmsgtm = 15;
+                            tmsgy = 300 + (blockXType[t] - 1);
+                            tmsg = (blockXType[t]);
+                        }
+                        if (blockXType[t] == 540) {
+                            tmsgtype = 1;
+                            tmsgtm = 15;
+                            tmsgy = 400;
+                            tmsg = 100;
+                            blockXType[t] = 541;
                         }
                     }
                 }        //300
 
+                if (blockType[t] == 301) {
+                    if (xx[17] == 1) {
+                        ot(oto[3]);
+                        eyobi(blockX[t] + 1200,
+                              blockY[t] + 1200, 300,
+                              -1000, 0, 160, 1000, 1000, 1, 120);
+                        eyobi(blockX[t] + 1200,
+                              blockY[t] + 1200,
+                              -300, -1000, 0, 160, 1000, 1000, 1, 120);
+                        eyobi(blockX[t] + 1200,
+                              blockY[t] + 1200, 240,
+                              -1400, 0, 160, 1000, 1000, 1, 120);
+                        eyobi(blockX[t] + 1200,
+                              blockY[t] + 1200,
+                              -240, -1400, 0, 160, 1000, 1000, 1, 120);
+                        brockbreak(t);
+                    }
+                }        //300
+
+            } else if (marioType == MarioType::HUGE) {
+                if (marioX + marioWidth > xx[8]
+                    && marioX < xx[8] + xx[1]
+                    && marioY + marioHeight > xx[9]
+                    && marioY < xx[9] + xx[1]) {
+
+                    ot(oto[3]);
+                    eyobi(blockX[t] + 1200,
+                          blockY[t] + 1200, 300, -1000,
+                          0, 160, 1000, 1000, 1, 120);
+                    eyobi(blockX[t] + 1200,
+                          blockY[t] + 1200, -300, -1000,
+                          0, 160, 1000, 1000, 1, 120);
+                    eyobi(blockX[t] + 1200,
+                          blockY[t] + 1200, 240, -1400,
+                          0, 160, 1000, 1000, 1, 120);
+                    eyobi(blockX[t] + 1200,
+                          blockY[t] + 1200, -240, -1400,
+                          0, 160, 1000, 1000, 1, 120);
+                    brockbreak(t);
+
+                }
             }
-        }            //ブロック
+//ONOFF
+            if (blockType[t] == 130 && stageonoff == 0) {
+                blockType[t] = 131;
+            }
+            if (blockType[t] == 131 && stageonoff == 1) {
+                blockType[t] = 130;
+            }
+//ヒント
+            if (blockType[t] == 300) {
+                if (blockXType[t] >= 500 && blockX[t] >= -6000) {    // && blockX[t]>=-6000){
+                    if (blockXType[t] <= 539)
+                        blockXType[t]++;
+                    if (blockXType[t] >= 540) {
+                        blockX[t] -= 500;
+                    }
+                }
+            }        //300
+
+        }
+    }            //ブロック
 
 //壁
-        for (t = 0; t < smax; t++) {
-            if (sa[t] - fx + sc[t] >= -12000 && sa[t] - fx <= fxmax) {
-                xx[0] = 200;
-                xx[1] = 2400;
-                xx[2] = 1000;
-                xx[7] = 0;
+    for (t = 0; t < smax; t++) {
+        if (sa[t] - fx + sc[t] >= -12000 && sa[t] - fx <= fxmax) {
+            xx[0] = 200;
+            xx[1] = 2400;
+            xx[2] = 1000;
+            xx[7] = 0;
 
-                xx[8] = sa[t] - fx;
-                xx[9] = sb[t] - fy;
-                if ((stype[t] <= 99 || stype[t] == 200)
-                    && int(marioType) < 10) {
+            xx[8] = sa[t] - fx;
+            xx[9] = sb[t] - fy;
+            if ((stype[t] <= 99 || stype[t] == 200)
+                && int(marioType) < 10) {
 
 //おちるブロック
-                    if (stype[t] == 51) {
-                        if (marioX + marioWidth >
-                            xx[8] + xx[0] + 3000
-                            && marioX < xx[8] + sc[t] - xx[0]
-                            && marioY + marioHeight >
-                               xx[9] + 3000 && sgtype[t] == 0) {
-                            if (sxtype[t] == 0) {
-                                sgtype[t] = 1;
-                                sr[t] = 0;
-                            }
-                        }
-                        if (marioX + marioWidth >
-                            xx[8] + xx[0] + 1000
-                            && marioX < xx[8] + sc[t] - xx[0]
-                            && marioY + marioHeight >
-                               xx[9] + 3000 && sgtype[t] == 0) {
-                            if ((sxtype[t] == 10)
-                                && sgtype[t] == 0) {
-                                sgtype[t] = 1;
-                                sr[t] = 0;
-                            }
-                        }
-
-                        if ((sxtype[t] == 1)
-                            && sb[27] >= 25000
-                            && sa[27] > marioX + marioWidth
-                            && t != 27 && sgtype[t] == 0) {
+                if (stype[t] == 51) {
+                    if (marioX + marioWidth >
+                        xx[8] + xx[0] + 3000
+                        && marioX < xx[8] + sc[t] - xx[0]
+                        && marioY + marioHeight >
+                           xx[9] + 3000 && sgtype[t] == 0) {
+                        if (sxtype[t] == 0) {
                             sgtype[t] = 1;
                             sr[t] = 0;
-                        }
-                        if (sxtype[t] == 2
-                            && sb[28] >= 48000
-                            && t != 28 && sgtype[t] == 0 && marioHP >= 1) {
-                            sgtype[t] = 1;
-                            sr[t] = 0;
-                        }
-                        if ((sxtype[t] == 3
-                             && marioY >= 30000
-                             || sxtype[t] == 4 && marioY >= 25000)
-                            && sgtype[t] == 0
-                            && marioHP >= 1
-                            && marioX + marioWidth >
-                               xx[8] + xx[0] + 3000 - 300
-                            && marioX < xx[8] + sc[t] - xx[0]) {
-                            sgtype[t] = 1;
-                            sr[t] = 0;
-                            if (sxtype[t] == 4)
-                                sr[t] = 100;
-                        }
-
-                        if (sgtype[t] == 1 && sb[t] <= fymax + 18000) {
-                            sr[t] += 120;
-                            if (sr[t] >= 1600) {
-                                sr[t] = 1600;
-                            }
-                            sb[t] += sr[t];
-                            if (marioX + marioWidth > xx[8] + xx[0]
-                                && marioX < xx[8] + sc[t] - xx[0]
-                                && marioY + marioHeight > xx[9]
-                                && marioY < xx[9] + sd[t] + xx[0]) {
-                                marioHP--;
-                                xx[7] = 1;
-                            }
                         }
                     }
-//おちるブロック2
-                    if (stype[t] == 52) {
-                        if (sgtype[t] == 0
-                            && marioX + marioWidth >
-                               xx[8] + xx[0] + 2000
-                            && marioX <
-                               xx[8] + sc[t] - xx[0] - 2500
-                            && marioY + marioHeight > xx[9] - 3000) {
+                    if (marioX + marioWidth >
+                        xx[8] + xx[0] + 1000
+                        && marioX < xx[8] + sc[t] - xx[0]
+                        && marioY + marioHeight >
+                           xx[9] + 3000 && sgtype[t] == 0) {
+                        if ((sxtype[t] == 10)
+                            && sgtype[t] == 0) {
                             sgtype[t] = 1;
                             sr[t] = 0;
                         }
-                        if (sgtype[t] == 1) {
-                            sr[t] += 120;
-                            if (sr[t] >= 1600) {
-                                sr[t] = 1600;
-                            }
-                            sb[t] += sr[t];
-                        }
                     }
-//通常地面
-                    if (xx[7] == 0) {
+
+                    if ((sxtype[t] == 1)
+                        && sb[27] >= 25000
+                        && sa[27] > marioX + marioWidth
+                        && t != 27 && sgtype[t] == 0) {
+                        sgtype[t] = 1;
+                        sr[t] = 0;
+                    }
+                    if (sxtype[t] == 2
+                        && sb[28] >= 48000
+                        && t != 28 && sgtype[t] == 0 && marioHP >= 1) {
+                        sgtype[t] = 1;
+                        sr[t] = 0;
+                    }
+                    if ((sxtype[t] == 3
+                         && marioY >= 30000
+                         || sxtype[t] == 4 && marioY >= 25000)
+                        && sgtype[t] == 0
+                        && marioHP >= 1
+                        && marioX + marioWidth >
+                           xx[8] + xx[0] + 3000 - 300
+                        && marioX < xx[8] + sc[t] - xx[0]) {
+                        sgtype[t] = 1;
+                        sr[t] = 0;
+                        if (sxtype[t] == 4)
+                            sr[t] = 100;
+                    }
+
+                    if (sgtype[t] == 1 && sb[t] <= fymax + 18000) {
+                        sr[t] += 120;
+                        if (sr[t] >= 1600) {
+                            sr[t] = 1600;
+                        }
+                        sb[t] += sr[t];
                         if (marioX + marioWidth > xx[8] + xx[0]
                             && marioX < xx[8] + sc[t] - xx[0]
                             && marioY + marioHeight > xx[9]
-                            && marioY + marioHeight < xx[9] + xx[1]
-                            && marioSpeedY >= -100) {
-                            marioY = sb[t] - fy - marioHeight + 100;
-                            marioSpeedY = 0;
-                            marioOnGround = true;
-                        }
-                        if (marioX + marioWidth > xx[8] - xx[0]
-                            && marioX < xx[8] + xx[2]
-                            && marioY + marioHeight >
-                               xx[9] + xx[1] * 3 / 4
-                            && marioY < xx[9] + sd[t] - xx[2]) {
-                            marioX = xx[8] - xx[0] - marioWidth;
-                            marioSpeedX = 0;
-                        }
-                        if (marioX + marioWidth > xx[8] + sc[t] - xx[0]
-                            && marioX < xx[8] + sc[t] + xx[0]
-                            && marioY + marioHeight >
-                               xx[9] + xx[1] * 3 / 4
-                            && marioY < xx[9] + sd[t] - xx[2]) {
-                            marioX = xx[8] + sc[t] + xx[0];
-                            marioSpeedX = 0;
-                        }
-                        if (marioX + marioWidth >
-                            xx[8] + xx[0] * 2
-                            && marioX <
-                               xx[8] + sc[t] - xx[0] * 2
-                            && marioY > xx[9] + sd[t] - xx[1]
                             && marioY < xx[9] + sd[t] + xx[0]) {
-                            marioY = xx[9] + sd[t] + xx[0];
-                            if (marioSpeedY < 0) {
-                                marioSpeedY = -marioSpeedY * 2 / 3;
-                            }
+                            marioHP--;
+                            xx[7] = 1;
                         }
-                    }        //xx[7]
-
-//入る土管
-                    if (stype[t] == 50) {
-                        if (marioX + marioWidth > xx[8] + 2800
-                            && marioX < xx[8] + sc[t] - 3000
-                            && marioY + marioHeight >
-                               xx[9] - 1000
-                            && marioY + marioHeight <
-                               xx[9] + xx[1] + 3000
-                            && marioOnGround
-                            && actaon[3] == 1 && marioType == MarioType::NORMAL) {
-//飛び出し
-                            if (sxtype[t] == 0) {
-                                marioType = MarioType::IN_PIPE;
-                                mtm = 0;
-                                ot(oto[7]);
-                                marioXType = 0;
-                            }
-//普通
-                            if (sxtype[t] == 1) {
-                                marioType = MarioType::IN_PIPE;
-                                mtm = 0;
-                                ot(oto[7]);
-                                marioXType = 1;
-                            }
-//普通
-                            if (sxtype[t] == 2) {
-                                marioType = MarioType::IN_PIPE;
-                                mtm = 0;
-                                ot(oto[7]);
-                                marioXType = 2;
-                            }
-                            if (sxtype[t] == 5) {
-                                marioType = MarioType::IN_PIPE;
-                                mtm = 0;
-                                ot(oto[7]);
-                                marioXType = 5;
-                            }
-// ループ
-                            if (sxtype[t] == 6) {
-                                marioType = MarioType::IN_PIPE;
-                                mtm = 0;
-                                ot(oto[7]);
-                                marioXType = 6;
-                            }
+                    }
+                }
+//おちるブロック2
+                if (stype[t] == 52) {
+                    if (sgtype[t] == 0
+                        && marioX + marioWidth >
+                           xx[8] + xx[0] + 2000
+                        && marioX <
+                           xx[8] + sc[t] - xx[0] - 2500
+                        && marioY + marioHeight > xx[9] - 3000) {
+                        sgtype[t] = 1;
+                        sr[t] = 0;
+                    }
+                    if (sgtype[t] == 1) {
+                        sr[t] += 120;
+                        if (sr[t] >= 1600) {
+                            sr[t] = 1600;
                         }
-                    }        //50
-
-//入る土管(左から)
-                    if (stype[t] == 40) {
-                        if (marioX + marioWidth > xx[8] - 300 && marioX < xx[8] + sc[t] - 1000 && marioY > xx[9] + 1000 &&
-                            marioY + marioHeight < xx[9] + xx[1] + 4000 && marioOnGround && actaon[4] == 1 &&
-                            marioType == MarioType::NORMAL) {    //end();
-//飛び出し
-                            if (sxtype[t] == 0) {
-                                marioType = MarioType::_500;
-                                mtm = 0;
-                                ot(oto[7]);    //marioXType=1;
-                                marioType = MarioType::IN_PIPE;
-                                marioXType = 10;
-                            }
-
-                            if (sxtype[t] == 2) {
-                                marioXType = 3;
-                                mtm = 0;
-                                ot(oto[7]);    //marioXType=1;
-                                marioType = MarioType::IN_PIPE;
-                            }
-// ループ
-                            if (sxtype[t] == 6) {
-                                marioType = MarioType::AFTER_SPRING;
-                                mtm = 0;
-                                ot(oto[7]);
-                                marioXType = 6;
-                            }
-                        }
-                    }        //40
-
-                }        //stype
-                else {
+                        sb[t] += sr[t];
+                    }
+                }
+//通常地面
+                if (xx[7] == 0) {
                     if (marioX + marioWidth > xx[8] + xx[0]
                         && marioX < xx[8] + sc[t] - xx[0]
                         && marioY + marioHeight > xx[9]
+                        && marioY + marioHeight < xx[9] + xx[1]
+                        && marioSpeedY >= -100) {
+                        marioY = sb[t] - fy - marioHeight + 100;
+                        marioSpeedY = 0;
+                        marioOnGround = true;
+                    }
+                    if (marioX + marioWidth > xx[8] - xx[0]
+                        && marioX < xx[8] + xx[2]
+                        && marioY + marioHeight >
+                           xx[9] + xx[1] * 3 / 4
+                        && marioY < xx[9] + sd[t] - xx[2]) {
+                        marioX = xx[8] - xx[0] - marioWidth;
+                        marioSpeedX = 0;
+                    }
+                    if (marioX + marioWidth > xx[8] + sc[t] - xx[0]
+                        && marioX < xx[8] + sc[t] + xx[0]
+                        && marioY + marioHeight >
+                           xx[9] + xx[1] * 3 / 4
+                        && marioY < xx[9] + sd[t] - xx[2]) {
+                        marioX = xx[8] + sc[t] + xx[0];
+                        marioSpeedX = 0;
+                    }
+                    if (marioX + marioWidth >
+                        xx[8] + xx[0] * 2
+                        && marioX <
+                           xx[8] + sc[t] - xx[0] * 2
+                        && marioY > xx[9] + sd[t] - xx[1]
                         && marioY < xx[9] + sd[t] + xx[0]) {
-                        if (stype[t] == 100) {
-                            if (sxtype[t] == 0
-                                || sxtype[t] == 1 && blockType[1] != 3) {
-                                ayobi(sa[t] + 1000, 32000, 0, 0, 0, 3, 0);
-                                sa[t] = -800000000;
-                                ot(oto[10]);
-                            }
+                        marioY = xx[9] + sd[t] + xx[0];
+                        if (marioSpeedY < 0) {
+                            marioSpeedY = -marioSpeedY * 2 / 3;
                         }
-                        if (stype[t] == 101) {
-                            ayobi(sa[t] + 6000, -4000, 0, 0, 0, 3, 1);
+                    }
+                }        //xx[7]
+
+//入る土管
+                if (stype[t] == 50) {
+                    if (marioX + marioWidth > xx[8] + 2800
+                        && marioX < xx[8] + sc[t] - 3000
+                        && marioY + marioHeight >
+                           xx[9] - 1000
+                        && marioY + marioHeight <
+                           xx[9] + xx[1] + 3000
+                        && marioOnGround
+                        && actaon[3] == 1 && marioType == MarioType::NORMAL) {
+//飛び出し
+                        if (sxtype[t] == 0) {
+                            marioType = MarioType::IN_PIPE;
+                            mtm = 0;
+                            ot(oto[7]);
+                            marioXType = 0;
+                        }
+//普通
+                        if (sxtype[t] == 1) {
+                            marioType = MarioType::IN_PIPE;
+                            mtm = 0;
+                            ot(oto[7]);
+                            marioXType = 1;
+                        }
+//普通
+                        if (sxtype[t] == 2) {
+                            marioType = MarioType::IN_PIPE;
+                            mtm = 0;
+                            ot(oto[7]);
+                            marioXType = 2;
+                        }
+                        if (sxtype[t] == 5) {
+                            marioType = MarioType::IN_PIPE;
+                            mtm = 0;
+                            ot(oto[7]);
+                            marioXType = 5;
+                        }
+// ループ
+                        if (sxtype[t] == 6) {
+                            marioType = MarioType::IN_PIPE;
+                            mtm = 0;
+                            ot(oto[7]);
+                            marioXType = 6;
+                        }
+                    }
+                }        //50
+
+//入る土管(左から)
+                if (stype[t] == 40) {
+                    if (marioX + marioWidth > xx[8] - 300 && marioX < xx[8] + sc[t] - 1000 && marioY > xx[9] + 1000 &&
+                        marioY + marioHeight < xx[9] + xx[1] + 4000 && marioOnGround && actaon[4] == 1 &&
+                        marioType == MarioType::NORMAL) {    //end();
+//飛び出し
+                        if (sxtype[t] == 0) {
+                            marioType = MarioType::_500;
+                            mtm = 0;
+                            ot(oto[7]);    //marioXType=1;
+                            marioType = MarioType::IN_PIPE;
+                            marioXType = 10;
+                        }
+
+                        if (sxtype[t] == 2) {
+                            marioXType = 3;
+                            mtm = 0;
+                            ot(oto[7]);    //marioXType=1;
+                            marioType = MarioType::IN_PIPE;
+                        }
+// ループ
+                        if (sxtype[t] == 6) {
+                            marioType = MarioType::AFTER_SPRING;
+                            mtm = 0;
+                            ot(oto[7]);
+                            marioXType = 6;
+                        }
+                    }
+                }        //40
+
+            }        //stype
+            else {
+                if (marioX + marioWidth > xx[8] + xx[0]
+                    && marioX < xx[8] + sc[t] - xx[0]
+                    && marioY + marioHeight > xx[9]
+                    && marioY < xx[9] + sd[t] + xx[0]) {
+                    if (stype[t] == 100) {
+                        if (sxtype[t] == 0
+                            || sxtype[t] == 1 && blockType[1] != 3) {
+                            ayobi(sa[t] + 1000, 32000, 0, 0, 0, 3, 0);
                             sa[t] = -800000000;
                             ot(oto[10]);
                         }
-                        if (stype[t] == 102) {
-                            if (sxtype[t] == 0) {
-                                for (t3 = 0; t3 <= 3; t3++) {
-                                    ayobi(sa[t]
-                                          +
-                                          t3 * 3000, -3000, 0, 0, 0, 0, 0);
-                                }
+                    }
+                    if (stype[t] == 101) {
+                        ayobi(sa[t] + 6000, -4000, 0, 0, 0, 3, 1);
+                        sa[t] = -800000000;
+                        ot(oto[10]);
+                    }
+                    if (stype[t] == 102) {
+                        if (sxtype[t] == 0) {
+                            for (t3 = 0; t3 <= 3; t3++) {
+                                ayobi(sa[t]
+                                      +
+                                      t3 * 3000, -3000, 0, 0, 0, 0, 0);
                             }
-                            if (sxtype[t] == 1 && marioY >= 16000) {
-                                ayobi(sa[t] +
-                                      1500, 44000, 0, -2000, 0, 4, 0);
-                            } else if (sxtype[t] == 2) {
-                                ayobi(sa[t] +
-                                      4500, 30000, 0, -1600, 0, 5, 0);
-                                ot(oto[10]);
-                                sxtype[t] = 3;
-                                sa[t] -= 12000;
-                            } else if (sxtype[t] == 3) {
-                                sa[t] += 12000;
-                                sxtype[t] = 4;
-                            } else if (sxtype[t] == 4) {
-                                ayobi(sa[t] +
-                                      4500, 30000, 0, -1600, 0, 5, 0);
-                                ot(oto[10]);
-                                sxtype[t] = 5;
-                                sxtype[t] = 0;
-                            } else if (sxtype[t] == 7) {
-                                mainmsgtype = 1;
-                            } else if (sxtype[t] == 8) {
-                                ayobi(sa[t] -
-                                      5000 -
-                                      3000 * 1, 26000, 0, -1600, 0, 5, 0);
-                                ot(oto[10]);
-                            } else if (sxtype[t] == 9) {
-                                for (t3 = 0; t3 <= 2; t3++) {
-                                    ayobi(sa[t]
-                                          +
-                                          t3
-                                          *
-                                          3000
-                                          +
-                                          3000, 48000, 0, -6000, 0, 3, 0);
-                                }
+                        }
+                        if (sxtype[t] == 1 && marioY >= 16000) {
+                            ayobi(sa[t] +
+                                  1500, 44000, 0, -2000, 0, 4, 0);
+                        } else if (sxtype[t] == 2) {
+                            ayobi(sa[t] +
+                                  4500, 30000, 0, -1600, 0, 5, 0);
+                            ot(oto[10]);
+                            sxtype[t] = 3;
+                            sa[t] -= 12000;
+                        } else if (sxtype[t] == 3) {
+                            sa[t] += 12000;
+                            sxtype[t] = 4;
+                        } else if (sxtype[t] == 4) {
+                            ayobi(sa[t] +
+                                  4500, 30000, 0, -1600, 0, 5, 0);
+                            ot(oto[10]);
+                            sxtype[t] = 5;
+                            sxtype[t] = 0;
+                        } else if (sxtype[t] == 7) {
+                            mainmsgtype = 1;
+                        } else if (sxtype[t] == 8) {
+                            ayobi(sa[t] -
+                                  5000 -
+                                  3000 * 1, 26000, 0, -1600, 0, 5, 0);
+                            ot(oto[10]);
+                        } else if (sxtype[t] == 9) {
+                            for (t3 = 0; t3 <= 2; t3++) {
+                                ayobi(sa[t]
+                                      +
+                                      t3
+                                      *
+                                      3000
+                                      +
+                                      3000, 48000, 0, -6000, 0, 3, 0);
                             }
-                            if (sxtype[t] == 10) {
-                                sa[t] -= 5 * 30 * 100;
-                                stype[t] = 101;
-                            }
+                        }
+                        if (sxtype[t] == 10) {
+                            sa[t] -= 5 * 30 * 100;
+                            stype[t] = 101;
+                        }
 
-                            if (sxtype[t] == 12) {
-                                for (t3 = 1; t3 <= 3; t3++) {
-                                    ayobi(sa[t]
-                                          +
-                                          t3
-                                          *
-                                          3000
-                                          -
-                                          1000, 40000, 0, -2600, 0, 9, 0);
-                                }
+                        if (sxtype[t] == 12) {
+                            for (t3 = 1; t3 <= 3; t3++) {
+                                ayobi(sa[t]
+                                      +
+                                      t3
+                                      *
+                                      3000
+                                      -
+                                      1000, 40000, 0, -2600, 0, 9, 0);
                             }
+                        }
 //スクロール消し
-                            if (sxtype[t] == 20) {
-                                scrollx = 0;
-                            }
+                        if (sxtype[t] == 20) {
+                            scrollx = 0;
+                        }
 //クリア
-                            if (sxtype[t] == 30) {
-                                sa[t] = -80000000;
-                                marioSpeedY = 0;
-                                Mix_HaltMusic();
-                                marioType = MarioType::WIN_AUTO;
-                                mtm = 0;
-                                ot(oto[16]);
-                            }
-
-                            if (sxtype[t] != 3
-                                && sxtype[t] != 4 && sxtype[t] != 10) {
-                                sa[t] = -800000000;
-                            }
-                        }
-
-                        if (stype[t] == 103) {
-                            if (sxtype[t] == 0) {
-                                amsgtm[aco] = 10;
-                                amsgtype[aco] = 50;
-                                ayobi(sa[t] +
-                                      9000, sb[t] + 2000, 0, 0, 0, 79, 0);
-                                sa[t] = -800000000;
-                            }
-
-                            if (sxtype[t] == 1 && blockType[6] <= 6) {
-                                amsgtm[aco] = 10;
-                                amsgtype[aco] = 50;
-                                ayobi(sa[t] -
-                                      12000, sb[t] + 2000, 0, 0, 0, 79, 0);
-                                sa[t] = -800000000;
-                                blockXType[9] = 500;    //blockType[9]=1;
-                            }
-                        }    //103
-
-                        if (stype[t] == 104) {
-                            if (sxtype[t] == 0) {
-                                ayobi(sa[t] +
-                                      12000,
-                                      sb[t] + 2000 + 3000, 0, 0, 0, 79, 0);
-                                ayobi(sa[t] +
-                                      12000,
-                                      sb[t] + 2000 + 3000, 0, 0, 0, 79, 1);
-                                ayobi(sa[t] +
-                                      12000,
-                                      sb[t] + 2000 + 3000, 0, 0, 0, 79, 2);
-                                ayobi(sa[t] +
-                                      12000,
-                                      sb[t] + 2000 + 3000, 0, 0, 0, 79, 3);
-                                ayobi(sa[t] +
-                                      12000,
-                                      sb[t] + 2000 + 3000, 0, 0, 0, 79, 4);
-                                sa[t] = -800000000;
-                            }
-                        }
-
-                        if (stype[t] == 105 && !marioOnGround && marioSpeedY >= 0) {
-                            blockX[1] -= 1000;
-                            blockX[2] += 1000;
-                            sxtype[t]++;
-                            if (sxtype[t] >= 3)
-                                sa[t] = -8000000;
-                        }
-
-                        if (stype[t] == 300 && marioType == MarioType::NORMAL
-                                && marioY < xx[9] + sd[t] + xx[0] - 3000 && marioHP >= 1) {
-                            Mix_HaltMusic();
-                            marioType = MarioType::_300;
-                            mtm = 0;
-                            marioX = sa[t] - fx - 2000;
-                            ot(oto[11]);
-                        }
-//中間ゲート
-                        if (stype[t] == 500 && marioType == MarioType::NORMAL && marioHP >= 1) {
-                            tyuukan += 1;
+                        if (sxtype[t] == 30) {
                             sa[t] = -80000000;
+                            marioSpeedY = 0;
+                            Mix_HaltMusic();
+                            marioType = MarioType::WIN_AUTO;
+                            mtm = 0;
+                            ot(oto[16]);
                         }
 
+                        if (sxtype[t] != 3
+                            && sxtype[t] != 4 && sxtype[t] != 10) {
+                            sa[t] = -800000000;
+                        }
                     }
 
-                    if (stype[t] == 180) {
-                        sr[t]++;
-                        if (sr[t] >= sgtype[t]) {
-                            sr[t] = 0;
-                            ayobi(sa[t], 30000,
-                                  rand(600) - 300,
-                                  -1600 - rand(900), 0, 84, 0);
+                    if (stype[t] == 103) {
+                        if (sxtype[t] == 0) {
+                            amsgtm[aco] = 10;
+                            amsgtype[aco] = 50;
+                            ayobi(sa[t] +
+                                  9000, sb[t] + 2000, 0, 0, 0, 79, 0);
+                            sa[t] = -800000000;
                         }
+
+                        if (sxtype[t] == 1 && blockType[6] <= 6) {
+                            amsgtm[aco] = 10;
+                            amsgtype[aco] = 50;
+                            ayobi(sa[t] -
+                                  12000, sb[t] + 2000, 0, 0, 0, 79, 0);
+                            sa[t] = -800000000;
+                            blockXType[9] = 500;    //blockType[9]=1;
+                        }
+                    }    //103
+
+                    if (stype[t] == 104) {
+                        if (sxtype[t] == 0) {
+                            ayobi(sa[t] +
+                                  12000,
+                                  sb[t] + 2000 + 3000, 0, 0, 0, 79, 0);
+                            ayobi(sa[t] +
+                                  12000,
+                                  sb[t] + 2000 + 3000, 0, 0, 0, 79, 1);
+                            ayobi(sa[t] +
+                                  12000,
+                                  sb[t] + 2000 + 3000, 0, 0, 0, 79, 2);
+                            ayobi(sa[t] +
+                                  12000,
+                                  sb[t] + 2000 + 3000, 0, 0, 0, 79, 3);
+                            ayobi(sa[t] +
+                                  12000,
+                                  sb[t] + 2000 + 3000, 0, 0, 0, 79, 4);
+                            sa[t] = -800000000;
+                        }
+                    }
+
+                    if (stype[t] == 105 && !marioOnGround && marioSpeedY >= 0) {
+                        blockX[1] -= 1000;
+                        blockX[2] += 1000;
+                        sxtype[t]++;
+                        if (sxtype[t] >= 3)
+                            sa[t] = -8000000;
+                    }
+
+                    if (stype[t] == 300 && marioType == MarioType::NORMAL
+                        && marioY < xx[9] + sd[t] + xx[0] - 3000 && marioHP >= 1) {
+                        Mix_HaltMusic();
+                        marioType = MarioType::_300;
+                        mtm = 0;
+                        marioX = sa[t] - fx - 2000;
+                        ot(oto[11]);
+                    }
+//中間ゲート
+                    if (stype[t] == 500 && marioType == MarioType::NORMAL && marioHP >= 1) {
+                        tyuukan += 1;
+                        sa[t] = -80000000;
                     }
 
                 }
+
+                if (stype[t] == 180) {
+                    sr[t]++;
+                    if (sr[t] >= sgtype[t]) {
+                        sr[t] = 0;
+                        ayobi(sa[t], 30000,
+                              rand(600) - 300,
+                              -1600 - rand(900), 0, 84, 0);
+                    }
+                }
+
             }
-        }            //壁
+        }
+    }            //壁
 
 //キー入力初期化
 //for (t=0;t<=6;t++)
-        actaon[0] = 0;
-        actaon[4] = 0;
+    actaon[0] = 0;
+    actaon[4] = 0;
 
 //リフト
-        for (t = 0; t < srmax; t++) {
-            xx[10] = sra[t];
-            xx[11] = srb[t];
-            xx[12] = src[t];
-            xx[13] = srd[t];
-            xx[8] = xx[10] - fx;
-            xx[9] = xx[11] - fy;
-            if (xx[8] + xx[12] >= -10 - 12000 && xx[8] <= fxmax + 12100) {
-                xx[0] = 500;
-                xx[1] = 1200;
-                xx[2] = 1000;
-                xx[7] = 2000;
-                if (marioSpeedY >= 100) {
-                    xx[1] = 900 + marioSpeedY;
-                }
+    for (t = 0; t < srmax; t++) {
+        xx[10] = sra[t];
+        xx[11] = srb[t];
+        xx[12] = src[t];
+        xx[13] = srd[t];
+        xx[8] = xx[10] - fx;
+        xx[9] = xx[11] - fy;
+        if (xx[8] + xx[12] >= -10 - 12000 && xx[8] <= fxmax + 12100) {
+            xx[0] = 500;
+            xx[1] = 1200;
+            xx[2] = 1000;
+            xx[7] = 2000;
+            if (marioSpeedY >= 100) {
+                xx[1] = 900 + marioSpeedY;
+            }
 //if (srtype[t]==1){xx[0]=600;}
-                if (marioSpeedY > xx[1])
-                    xx[1] = marioSpeedY + 100;
+            if (marioSpeedY > xx[1])
+                xx[1] = marioSpeedY + 100;
 //xx[18]=0;
 
-                srb[t] += sre[t];
-                sre[t] += srf[t];
+            srb[t] += sre[t];
+            sre[t] += srf[t];
 //if (srf[t]>=500)srf[t]=0;
 
 //動き
-                switch (sracttype[t]) {
+            switch (sracttype[t]) {
 
-                    case 1:
-                        if (sron[t] == 1)
-                            srf[t] = 60;
-                        break;
+                case 1:
+                    if (sron[t] == 1)
+                        srf[t] = 60;
+                    break;
 
-                    case 2:
+                case 2:
 /*
 if (sra[t]<=srmovep[t]-srmove[t])srmuki[t]=1;
 if (sra[t]>=srmovep[t]+srmove[t])srmuki[t]=0;
 */
-                        break;
+                    break;
 
-                    case 3:
+                case 3:
 /*
 if (srb[t]<=srmovep[t]-srmove[t])srmuki[t]=1;
 if (srb[t]>=srmovep[t]+srmove[t])srmuki[t]=0;
 */
-                        break;
+                    break;
 
 /*
 case 4:
@@ -2522,56 +2504,56 @@ if (sra[t]-fx>24000+scrollx){sra[t]=-1100-src[t]+fx;}
 break;
 */
 
-                    case 5:
-                        if (srmove[t] == 0) {
-                            srmuki[t] = 0;
-                        } else {
-                            srmuki[t] = 1;
-                        }
-                        if (srb[t] - fy < -2100) {
-                            srb[t] = fymax + fy + scrolly + 2000;
-                        }
-                        if (srb[t] - fy > fymax + scrolly + 2000) {
-                            srb[t] = -2100 + fy;
-                        }
-                        break;
+                case 5:
+                    if (srmove[t] == 0) {
+                        srmuki[t] = 0;
+                    } else {
+                        srmuki[t] = 1;
+                    }
+                    if (srb[t] - fy < -2100) {
+                        srb[t] = fymax + fy + scrolly + 2000;
+                    }
+                    if (srb[t] - fy > fymax + scrolly + 2000) {
+                        srb[t] = -2100 + fy;
+                    }
+                    break;
 
-                    case 6:
-                        if (sron[t] == 1)
-                            srf[t] = 40;
-                        break;
+                case 6:
+                    if (sron[t] == 1)
+                        srf[t] = 40;
+                    break;
 
-                    case 7:
-                        break;
+                case 7:
+                    break;
 
-                }        //sw
+            }        //sw
 
 //if (srtype[t]==1){sre[10]=300;sre[11]=300;}
 
 //乗ったとき
-                if (!(mztm >= 1 && mztype == 1 && actaon[3] == 1)
-                    && marioHP >= 1) {
-                    if (marioX + marioWidth > xx[8] + xx[0]
-                        && marioX < xx[8] + xx[12] - xx[0]
-                        && marioY + marioHeight > xx[9]
-                        && marioY + marioHeight < xx[9] + xx[1]
-                        && marioSpeedY >= -100) {
-                        marioY = xx[9] - marioHeight + 100;
+            if (!(mztm >= 1 && mztype == 1 && actaon[3] == 1)
+                && marioHP >= 1) {
+                if (marioX + marioWidth > xx[8] + xx[0]
+                    && marioX < xx[8] + xx[12] - xx[0]
+                    && marioY + marioHeight > xx[9]
+                    && marioY + marioHeight < xx[9] + xx[1]
+                    && marioSpeedY >= -100) {
+                    marioY = xx[9] - marioHeight + 100;
 //if (sracttype[t]!=7)marioOnGround=1;
 
-                        if (srtype[t] == 1) {
-                            sre[10] = 900;
-                            sre[11] = 900;
-                        }
+                    if (srtype[t] == 1) {
+                        sre[10] = 900;
+                        sre[11] = 900;
+                    }
 
-                        if (srsp[t] != 12) {
-                            marioOnGround = true;
-                            marioSpeedY = 0;
-                        } else {
+                    if (srsp[t] != 12) {
+                        marioOnGround = true;
+                        marioSpeedY = 0;
+                    } else {
 //すべり
 //marioSpeedY=0;mrzimen=1;marioOnGround=1;
-                            marioSpeedY = -800;
-                        }
+                        marioSpeedY = -800;
+                    }
 
 /*
 marioSpeedY=0;
@@ -2584,111 +2566,111 @@ if (srmuki[t]==1)marioX+=srsok[t];
 */
 
 //落下
-                        if ((sracttype[t] == 1)
-                            && sron[t] == 0)
-                            sron[t] = 1;
+                    if ((sracttype[t] == 1)
+                        && sron[t] == 0)
+                        sron[t] = 1;
 
-                        if (sracttype[t] == 1
-                            && sron[t] == 1
-                            || sracttype[t] == 3 || sracttype[t] == 5) {
-                            marioY += sre[t];
+                    if (sracttype[t] == 1
+                        && sron[t] == 1
+                        || sracttype[t] == 3 || sracttype[t] == 5) {
+                        marioY += sre[t];
 //if (srmuki[t]==0)
 //if (srf[t]<0)
 //if (srmuki[t]==1)
 //if (srf[t]>0)
 //marioY+=srsok[t];
-                        }
+                    }
 
-                        if (sracttype[t] == 7) {
-                            if (actaon[2] != 1) {
-                                marioSpeedY = -600;
-                                marioY -= 810;
-                            }
-                            if (actaon[2] == 1) {
-                                marioY -= 400;
-                                marioSpeedY = -1400;
-                                mjumptm = 10;
-                            }
+                    if (sracttype[t] == 7) {
+                        if (actaon[2] != 1) {
+                            marioSpeedY = -600;
+                            marioY -= 810;
                         }
+                        if (actaon[2] == 1) {
+                            marioY -= 400;
+                            marioSpeedY = -1400;
+                            mjumptm = 10;
+                        }
+                    }
 //特殊
-                        if (srsp[t] == 1) {
-                            ot(oto[3]);
-                            eyobi(sra[t] + 200,
-                                  srb[t] - 1000,
-                                  -240, -1400, 0, 160, 4500, 4500, 2, 120);
-                            eyobi(sra[t] + 4500 -
-                                  200,
-                                  srb[t] - 1000,
-                                  240, -1400, 0, 160, 4500, 4500, 3, 120);
-                            sra[t] = -70000000;
-                        }
+                    if (srsp[t] == 1) {
+                        ot(oto[3]);
+                        eyobi(sra[t] + 200,
+                              srb[t] - 1000,
+                              -240, -1400, 0, 160, 4500, 4500, 2, 120);
+                        eyobi(sra[t] + 4500 -
+                              200,
+                              srb[t] - 1000,
+                              240, -1400, 0, 160, 4500, 4500, 3, 120);
+                        sra[t] = -70000000;
+                    }
 
-                        if (srsp[t] == 2) {
-                            marioSpeedX = -2400;
-                            srmove[t] += 1;
-                            if (srmove[t] >= 100) {
-                                marioHP = 0;
-                                mmsgtype = 53;
-                                mmsgtm = 30;
-                                srmove[t] = -5000;
-                            }
+                    if (srsp[t] == 2) {
+                        marioSpeedX = -2400;
+                        srmove[t] += 1;
+                        if (srmove[t] >= 100) {
+                            marioHP = 0;
+                            mmsgtype = 53;
+                            mmsgtm = 30;
+                            srmove[t] = -5000;
                         }
+                    }
 
-                        if (srsp[t] == 3) {
-                            marioSpeedX = 2400;
-                            srmove[t] += 1;
-                            if (srmove[t] >= 100) {
-                                marioHP = 0;
-                                mmsgtype = 53;
-                                mmsgtm = 30;
-                                srmove[t] = -5000;
-                            }
+                    if (srsp[t] == 3) {
+                        marioSpeedX = 2400;
+                        srmove[t] += 1;
+                        if (srmove[t] >= 100) {
+                            marioHP = 0;
+                            mmsgtype = 53;
+                            mmsgtm = 30;
+                            srmove[t] = -5000;
                         }
+                    }
 //if (srtype[t]==1){marioSpeedY=-600;marioY-=610;marioHP-=1;if (mmutekion!=1)mmutekitm=40;}
-                    }        //判定内
+                }        //判定内
 
 //疲れ初期化
-                    if ((srsp[t] == 2 || srsp[t] == 3)
-                        && marioSpeedX != -2400 && srmove[t] > 0) {
-                        srmove[t]--;
-                    }
+                if ((srsp[t] == 2 || srsp[t] == 3)
+                    && marioSpeedX != -2400 && srmove[t] > 0) {
+                    srmove[t]--;
+                }
 
-                    if (srsp[t] == 11) {
-                        if (marioX + marioWidth >
-                            xx[8] + xx[0] - 2000
-                            && marioX < xx[8] + xx[12] - xx[0]) {
-                            sron[t] = 1;
-                        }    // && marioY+marioHeight>xx[9]-1000 && marioY+marioHeight<xx[9]+xx[1]+2000)
-                        if (sron[t] == 1) {
-                            srf[t] = 60;
-                            srb[t] += sre[t];
-                        }
+                if (srsp[t] == 11) {
+                    if (marioX + marioWidth >
+                        xx[8] + xx[0] - 2000
+                        && marioX < xx[8] + xx[12] - xx[0]) {
+                        sron[t] = 1;
+                    }    // && marioY+marioHeight>xx[9]-1000 && marioY+marioHeight<xx[9]+xx[1]+2000)
+                    if (sron[t] == 1) {
+                        srf[t] = 60;
+                        srb[t] += sre[t];
                     }
+                }
 //トゲ(下)
-                    if (marioX + marioWidth > xx[8] + xx[0]
-                        && marioX < xx[8] + xx[12] - xx[0]
-                        && marioY > xx[9] - xx[1] / 2
-                        && marioY < xx[9] + xx[1] / 2) {
-                        if (srtype[t] == 2) {
-                            if (marioSpeedY < 0) {
-                                marioSpeedY = -marioSpeedY;
-                            }
-                            marioY += 110;
-                            if (mmutekitm <= 0)
-                                marioHP -= 1;
-                            if (mmutekion != 1)
-                                mmutekitm = 40;
+                if (marioX + marioWidth > xx[8] + xx[0]
+                    && marioX < xx[8] + xx[12] - xx[0]
+                    && marioY > xx[9] - xx[1] / 2
+                    && marioY < xx[9] + xx[1] / 2) {
+                    if (srtype[t] == 2) {
+                        if (marioSpeedY < 0) {
+                            marioSpeedY = -marioSpeedY;
                         }
+                        marioY += 110;
+                        if (mmutekitm <= 0)
+                            marioHP -= 1;
+                        if (mmutekion != 1)
+                            mmutekitm = 40;
                     }
+                }
 //落下
-                    if (sracttype[t] == 6) {
-                        if (marioX + marioWidth > xx[8] + xx[0]
-                            && marioX < xx[8] + xx[12] - xx[0]) {
-                            sron[t] = 1;
-                        }
+                if (sracttype[t] == 6) {
+                    if (marioX + marioWidth > xx[8] + xx[0]
+                        && marioX < xx[8] + xx[12] - xx[0]) {
+                        sron[t] = 1;
                     }
+                }
 
-                }        //!
+            }        //!
 
 /*
 //ジャンプ台
@@ -2699,311 +2681,148 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
 }}
 */
 
-                if (sracttype[t] == 2 || sracttype[t] == 4) {
-                    if (srmuki[t] == 0)
-                        sra[t] -= srsok[t];
-                    if (srmuki[t] == 1)
-                        sra[t] += srsok[t];
-                }
-                if (sracttype[t] == 3 || sracttype[t] == 5) {
-                    if (srmuki[t] == 0)
-                        srb[t] -= srsok[t];
-                    if (srmuki[t] == 1)
-                        srb[t] += srsok[t];
-                }
+            if (sracttype[t] == 2 || sracttype[t] == 4) {
+                if (srmuki[t] == 0)
+                    sra[t] -= srsok[t];
+                if (srmuki[t] == 1)
+                    sra[t] += srsok[t];
+            }
+            if (sracttype[t] == 3 || sracttype[t] == 5) {
+                if (srmuki[t] == 0)
+                    srb[t] -= srsok[t];
+                if (srmuki[t] == 1)
+                    srb[t] += srsok[t];
+            }
 //敵キャラ適用
-                for (tt = 0; tt < amax; tt++) {
-                    if (azimentype[tt] == 1) {
-                        if (aa[tt] + anobia[tt] - fx > xx[8] + xx[0]
-                            && aa[tt] - fx < xx[8] + xx[12] - xx[0]
-                            && ab[tt] + anobib[tt] >
-                               xx[11] - 100
-                            && ab[tt] + anobib[tt] <
-                               xx[11] + xx[1] + 500 && ad[tt] >= -100) {
-                            ab[tt] = xx[9] - anobib[tt] + 100;
-                            ad[tt] = 0;
-                            axzimen[tt] = 1;
-                        }
+            for (tt = 0; tt < amax; tt++) {
+                if (azimentype[tt] == 1) {
+                    if (aa[tt] + anobia[tt] - fx > xx[8] + xx[0]
+                        && aa[tt] - fx < xx[8] + xx[12] - xx[0]
+                        && ab[tt] + anobib[tt] >
+                           xx[11] - 100
+                        && ab[tt] + anobib[tt] <
+                           xx[11] + xx[1] + 500 && ad[tt] >= -100) {
+                        ab[tt] = xx[9] - anobib[tt] + 100;
+                        ad[tt] = 0;
+                        axzimen[tt] = 1;
                     }
                 }
-
             }
-        }            //リフト
+
+        }
+    }            //リフト
 
 //グラ
-        for (t = 0; t < emax; t++) {
-            xx[0] = ea[t] - fx;
-            xx[1] = eb[t] - fy;
-            xx[2] = enobia[t] / 100;
-            xx[3] = enobib[t] / 100;
-            if (etm[t] >= 0)
-                etm[t]--;
-            if (xx[0] + xx[2] * 100 >= -10 && xx[1] <= fxmax
-                && xx[1] + xx[3] * 100 >= -10 - 8000
-                && xx[3] <= fymax && etm[t] >= 0) {
-                ea[t] += ec[t];
-                eb[t] += ed[t];
-                ec[t] += ee[t];
-                ed[t] += ef[t];
+    for (t = 0; t < emax; t++) {
+        xx[0] = ea[t] - fx;
+        xx[1] = eb[t] - fy;
+        xx[2] = enobia[t] / 100;
+        xx[3] = enobib[t] / 100;
+        if (etm[t] >= 0)
+            etm[t]--;
+        if (xx[0] + xx[2] * 100 >= -10 && xx[1] <= fxmax
+            && xx[1] + xx[3] * 100 >= -10 - 8000
+            && xx[3] <= fymax && etm[t] >= 0) {
+            ea[t] += ec[t];
+            eb[t] += ed[t];
+            ec[t] += ee[t];
+            ed[t] += ef[t];
 
-            } else {
-                ea[t] = -9000000;
-            }
+        } else {
+            ea[t] = -9000000;
+        }
 
-        }            //emax
+    }            //emax
 
 //敵キャラの配置
-        for (t = 0; t < bmax; t++) {
-            if (ba[t] >= -80000) {
+    for (t = 0; t < bmax; t++) {
+        if (ba[t] >= -80000) {
 
-                if (btm[t] >= 0) {
-                    btm[t] = btm[t] - 1;
-                }
+            if (btm[t] >= 0) {
+                btm[t] = btm[t] - 1;
+            }
 
-                for (tt = 0; tt <= 1; tt++) {
-                    xx[0] = 0;
-                    xx[1] = 0;
+            for (tt = 0; tt <= 1; tt++) {
+                xx[0] = 0;
+                xx[1] = 0;
 
-                    if (bz[t] == 0 && btm[t] < 0
-                        && ba[t] - fx >= fxmax + 2000
-                        && ba[t] - fx < fxmax + 2000 + marioSpeedX && tt == 0) {
-                        xx[0] = 1;
-                        amuki[aco] = 0;
-                    }        // && mmuki==1
-                    if (bz[t] == 0 && btm[t] < 0
-                        && ba[t] - fx >=
-                                                                         -400 - anx[btype[t]] + marioSpeedX
-                        && ba[t] - fx < -400 - anx[btype[t]]
-                        && tt == 1) {
-                        xx[0] = 1;
-                        xx[1] = 1;
-                        amuki[aco] = 1;
-                    }        // && mmuki==0
-                    if (bz[t] == 1 && ba[t] - fx >= 0 - anx[btype[t]]
-                        && ba[t] - fx <= fxmax + 4000
-                        && bb[t] - fy >= -9000
-                        && bb[t] - fy <= fymax + 4000 && btm[t] < 0) {
-                        xx[0] = 1;
-                        bz[t] = 0;
-                    }        // && xza<=5000// && tyuukan!=1
+                if (bz[t] == 0 && btm[t] < 0
+                    && ba[t] - fx >= fxmax + 2000
+                    && ba[t] - fx < fxmax + 2000 + marioSpeedX && tt == 0) {
+                    xx[0] = 1;
+                    amuki[aco] = 0;
+                }        // && mmuki==1
+                if (bz[t] == 0 && btm[t] < 0
+                    && ba[t] - fx >=
+                       -400 - anx[btype[t]] + marioSpeedX
+                    && ba[t] - fx < -400 - anx[btype[t]]
+                    && tt == 1) {
+                    xx[0] = 1;
+                    xx[1] = 1;
+                    amuki[aco] = 1;
+                }        // && mmuki==0
+                if (bz[t] == 1 && ba[t] - fx >= 0 - anx[btype[t]]
+                    && ba[t] - fx <= fxmax + 4000
+                    && bb[t] - fy >= -9000
+                    && bb[t] - fy <= fymax + 4000 && btm[t] < 0) {
+                    xx[0] = 1;
+                    bz[t] = 0;
+                }        // && xza<=5000// && tyuukan!=1
 //if (bz[t]==2){xx[0]=0;xx[1]=0;}
 //if (btype[t]>=100){bz[t]=2;}
 
-                    if (xx[0] == 1) {    //400
-                        btm[t] = 401;
-                        xx[0] = 0;    //if (btype[t]>=20 && btype[t]<=23){btm[t]=90000;}
-                        if (btype[t] >= 10) {
-                            btm[t] = 9999999;
-                        }
-//10
-                        ayobi(ba[t], bb[t], 0, 0, 0, btype[t], bxtype[t]);
-
+                if (xx[0] == 1) {    //400
+                    btm[t] = 401;
+                    xx[0] = 0;    //if (btype[t]>=20 && btype[t]<=23){btm[t]=90000;}
+                    if (btype[t] >= 10) {
+                        btm[t] = 9999999;
                     }
+//10
+                    ayobi(ba[t], bb[t], 0, 0, 0, btype[t], bxtype[t]);
 
-                }        //tt
+                }
 
-            }
-        }            //t
+            }        //tt
+
+        }
+    }            //t
 
 //敵キャラ
-        for (t = 0; t < amax; t++) {
-            xx[0] = aa[t] - fx;
-            xx[1] = ab[t] - fy;
-            xx[2] = anobia[t];
-            xx[3] = anobib[t];
-            xx[14] = 12000 * 1;
-            if (anotm[t] >= 0)
-                anotm[t]--;
-            if (xx[0] + xx[2] >= -xx[14] && xx[0] <= fxmax + xx[14]
-                && xx[1] + xx[3] >= -10 - 9000 && xx[1] <= fymax + 20000) {
-                aacta[t] = 0;
-                aactb[t] = 0;
+    for (t = 0; t < amax; t++) {
+        xx[0] = aa[t] - fx;
+        xx[1] = ab[t] - fy;
+        xx[2] = anobia[t];
+        xx[3] = anobib[t];
+        xx[14] = 12000 * 1;
+        if (anotm[t] >= 0)
+            anotm[t]--;
+        if (xx[0] + xx[2] >= -xx[14] && xx[0] <= fxmax + xx[14]
+            && xx[1] + xx[3] >= -10 - 9000 && xx[1] <= fymax + 20000) {
+            aacta[t] = 0;
+            aactb[t] = 0;
 
-                xx[10] = 0;
+            xx[10] = 0;
 
-                switch (atype[t]) {
-                    case 0:
-                        xx[10] = 100;
-                        break;
+            switch (atype[t]) {
+                case 0:
+                    xx[10] = 100;
+                    break;
 
 //こうらの敵
-                    case 1:
-                        xx[10] = 100;
-                        break;
+                case 1:
+                    xx[10] = 100;
+                    break;
 
 //こうら
-                    case 2:
-                        xx[10] = 0;
-                        xx[17] = 800;
-                        if (axtype[t] >= 1)
-                            xx[10] = xx[17];
+                case 2:
+                    xx[10] = 0;
+                    xx[17] = 800;
+                    if (axtype[t] >= 1)
+                        xx[10] = xx[17];
 //if (axtype[t]==1)xx[10]=xx[17];
 //if (axtype[t]==2)xx[10]=-xx[17];
 //他の敵を倒す
-                        if (axtype[t] >= 1) {
-                            for (tt = 0; tt < amax; tt++) {
-                                xx[0] = 250;
-                                xx[5] = -800;
-                                xx[12] = 0;
-                                xx[1] = 1600;
-                                xx[8] = aa[tt] - fx;
-                                xx[9] = ab[tt] - fy;
-                                if (t != tt) {
-                                    if (aa[t] +
-                                        anobia[t] -
-                                        fx >
-                                        xx[8] +
-                                        xx[0] * 2
-                                        && aa[t] -
-                                           fx <
-                                           xx[8] +
-                                           anobia[tt] -
-                                           xx[0] * 2
-                                        && ab[t] +
-                                           anobib[t] - fy > xx[9] + xx[5]
-                                        && ab[t] +
-                                           anobib[t] -
-                                           fy <
-                                           xx[9] + xx[1] * 3 + xx[12] + 1500) {
-                                        aa[tt] = -800000;
-                                        ot(oto[6]);
-                                    }
-                                }
-                            }
-                        }
-
-                        break;
-
-//あらまき
-                    case 3:
-                        azimentype[t] = 0;    //end();
-                        if (axtype[t] == 0) {
-                            ab[t] -= 800;
-                        }
-                        if (axtype[t] == 1)
-                            ab[t] += 1200;
-
-//xx[10]=100;
-                        break;
-
-//スーパージエン
-                    case 4:
-                        xx[10] = 120;
-                        xx[0] = 250;
-                        xx[8] = aa[t] - fx;
-                        xx[9] = ab[t] - fy;
-                        if (atm[t] >= 0)
-                            atm[t]--;
-                        if (abs(marioX + marioWidth - xx[8] - xx[0] * 2)
-                            < 9000
-                            && abs(marioX <
-                                   xx[8] - anobia[t] +
-                                   xx[0] * 2) < 3000
-                            && marioSpeedY <= -600 && atm[t] <= 0) {
-                            if (axtype[t] == 1
-                                && !marioOnGround && axzimen[t] == 1) {
-                                ad[t] = -1600;
-                                atm[t] = 40;
-                                ab[t] -= 1000;
-                            }
-                        }        //
-                        break;
-
-//クマー
-                    case 5:
-                        xx[10] = 160;
-//azimentype[t]=2;
-                        break;
-
-//デフラグさん
-                    case 6:
-                        if (azimentype[t] == 30) {
-                            ad[t] = -1600;
-                            ab[t] += ad[t];
-                        }
-
-                        xx[10] = 120;
-                        if (atm[t] >= 10) {
-                            atm[t]++;
-                            if (marioHP >= 1) {
-                                if (atm[t] <= 19) {
-                                    marioX = xx[0];
-                                    marioY = xx[1] - 3000;
-                                    marioType = MarioType::NORMAL;
-                                }
-                                xx[10] = 0;
-                                if (atm[t] == 20) {
-                                    marioSpeedX = 700;
-                                    mkeytm = 24;
-                                    marioSpeedY = -1200;
-                                    marioY = xx[1] - 1000 - 3000;
-                                    amuki[t] = 1;
-                                    if (axtype[t] == 1) {
-                                        marioSpeedX = 840;
-                                        axtype[t]
-                                                = 0;
-                                    }
-                                }
-                                if (atm[t] == 40) {
-                                    amuki[t] = 0;
-                                    atm[t] = 0;
-                                }
-                            }
-                        }
-//ポール捨て
-                        if (axtype[t] == 1) {
-                            for (tt = 0; tt < smax; tt++) {
-                                if (stype[tt] == 300) {
-//sa[sco]=xx[21]*100;sb[sco]=xx[22]*100;sc[sco]=3000;sd[sco]=(12-t)*3000;stype[sco]=300;sco++;
-                                    if (aa[t] -
-                                        fx >= -8000
-                                        && aa[t] >=
-                                           sa[tt] +
-                                           2000
-                                        && aa[t] <= sa[tt] + 3600 && axzimen[t]
-                                                                     == 1) {
-                                        sa[tt] = -800000;
-                                        atm[t] = 100;
-                                    }
-                                }
-                            }
-
-                            if (atm[t] == 100) {
-                                eyobi(aa[t] + 1200 -
-                                      1200,
-                                      ab[t] + 3000 -
-                                      10 * 3000 - 1500,
-                                      0, 0, 0, 0, 1000,
-                                      10 * 3000 - 1200, 4, 20);
-                                if (marioType == MarioType::_300) {
-                                    marioType = MarioType::NORMAL;StopSoundMem(oto[11]);
-                                    bgmchange(otom[1]);
-                                }
-                                for (t1 = 0; t1 < smax; t1++) {
-                                    if (stype[t1] == 104)
-                                        sa[t1] = -80000000;
-                                }
-                            }
-                            if (atm[t] == 120) {
-                                eyobi(aa[t] + 1200 -
-                                      1200,
-                                      ab[t] + 3000 -
-                                      10 * 3000 - 1500,
-                                      600, -1200, 0,
-                                      160, 1000, 10 * 3000 - 1200, 4, 240);
-                                amuki[t] = 1;
-                            }
-//marioSpeedX=700;mkeytm=24;marioSpeedY=-1200;marioY=xx[1]-1000-3000;amuki[t]=1;if (axtype[t]==1){marioSpeedX=840;axtype[t]=0;}}
-                            if (atm[t] == 140) {
-                                amuki[t] = 0;
-                                atm[t] = 0;
-                            }
-                        }
-                        if (atm[t] >= 220) {
-                            atm[t] = 0;
-                            amuki[t] = 0;
-                        }
-//他の敵を投げる
+                    if (axtype[t] >= 1) {
                         for (tt = 0; tt < amax; tt++) {
                             xx[0] = 250;
                             xx[5] = -800;
@@ -3011,374 +2830,537 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                             xx[1] = 1600;
                             xx[8] = aa[tt] - fx;
                             xx[9] = ab[tt] - fy;
-                            if (t != tt && atype[tt] >= 100) {
-                                if (aa[t] + anobia[t] -
+                            if (t != tt) {
+                                if (aa[t] +
+                                    anobia[t] -
                                     fx >
-                                    xx[8] + xx[0] * 2
-                                    && aa[t] - fx <
-                                       xx[8] + anobia[tt] -
+                                    xx[8] +
+                                    xx[0] * 2
+                                    && aa[t] -
+                                       fx <
+                                       xx[8] +
+                                       anobia[tt] -
                                        xx[0] * 2
-                                    && ab[t] + anobib[t] - fy > xx[9] + xx[5]
                                     && ab[t] +
-                                       anobib[t] - fy <
+                                       anobib[t] - fy > xx[9] + xx[5]
+                                    && ab[t] +
+                                       anobib[t] -
+                                       fy <
                                        xx[9] + xx[1] * 3 + xx[12] + 1500) {
-//aa[tt]=-800000;
-                                    amuki[tt] = 1;
-                                    aa[tt] = aa[t] + 300;
-                                    ab[tt] = ab[t] - 3000;
-                                    abrocktm[tt] = 120;    //aa[tt]=0;
-                                    atm[t] = 200;
-                                    amuki[t] = 1;
+                                    aa[tt] = -800000;
+                                    ot(oto[6]);
+                                }
+                            }
+                        }
+                    }
+
+                    break;
+
+//あらまき
+                case 3:
+                    azimentype[t] = 0;    //end();
+                    if (axtype[t] == 0) {
+                        ab[t] -= 800;
+                    }
+                    if (axtype[t] == 1)
+                        ab[t] += 1200;
+
+//xx[10]=100;
+                    break;
+
+//スーパージエン
+                case 4:
+                    xx[10] = 120;
+                    xx[0] = 250;
+                    xx[8] = aa[t] - fx;
+                    xx[9] = ab[t] - fy;
+                    if (atm[t] >= 0)
+                        atm[t]--;
+                    if (abs(marioX + marioWidth - xx[8] - xx[0] * 2)
+                        < 9000
+                        && abs(marioX <
+                               xx[8] - anobia[t] +
+                               xx[0] * 2) < 3000
+                        && marioSpeedY <= -600 && atm[t] <= 0) {
+                        if (axtype[t] == 1
+                            && !marioOnGround && axzimen[t] == 1) {
+                            ad[t] = -1600;
+                            atm[t] = 40;
+                            ab[t] -= 1000;
+                        }
+                    }        //
+                    break;
+
+//クマー
+                case 5:
+                    xx[10] = 160;
+//azimentype[t]=2;
+                    break;
+
+//デフラグさん
+                case 6:
+                    if (azimentype[t] == 30) {
+                        ad[t] = -1600;
+                        ab[t] += ad[t];
+                    }
+
+                    xx[10] = 120;
+                    if (atm[t] >= 10) {
+                        atm[t]++;
+                        if (marioHP >= 1) {
+                            if (atm[t] <= 19) {
+                                marioX = xx[0];
+                                marioY = xx[1] - 3000;
+                                marioType = MarioType::NORMAL;
+                            }
+                            xx[10] = 0;
+                            if (atm[t] == 20) {
+                                marioSpeedX = 700;
+                                mkeytm = 24;
+                                marioSpeedY = -1200;
+                                marioY = xx[1] - 1000 - 3000;
+                                amuki[t] = 1;
+                                if (axtype[t] == 1) {
+                                    marioSpeedX = 840;
+                                    axtype[t]
+                                            = 0;
+                                }
+                            }
+                            if (atm[t] == 40) {
+                                amuki[t] = 0;
+                                atm[t] = 0;
+                            }
+                        }
+                    }
+//ポール捨て
+                    if (axtype[t] == 1) {
+                        for (tt = 0; tt < smax; tt++) {
+                            if (stype[tt] == 300) {
+//sa[sco]=xx[21]*100;sb[sco]=xx[22]*100;sc[sco]=3000;sd[sco]=(12-t)*3000;stype[sco]=300;sco++;
+                                if (aa[t] -
+                                    fx >= -8000
+                                    && aa[t] >=
+                                       sa[tt] +
+                                       2000
+                                    && aa[t] <= sa[tt] + 3600 && axzimen[t]
+                                                                 == 1) {
+                                    sa[tt] = -800000;
+                                    atm[t] = 100;
                                 }
                             }
                         }
 
-                        break;
+                        if (atm[t] == 100) {
+                            eyobi(aa[t] + 1200 -
+                                  1200,
+                                  ab[t] + 3000 -
+                                  10 * 3000 - 1500,
+                                  0, 0, 0, 0, 1000,
+                                  10 * 3000 - 1200, 4, 20);
+                            if (marioType == MarioType::_300) {
+                                marioType = MarioType::NORMAL;StopSoundMem(oto[11]);
+                                bgmchange(otom[1]);
+                            }
+                            for (t1 = 0; t1 < smax; t1++) {
+                                if (stype[t1] == 104)
+                                    sa[t1] = -80000000;
+                            }
+                        }
+                        if (atm[t] == 120) {
+                            eyobi(aa[t] + 1200 -
+                                  1200,
+                                  ab[t] + 3000 -
+                                  10 * 3000 - 1500,
+                                  600, -1200, 0,
+                                  160, 1000, 10 * 3000 - 1200, 4, 240);
+                            amuki[t] = 1;
+                        }
+//marioSpeedX=700;mkeytm=24;marioSpeedY=-1200;marioY=xx[1]-1000-3000;amuki[t]=1;if (axtype[t]==1){marioSpeedX=840;axtype[t]=0;}}
+                        if (atm[t] == 140) {
+                            amuki[t] = 0;
+                            atm[t] = 0;
+                        }
+                    }
+                    if (atm[t] >= 220) {
+                        atm[t] = 0;
+                        amuki[t] = 0;
+                    }
+//他の敵を投げる
+                    for (tt = 0; tt < amax; tt++) {
+                        xx[0] = 250;
+                        xx[5] = -800;
+                        xx[12] = 0;
+                        xx[1] = 1600;
+                        xx[8] = aa[tt] - fx;
+                        xx[9] = ab[tt] - fy;
+                        if (t != tt && atype[tt] >= 100) {
+                            if (aa[t] + anobia[t] -
+                                fx >
+                                xx[8] + xx[0] * 2
+                                && aa[t] - fx <
+                                   xx[8] + anobia[tt] -
+                                   xx[0] * 2
+                                && ab[t] + anobib[t] - fy > xx[9] + xx[5]
+                                && ab[t] +
+                                   anobib[t] - fy <
+                                   xx[9] + xx[1] * 3 + xx[12] + 1500) {
+//aa[tt]=-800000;
+                                amuki[tt] = 1;
+                                aa[tt] = aa[t] + 300;
+                                ab[tt] = ab[t] - 3000;
+                                abrocktm[tt] = 120;    //aa[tt]=0;
+                                atm[t] = 200;
+                                amuki[t] = 1;
+                            }
+                        }
+                    }
+
+                    break;
 
 //ジエン大砲
-                    case 7:
-                        azimentype[t] = 0;
-                        xx[10] = 0;
-                        xx[11] = 400;
-                        if (axtype[t] == 0)
-                            xx[10] = xx[11];
-                        if (axtype[t] == 1)
-                            xx[10] = -xx[11];
-                        if (axtype[t] == 2)
-                            ab[t] -= xx[11];
-                        if (axtype[t] == 3)
-                            ab[t] += xx[11];
-                        break;
+                case 7:
+                    azimentype[t] = 0;
+                    xx[10] = 0;
+                    xx[11] = 400;
+                    if (axtype[t] == 0)
+                        xx[10] = xx[11];
+                    if (axtype[t] == 1)
+                        xx[10] = -xx[11];
+                    if (axtype[t] == 2)
+                        ab[t] -= xx[11];
+                    if (axtype[t] == 3)
+                        ab[t] += xx[11];
+                    break;
 
 //スーパーブーン
-                    case 8:
-                        azimentype[t] = 0;
-                        xx[22] = 20;
-                        if (atm[t] == 0) {
-                            af[t] += xx[22];
-                            ad[t] += xx[22];
-                        }
-                        if (atm[t] == 1) {
-                            af[t] -= xx[22];
-                            ad[t] -= xx[22];
-                        }
-                        if (ad[t] > 300)
-                            ad[t] = 300;
-                        if (ad[t] < -300)
-                            ad[t] = -300;
-                        if (af[t] >= 1200)
-                            atm[t] = 1;
-                        if (af[t] < -0)
-                            atm[t] = 0;
-                        ab[t] += ad[t];
+                case 8:
+                    azimentype[t] = 0;
+                    xx[22] = 20;
+                    if (atm[t] == 0) {
+                        af[t] += xx[22];
+                        ad[t] += xx[22];
+                    }
+                    if (atm[t] == 1) {
+                        af[t] -= xx[22];
+                        ad[t] -= xx[22];
+                    }
+                    if (ad[t] > 300)
+                        ad[t] = 300;
+                    if (ad[t] < -300)
+                        ad[t] = -300;
+                    if (af[t] >= 1200)
+                        atm[t] = 1;
+                    if (af[t] < -0)
+                        atm[t] = 0;
+                    ab[t] += ad[t];
 //atype[t]=151;
-                        break;
+                    break;
 //ノーマルブーン
-                    case 151:
-                        azimentype[t] = 2;
-                        break;
+                case 151:
+                    azimentype[t] = 2;
+                    break;
 
 //ファイアー玉
-                    case 9:
-                        azimentype[t] = 5;
-                        ab[t] += ad[t];
-                        ad[t] += 100;
-                        if (ab[t] >= fymax + 1000) {
-                            ad[t] = 900;
-                        }
-                        if (ab[t] >= fymax + 12000) {
-                            ab[t] = fymax;
-                            ad[t] = -2600;
-                        }
-                        break;
+                case 9:
+                    azimentype[t] = 5;
+                    ab[t] += ad[t];
+                    ad[t] += 100;
+                    if (ab[t] >= fymax + 1000) {
+                        ad[t] = 900;
+                    }
+                    if (ab[t] >= fymax + 12000) {
+                        ab[t] = fymax;
+                        ad[t] = -2600;
+                    }
+                    break;
 
 //ファイアー
-                    case 10:
-                        azimentype[t] = 0;
-                        xx[10] = 0;
-                        xx[11] = 400;
-                        if (axtype[t] == 0)
-                            xx[10] = xx[11];
-                        if (axtype[t] == 1)
-                            xx[10] = -xx[11];
-                        break;
+                case 10:
+                    azimentype[t] = 0;
+                    xx[10] = 0;
+                    xx[11] = 400;
+                    if (axtype[t] == 0)
+                        xx[10] = xx[11];
+                    if (axtype[t] == 1)
+                        xx[10] = -xx[11];
+                    break;
 
 //モララー
-                    case 30:
-                        atm[t] += 1;
-                        if (axtype[t] == 0) {
-                            if (atm[t] == 50 && marioY >= 6000) {
-                                ac[t] = 300;
-                                ad[t] -= 1600;
-                                ab[t] -= 1000;
-                            }
+                case 30:
+                    atm[t] += 1;
+                    if (axtype[t] == 0) {
+                        if (atm[t] == 50 && marioY >= 6000) {
+                            ac[t] = 300;
+                            ad[t] -= 1600;
+                            ab[t] -= 1000;
+                        }
 
-                            for (tt = 0; tt < amax; tt++) {
-                                xx[0] = 250;
-                                xx[5] = -800;
-                                xx[12] = 0;
-                                xx[1] = 1600;
-                                xx[8] = aa[tt] - fx;
-                                xx[9] = ab[tt] - fy;
-                                if (t != tt && atype[tt] == 102) {
-                                    if (aa[t] +
-                                        anobia[t] -
-                                        fx >
-                                        xx[8] +
-                                        xx[0] * 2
-                                        && aa[t] -
-                                           fx <
-                                           xx[8] +
-                                           anobia[tt] -
-                                           xx[0] * 2
-                                        && ab[t] +
-                                           anobib[t] - fy > xx[9] + xx[5]
-                                        && ab[t] +
-                                           anobib[t] -
-                                           fy <
-                                           xx[9] + xx[1] * 3 + xx[12] + 1500) {
-                                        aa[tt] = -800000;
-                                        axtype[t]
-                                                = 1;
-                                        ad[t] = -1600;
-                                        amsgtm[t]
-                                                = 30;
-                                        amsgtype[t]
-                                                = 25;
-                                    }
+                        for (tt = 0; tt < amax; tt++) {
+                            xx[0] = 250;
+                            xx[5] = -800;
+                            xx[12] = 0;
+                            xx[1] = 1600;
+                            xx[8] = aa[tt] - fx;
+                            xx[9] = ab[tt] - fy;
+                            if (t != tt && atype[tt] == 102) {
+                                if (aa[t] +
+                                    anobia[t] -
+                                    fx >
+                                    xx[8] +
+                                    xx[0] * 2
+                                    && aa[t] -
+                                       fx <
+                                       xx[8] +
+                                       anobia[tt] -
+                                       xx[0] * 2
+                                    && ab[t] +
+                                       anobib[t] - fy > xx[9] + xx[5]
+                                    && ab[t] +
+                                       anobib[t] -
+                                       fy <
+                                       xx[9] + xx[1] * 3 + xx[12] + 1500) {
+                                    aa[tt] = -800000;
+                                    axtype[t]
+                                            = 1;
+                                    ad[t] = -1600;
+                                    amsgtm[t]
+                                            = 30;
+                                    amsgtype[t]
+                                            = 25;
                                 }
                             }
                         }
-                        if (axtype[t] == 1) {
-                            azimentype[t] = 0;
-                            ab[t] += ad[t];
-                            ad[t] += 120;
-                        }
-                        break;
+                    }
+                    if (axtype[t] == 1) {
+                        azimentype[t] = 0;
+                        ab[t] += ad[t];
+                        ad[t] += 120;
+                    }
+                    break;
 
 //レーザー
-                    case 79:
-                        azimentype[t] = 0;
-                        xx[10] = 1600;
-                        if (axtype[t] == 1) {
-                            xx[10] = 1200;
-                            ab[t] -= 200;
-                        }
-                        if (axtype[t] == 2) {
-                            xx[10] = 1200;
-                            ab[t] += 200;
-                        }
-                        if (axtype[t] == 3) {
-                            xx[10] = 900;
-                            ab[t] -= 600;
-                        }
-                        if (axtype[t] == 4) {
-                            xx[10] = 900;
-                            ab[t] += 600;
-                        }
-                        break;
+                case 79:
+                    azimentype[t] = 0;
+                    xx[10] = 1600;
+                    if (axtype[t] == 1) {
+                        xx[10] = 1200;
+                        ab[t] -= 200;
+                    }
+                    if (axtype[t] == 2) {
+                        xx[10] = 1200;
+                        ab[t] += 200;
+                    }
+                    if (axtype[t] == 3) {
+                        xx[10] = 900;
+                        ab[t] -= 600;
+                    }
+                    if (axtype[t] == 4) {
+                        xx[10] = 900;
+                        ab[t] += 600;
+                    }
+                    break;
 
 //雲の敵
-                    case 80:
-                        azimentype[t] = 0;
+                case 80:
+                    azimentype[t] = 0;
 //xx[10]=100;
-                        break;
-                    case 81:
-                        azimentype[t] = 0;
-                        break;
-                    case 82:
-                        azimentype[t] = 0;
-                        break;
-                    case 83:
-                        azimentype[t] = 0;
-                        break;
+                    break;
+                case 81:
+                    azimentype[t] = 0;
+                    break;
+                case 82:
+                    azimentype[t] = 0;
+                    break;
+                case 83:
+                    azimentype[t] = 0;
+                    break;
 
-                    case 84:
-                        azimentype[t] = 2;
-                        break;
+                case 84:
+                    azimentype[t] = 2;
+                    break;
 
-                    case 85:
-                        xx[23] = 400;
-                        if (axtype[t] == 0) {
-                            axtype[t] = 1;
-                            amuki[t] = 1;
-                        }
-                        if (marioY >= 30000
-                            && marioX >= aa[t] - 3000 * 5 - fx
-                            && marioX <= aa[t] - fx && axtype[t] == 1) {
-                            axtype[t] = 5;
-                            amuki[t] = 0;
-                        }
-                        if (marioY >= 24000
-                            && marioX <= aa[t] + 3000 * 8 - fx
-                            && marioX >= aa[t] - fx && axtype[t] == 1) {
-                            axtype[t] = 5;
-                            amuki[t] = 1;
-                        }
-                        if (axtype[t] == 5)
-                            xx[10] = xx[23];
-                        break;
+                case 85:
+                    xx[23] = 400;
+                    if (axtype[t] == 0) {
+                        axtype[t] = 1;
+                        amuki[t] = 1;
+                    }
+                    if (marioY >= 30000
+                        && marioX >= aa[t] - 3000 * 5 - fx
+                        && marioX <= aa[t] - fx && axtype[t] == 1) {
+                        axtype[t] = 5;
+                        amuki[t] = 0;
+                    }
+                    if (marioY >= 24000
+                        && marioX <= aa[t] + 3000 * 8 - fx
+                        && marioX >= aa[t] - fx && axtype[t] == 1) {
+                        axtype[t] = 5;
+                        amuki[t] = 1;
+                    }
+                    if (axtype[t] == 5)
+                        xx[10] = xx[23];
+                    break;
 
-                    case 86:
-                        azimentype[t] = 4;
-                        xx[23] = 1000;
-                        if (marioX >= aa[t] - fx - marioWidth - xx[26]
-                            && marioX <= aa[t] - fx + anobia[t] + xx[26]) {
-                            atm[t] = 1;
-                        }
-                        if (atm[t] == 1) {
-                            ab[t] += 1200;
-                        }
-                        break;
+                case 86:
+                    azimentype[t] = 4;
+                    xx[23] = 1000;
+                    if (marioX >= aa[t] - fx - marioWidth - xx[26]
+                        && marioX <= aa[t] - fx + anobia[t] + xx[26]) {
+                        atm[t] = 1;
+                    }
+                    if (atm[t] == 1) {
+                        ab[t] += 1200;
+                    }
+                    break;
 
 //ファイアバー
-                    case 87:
-                        azimentype[t] = 0;
-                        if (aa[t] % 10 != 1)
-                            atm[t] += 6;
-                        else {
-                            atm[t] -= 6;
+                case 87:
+                    azimentype[t] = 0;
+                    if (aa[t] % 10 != 1)
+                        atm[t] += 6;
+                    else {
+                        atm[t] -= 6;
+                    }
+                    xx[25] = 2;
+                    if (atm[t] > 360 * xx[25])
+                        atm[t] -= 360 * xx[25];
+                    if (atm[t] < 0)
+                        atm[t] += 360 * xx[25];
+
+                    for (tt = 0; tt <= axtype[t] % 100; tt++) {
+                        xx[26] = 18;
+                        xd[4] = tt * xx[26] * cos(atm[t] * pai / 180 / 2);
+                        xd[5] = tt * xx[26] * sin(atm[t] * pai / 180 / 2);
+
+                        xx[4] = 1800;
+                        xx[5] = 800;
+                        xx[8] = aa[t] - fx + int(xd[4]) * 100 - xx[4] / 2;
+                        xx[9] = ab[t] - fy + int(xd[5]) * 100 - xx[4] / 2;
+
+                        if (marioX + marioWidth > xx[8] + xx[5]
+                            && marioX < xx[8] + xx[4] - xx[5]
+                            && marioY + marioHeight > xx[9] + xx[5]
+                            && marioY < xx[9] + xx[4] - xx[5]) {
+                            marioHP -= 1;
+                            mmsgtype = 51;
+                            mmsgtm = 30;
                         }
-                        xx[25] = 2;
-                        if (atm[t] > 360 * xx[25])
-                            atm[t] -= 360 * xx[25];
-                        if (atm[t] < 0)
-                            atm[t] += 360 * xx[25];
+                    }
 
-                        for (tt = 0; tt <= axtype[t] % 100; tt++) {
-                            xx[26] = 18;
-                            xd[4] = tt * xx[26] * cos(atm[t] * pai / 180 / 2);
-                            xd[5] = tt * xx[26] * sin(atm[t] * pai / 180 / 2);
+                    break;
 
-                            xx[4] = 1800;
-                            xx[5] = 800;
-                            xx[8] = aa[t] - fx + int(xd[4]) * 100 - xx[4] / 2;
-                            xx[9] = ab[t] - fy + int(xd[5]) * 100 - xx[4] / 2;
+                case 88:
+                    azimentype[t] = 0;
+                    if (aa[t] % 10 != 1)
+                        atm[t] += 6;
+                    else {
+                        atm[t] -= 6;
+                    }
+                    xx[25] = 2;
+                    if (atm[t] > 360 * xx[25])
+                        atm[t] -= 360 * xx[25];
+                    if (atm[t] < 0)
+                        atm[t] += 360 * xx[25];
 
-                            if (marioX + marioWidth > xx[8] + xx[5]
-                                && marioX < xx[8] + xx[4] - xx[5]
-                                && marioY + marioHeight > xx[9] + xx[5]
-                                && marioY < xx[9] + xx[4] - xx[5]) {
-                                marioHP -= 1;
-                                mmsgtype = 51;
-                                mmsgtm = 30;
-                            }
+                    for (tt = 0; tt <= axtype[t] % 100; tt++) {
+                        xx[26] = 18;
+                        xd[4] = -tt * xx[26] * cos(atm[t] * pai / 180 / 2);
+                        xd[5] = tt * xx[26] * sin(atm[t] * pai / 180 / 2);
+
+                        xx[4] = 1800;
+                        xx[5] = 800;
+                        xx[8] = aa[t] - fx + int(xd[4]) * 100 - xx[4] / 2;
+                        xx[9] = ab[t] - fy + int(xd[5]) * 100 - xx[4] / 2;
+
+                        if (marioX + marioWidth > xx[8] + xx[5]
+                            && marioX < xx[8] + xx[4] - xx[5]
+                            && marioY + marioHeight > xx[9] + xx[5]
+                            && marioY < xx[9] + xx[4] - xx[5]) {
+                            marioHP -= 1;
+                            mmsgtype = 51;
+                            mmsgtm = 30;
                         }
+                    }
 
-                        break;
+                    break;
 
-                    case 88:
-                        azimentype[t] = 0;
-                        if (aa[t] % 10 != 1)
-                            atm[t] += 6;
-                        else {
-                            atm[t] -= 6;
-                        }
-                        xx[25] = 2;
-                        if (atm[t] > 360 * xx[25])
-                            atm[t] -= 360 * xx[25];
-                        if (atm[t] < 0)
-                            atm[t] += 360 * xx[25];
-
-                        for (tt = 0; tt <= axtype[t] % 100; tt++) {
-                            xx[26] = 18;
-                            xd[4] = -tt * xx[26] * cos(atm[t] * pai / 180 / 2);
-                            xd[5] = tt * xx[26] * sin(atm[t] * pai / 180 / 2);
-
-                            xx[4] = 1800;
-                            xx[5] = 800;
-                            xx[8] = aa[t] - fx + int(xd[4]) * 100 - xx[4] / 2;
-                            xx[9] = ab[t] - fy + int(xd[5]) * 100 - xx[4] / 2;
-
-                            if (marioX + marioWidth > xx[8] + xx[5]
-                                && marioX < xx[8] + xx[4] - xx[5]
-                                && marioY + marioHeight > xx[9] + xx[5]
-                                && marioY < xx[9] + xx[4] - xx[5]) {
-                                marioHP -= 1;
-                                mmsgtype = 51;
-                                mmsgtm = 30;
-                            }
-                        }
-
-                        break;
-
-                    case 90:
-                        xx[10] = 160;
+                case 90:
+                    xx[10] = 160;
 //azimentype[t]=0;
-                        break;
+                    break;
 
 //おいしいキノコ
-                    case 100:
-                        azimentype[t] = 1;
-                        xx[10] = 100;
+                case 100:
+                    azimentype[t] = 1;
+                    xx[10] = 100;
 
 //ほかの敵を巨大化
-                        if (axtype[t] == 2) {
-                            for (tt = 0; tt < amax; tt++) {
-                                xx[0] = 250;
-                                xx[5] = -800;
-                                xx[12] = 0;
-                                xx[1] = 1600;
-                                xx[8] = aa[tt] - fx;
-                                xx[9] = ab[tt] - fy;
-                                if (t != tt) {
-                                    if (aa[t] +
-                                        anobia[t] -
-                                        fx >
-                                        xx[8] +
-                                        xx[0] * 2
-                                        && aa[t] -
-                                           fx <
-                                           xx[8] +
-                                           anobia[tt] -
-                                           xx[0] * 2
-                                        && ab[t] +
-                                           anobib[t] - fy > xx[9] + xx[5]
-                                        && ab[t] +
-                                           anobib[t] -
-                                           fy < xx[9] + xx[1] * 3 + xx[12]) {
-                                        if (atype[tt] == 0 || atype[tt] == 4) {
-                                            atype[tt] = 90;    //ot(oto[6]);
-                                            anobia[tt]
-                                                    = 6400;
-                                            anobib[tt]
-                                                    = 6300;
-                                            axtype[tt]
-                                                    = 0;
-                                            aa[tt] -= 1050;
-                                            ab[tt] -= 1050;
-                                            ot(oto[9]);
-                                            aa[t] = -80000000;
-                                        }
+                    if (axtype[t] == 2) {
+                        for (tt = 0; tt < amax; tt++) {
+                            xx[0] = 250;
+                            xx[5] = -800;
+                            xx[12] = 0;
+                            xx[1] = 1600;
+                            xx[8] = aa[tt] - fx;
+                            xx[9] = ab[tt] - fy;
+                            if (t != tt) {
+                                if (aa[t] +
+                                    anobia[t] -
+                                    fx >
+                                    xx[8] +
+                                    xx[0] * 2
+                                    && aa[t] -
+                                       fx <
+                                       xx[8] +
+                                       anobia[tt] -
+                                       xx[0] * 2
+                                    && ab[t] +
+                                       anobib[t] - fy > xx[9] + xx[5]
+                                    && ab[t] +
+                                       anobib[t] -
+                                       fy < xx[9] + xx[1] * 3 + xx[12]) {
+                                    if (atype[tt] == 0 || atype[tt] == 4) {
+                                        atype[tt] = 90;    //ot(oto[6]);
+                                        anobia[tt]
+                                                = 6400;
+                                        anobib[tt]
+                                                = 6300;
+                                        axtype[tt]
+                                                = 0;
+                                        aa[tt] -= 1050;
+                                        ab[tt] -= 1050;
+                                        ot(oto[9]);
+                                        aa[t] = -80000000;
                                     }
                                 }
                             }
                         }
+                    }
 
-                        break;
+                    break;
 
 //毒キノコ
-                    case 102:
-                        azimentype[t] = 1;
-                        xx[10] = 100;
-                        if (axtype[t] == 1)
-                            xx[10] = 200;
-                        break;
+                case 102:
+                    azimentype[t] = 1;
+                    xx[10] = 100;
+                    if (axtype[t] == 1)
+                        xx[10] = 200;
+                    break;
 
 //悪スター
-                    case 110:
-                        azimentype[t] = 1;
-                        xx[10] = 200;
-                        if (axzimen[t] == 1) {
-                            ab[t] -= 1200;
-                            ad[t] = -1400;
-                        }
-                        break;
+                case 110:
+                    azimentype[t] = 1;
+                    xx[10] = 200;
+                    if (axzimen[t] == 1) {
+                        ab[t] -= 1200;
+                        ad[t] = -1400;
+                    }
+                    break;
 
-                    case 200:
-                        azimentype[t] = 1;
-                        xx[10] = 100;
-                        break;
+                case 200:
+                    azimentype[t] = 1;
+                    xx[10] = 100;
+                    break;
 
 /*
 case 1:
@@ -3500,429 +3482,429 @@ break;
 
 */
 
-                }        //sw
+            }        //sw
 
-                if (abrocktm[t] >= 1)
-                    xx[10] = 0;
+            if (abrocktm[t] >= 1)
+                xx[10] = 0;
 
-                if (amuki[t] == 0)
-                    aacta[t] -= xx[10];
-                if (amuki[t] == 1)
-                    aacta[t] += xx[10];
+            if (amuki[t] == 0)
+                aacta[t] -= xx[10];
+            if (amuki[t] == 1)
+                aacta[t] += xx[10];
 
 //最大値
-                xx[0] = 850;
-                xx[1] = 1200;
+            xx[0] = 850;
+            xx[1] = 1200;
 
 //if (marioSpeedX>xx[0]){marioSpeedX=xx[0];}
 //if (marioSpeedX<-xx[0]){marioSpeedX=-xx[0];}
-                if (ad[t] > xx[1] && azimentype[t] != 5) {
-                    ad[t] = xx[1];
-                }
+            if (ad[t] > xx[1] && azimentype[t] != 5) {
+                ad[t] = xx[1];
+            }
 //行動
-                aa[t] += aacta[t];    //ab[t]+=aactb[t];
+            aa[t] += aacta[t];    //ab[t]+=aactb[t];
 
-                if ((azimentype[t] >= 1 || azimentype[t] == -1)
-                    && abrocktm[t] <= 0) {
+            if ((azimentype[t] >= 1 || azimentype[t] == -1)
+                && abrocktm[t] <= 0) {
 //if (atype[t]==4)end();
 
 //移動
-                    aa[t] += ac[t];
-                    if (azimentype[t] >= 1 && azimentype[t] <= 3) {
-                        ab[t] += ad[t];
-                        ad[t] += 120;
-                    }        //ad[t]+=180;
+                aa[t] += ac[t];
+                if (azimentype[t] >= 1 && azimentype[t] <= 3) {
+                    ab[t] += ad[t];
+                    ad[t] += 120;
+                }        //ad[t]+=180;
 
-                    if (axzimen[t] == 1) {
-                        xx[0] = 100;
-                        if (ac[t] >= 200) {
-                            ac[t] -= xx[0];
-                        } else if (ac[t] <= -200) {
-                            ac[t] += xx[0];
-                        } else {
-                            ac[t] = 0;
-                        }
+                if (axzimen[t] == 1) {
+                    xx[0] = 100;
+                    if (ac[t] >= 200) {
+                        ac[t] -= xx[0];
+                    } else if (ac[t] <= -200) {
+                        ac[t] += xx[0];
+                    } else {
+                        ac[t] = 0;
                     }
+                }
 
-                    axzimen[t] = 0;
+                axzimen[t] = 0;
 
 //地面判定
-                    if (azimentype[t] != 2) {
-                        tekizimen();
-                    }
+                if (azimentype[t] != 2) {
+                    tekizimen();
+                }
 
-                }        //azimentype[t]>=1
+            }        //azimentype[t]>=1
 
 //ブロックから出現するさい
-                if (abrocktm[t] > 0) {
-                    abrocktm[t]--;
-                    if (abrocktm[t] < 100) {
-                        ab[t] -= 180;
-                    }
-                    if (abrocktm[t] > 100) {
-                    }
-                    if (abrocktm[t] == 100) {
-                        ab[t] -= 800;
-                        ad[t] = -1200;
-                        ac[t] = 700;
-                        abrocktm[t] = 0;
-                    }
-                }        //abrocktm[t]>0
+            if (abrocktm[t] > 0) {
+                abrocktm[t]--;
+                if (abrocktm[t] < 100) {
+                    ab[t] -= 180;
+                }
+                if (abrocktm[t] > 100) {
+                }
+                if (abrocktm[t] == 100) {
+                    ab[t] -= 800;
+                    ad[t] = -1200;
+                    ac[t] = 700;
+                    abrocktm[t] = 0;
+                }
+            }        //abrocktm[t]>0
 
 //プレイヤーからの判定
-                xx[0] = 250;
-                xx[1] = 1600;
-                xx[2] = 1000;
-                xx[4] = 500;
-                xx[5] = -800;
+            xx[0] = 250;
+            xx[1] = 1600;
+            xx[2] = 1000;
+            xx[4] = 500;
+            xx[5] = -800;
 
-                xx[8] = aa[t] - fx;
-                xx[9] = ab[t] - fy;
-                xx[12] = 0;
-                if (marioSpeedY >= 100)
-                    xx[12] = marioSpeedY;
-                xx[25] = 0;
+            xx[8] = aa[t] - fx;
+            xx[9] = ab[t] - fy;
+            xx[12] = 0;
+            if (marioSpeedY >= 100)
+                xx[12] = marioSpeedY;
+            xx[25] = 0;
 
-                if (marioX + marioWidth > xx[8] + xx[0] * 2
-                    && marioX < xx[8] + anobia[t] - xx[0] * 2
-                    && marioY + marioHeight > xx[9] - xx[5]
-                    && marioY + marioHeight < xx[9] + xx[1] + xx[12]
-                    && (mmutekitm <= 0 || marioSpeedY >= 100)
-                    && abrocktm[t] <= 0) {
-                    if (atype[t] != 4 && atype[t] != 9 && atype[t] != 10 && (atype[t] <= 78 || atype[t] == 85) &&
-                        !marioOnGround && marioType != MarioType::DYING) {    // && atype[t]!=4 && atype[t]!=7){
+            if (marioX + marioWidth > xx[8] + xx[0] * 2
+                && marioX < xx[8] + anobia[t] - xx[0] * 2
+                && marioY + marioHeight > xx[9] - xx[5]
+                && marioY + marioHeight < xx[9] + xx[1] + xx[12]
+                && (mmutekitm <= 0 || marioSpeedY >= 100)
+                && abrocktm[t] <= 0) {
+                if (atype[t] != 4 && atype[t] != 9 && atype[t] != 10 && (atype[t] <= 78 || atype[t] == 85) &&
+                    !marioOnGround && marioType != MarioType::DYING) {    // && atype[t]!=4 && atype[t]!=7){
 
-                        if (atype[t] == 0) {
-                            if (axtype[t] == 0)
-                                aa[t] = -900000;
-                            if (axtype[t] == 1) {
-                                ot(oto[5]);
-                                marioY = xx[9] - 900 - anobib[t];
-                                marioSpeedY = -2100;
-                                xx[25] = 1;
-                                actaon[2] = 0;
-                            }
-                        }
-
-                        if (atype[t] == 1) {
-                            atype[t] = 2;
-                            anobib[t] = 3000;
-                            axtype[t] = 0;
-                        }
-//こうら
-                        else if (atype[t] == 2 && marioSpeedY >= 0) {
-                            if (axtype[t] == 1 || axtype[t] == 2) {
-                                axtype[t] = 0;
-                            } else if (axtype[t] == 0) {
-                                if (marioX + marioWidth > xx[8] + xx[0] * 2 && marioX < xx[8] + anobia[t] / 2 - xx[0] * 4) {
-                                    axtype[t] = 1;
-                                    amuki[t] = 1;
-                                } else {
-                                    axtype[t] = 1;
-                                    amuki[t] = 0;
-                                }
-                            }
-                        }
-                        if (atype[t] == 3) {
+                    if (atype[t] == 0) {
+                        if (axtype[t] == 0)
+                            aa[t] = -900000;
+                        if (axtype[t] == 1) {
+                            ot(oto[5]);
+                            marioY = xx[9] - 900 - anobib[t];
+                            marioSpeedY = -2100;
                             xx[25] = 1;
-                        }
-
-                        if (atype[t] == 6) {
-                            atm[t] = 10;
-                            marioSpeedY = 0;
                             actaon[2] = 0;
                         }
+                    }
 
-                        if (atype[t] == 7) {
-                            aa[t] = -900000;
+                    if (atype[t] == 1) {
+                        atype[t] = 2;
+                        anobib[t] = 3000;
+                        axtype[t] = 0;
+                    }
+//こうら
+                    else if (atype[t] == 2 && marioSpeedY >= 0) {
+                        if (axtype[t] == 1 || axtype[t] == 2) {
+                            axtype[t] = 0;
+                        } else if (axtype[t] == 0) {
+                            if (marioX + marioWidth > xx[8] + xx[0] * 2 && marioX < xx[8] + anobia[t] / 2 - xx[0] * 4) {
+                                axtype[t] = 1;
+                                amuki[t] = 1;
+                            } else {
+                                axtype[t] = 1;
+                                amuki[t] = 0;
+                            }
                         }
+                    }
+                    if (atype[t] == 3) {
+                        xx[25] = 1;
+                    }
 
-                        if (atype[t] == 8) {
-                            atype[t] = 151;
-                            ad[t] = 0;
-                        }
+                    if (atype[t] == 6) {
+                        atm[t] = 10;
+                        marioSpeedY = 0;
+                        actaon[2] = 0;
+                    }
+
+                    if (atype[t] == 7) {
+                        aa[t] = -900000;
+                    }
+
+                    if (atype[t] == 8) {
+                        atype[t] = 151;
+                        ad[t] = 0;
+                    }
 //if (atype[t]==4){
 //xx[25]=1;
 //}
 
-                        if (atype[t] != 85) {
-                            if (xx[25] == 0) {
-                                ot(oto[5]);
-                                marioY = xx[9] - 1000 - anobib[t];
-                                marioSpeedY = -1000;
-                            }
-                        }
-                        if (atype[t] == 85) {
-                            if (xx[25] == 0) {
-                                ot(oto[5]);
-                                marioY = xx[9] - 4000;
-                                marioSpeedY = -1000;
-                                axtype[t] = 5;
-                            }
-                        }
-
-                        if (actaon[2] == 1) {
-                            marioSpeedY = -1600;
-                            actaon[2] = 0;
+                    if (atype[t] != 85) {
+                        if (xx[25] == 0) {
+                            ot(oto[5]);
+                            marioY = xx[9] - 1000 - anobib[t];
+                            marioSpeedY = -1000;
                         }
                     }
-//if (atype[t]==200){marioY=xx[9]-900-anobib[t];marioSpeedY=-2400;}
+                    if (atype[t] == 85) {
+                        if (xx[25] == 0) {
+                            ot(oto[5]);
+                            marioY = xx[9] - 4000;
+                            marioSpeedY = -1000;
+                            axtype[t] = 5;
+                        }
+                    }
+
+                    if (actaon[2] == 1) {
+                        marioSpeedY = -1600;
+                        actaon[2] = 0;
+                    }
                 }
+//if (atype[t]==200){marioY=xx[9]-900-anobib[t];marioSpeedY=-2400;}
+            }
 //if (aa[t]+anobia[t]-fx>xx[8]-xx[0] && aa[t]-fx<xx[8]){marioSpeedY=-1000;}//aa[t]=-9000000;
 // && ab[t]-fy<xx[9]+xx[1]/2 && ab[t]+anobib[t]-fy>xx[9]+marioHeight-xx[2]
 
-                xx[15] = -500;
+            xx[15] = -500;
 
 //プレイヤーに触れた時
-                xx[16] = 0;
-                if (atype[t] == 4 || atype[t] == 9 || atype[t] == 10)
-                    xx[16] = -3000;
-                if (atype[t] == 82 || atype[t] == 83 || atype[t] == 84)
-                    xx[16] = -3200;
-                if (atype[t] == 85)
-                    xx[16] = -anobib[t] + 6000;
-                if (marioX + marioWidth > xx[8] + xx[4]
-                    && marioX < xx[8] + anobia[t] - xx[4]
-                    && marioY < xx[9] + anobib[t] + xx[15]
-                    && marioY + marioHeight > xx[9] + anobib[t] - xx[0] + xx[16]
-                    && anotm[t] <= 0 && abrocktm[t] <= 0) {
-                    if (mmutekion == 1) {
-                        aa[t] = -9000000;
-                    }
-                    if (mmutekitm <= 0
-                        && (atype[t] <= 99 || atype[t] >= 200)) {
-                        if (mmutekion != 1 && marioType != MarioType::DYING) {
+            xx[16] = 0;
+            if (atype[t] == 4 || atype[t] == 9 || atype[t] == 10)
+                xx[16] = -3000;
+            if (atype[t] == 82 || atype[t] == 83 || atype[t] == 84)
+                xx[16] = -3200;
+            if (atype[t] == 85)
+                xx[16] = -anobib[t] + 6000;
+            if (marioX + marioWidth > xx[8] + xx[4]
+                && marioX < xx[8] + anobia[t] - xx[4]
+                && marioY < xx[9] + anobib[t] + xx[15]
+                && marioY + marioHeight > xx[9] + anobib[t] - xx[0] + xx[16]
+                && anotm[t] <= 0 && abrocktm[t] <= 0) {
+                if (mmutekion == 1) {
+                    aa[t] = -9000000;
+                }
+                if (mmutekitm <= 0
+                    && (atype[t] <= 99 || atype[t] >= 200)) {
+                    if (mmutekion != 1 && marioType != MarioType::DYING) {
 //if (mmutekitm<=0)
 
 //ダメージ
-                            if ((atype[t] != 2 || axtype[t] != 0)
-                                && marioHP >= 1) {
-                                if (atype[t] != 6) {
-                                    marioHP -= 1;
+                        if ((atype[t] != 2 || axtype[t] != 0)
+                            && marioHP >= 1) {
+                            if (atype[t] != 6) {
+                                marioHP -= 1;
 //mmutekitm=40;
-                                }
                             }
+                        }
 
-                            if (atype[t] == 6) {
-                                atm[t] = 10;
-                            }
+                        if (atype[t] == 6) {
+                            atm[t] = 10;
+                        }
 //せりふ
-                            if (marioHP == 0) {
+                        if (marioHP == 0) {
 
-                                if (atype[t] == 0 || atype[t]
-                                                     == 7) {
-                                    amsgtm[t]
-                                            = 60;
-                                    amsgtype[t]
-                                            = rand(7)
-                                              + 1 + 1000 + (stb - 1)
-                                                           * 10;
-                                }
+                            if (atype[t] == 0 || atype[t]
+                                                 == 7) {
+                                amsgtm[t]
+                                        = 60;
+                                amsgtype[t]
+                                        = rand(7)
+                                          + 1 + 1000 + (stb - 1)
+                                                       * 10;
+                            }
 
-                                if (atype[t] == 1) {
-                                    amsgtm[t]
-                                            = 60;
-                                    amsgtype[t]
-                                            = rand(2)
-                                              + 15;
-                                }
+                            if (atype[t] == 1) {
+                                amsgtm[t]
+                                        = 60;
+                                amsgtype[t]
+                                        = rand(2)
+                                          + 15;
+                            }
 
-                                if (atype[t] == 2 && axtype[t]
-                                                     >= 1 && mmutekitm <= 0) {
-                                    amsgtm[t]
-                                            = 60;
-                                    amsgtype[t]
-                                            = 18;
-                                }
+                            if (atype[t] == 2 && axtype[t]
+                                                 >= 1 && mmutekitm <= 0) {
+                                amsgtm[t]
+                                        = 60;
+                                amsgtype[t]
+                                        = 18;
+                            }
 
-                                if (atype[t] == 3) {
-                                    amsgtm[t]
-                                            = 60;
-                                    amsgtype[t]
-                                            = 20;
-                                }
+                            if (atype[t] == 3) {
+                                amsgtm[t]
+                                        = 60;
+                                amsgtype[t]
+                                        = 20;
+                            }
 
-                                if (atype[t] == 4) {
-                                    amsgtm[t]
-                                            = 60;
-                                    amsgtype[t]
-                                            = rand(7)
-                                              + 1 + 1000 + (stb - 1)
-                                                           * 10;
-                                }
+                            if (atype[t] == 4) {
+                                amsgtm[t]
+                                        = 60;
+                                amsgtype[t]
+                                        = rand(7)
+                                          + 1 + 1000 + (stb - 1)
+                                                       * 10;
+                            }
 
-                                if (atype[t] == 5) {
-                                    amsgtm[t]
-                                            = 60;
-                                    amsgtype[t]
-                                            = 21;
-                                }
+                            if (atype[t] == 5) {
+                                amsgtm[t]
+                                        = 60;
+                                amsgtype[t]
+                                        = 21;
+                            }
 
-                                if (atype[t] == 9 || atype[t]
-                                                     == 10) {
-                                    mmsgtm = 30;
-                                    mmsgtype = 54;
-                                }
+                            if (atype[t] == 9 || atype[t]
+                                                 == 10) {
+                                mmsgtm = 30;
+                                mmsgtype = 54;
+                            }
 
-                                if (atype[t] == 31) {
-                                    amsgtm[t]
-                                            = 30;
-                                    amsgtype[t]
-                                            = 24;
-                                }
+                            if (atype[t] == 31) {
+                                amsgtm[t]
+                                        = 30;
+                                amsgtype[t]
+                                        = 24;
+                            }
 
-                                if (atype[t] == 80 || atype[t]
-                                                      == 81) {
-                                    amsgtm[t]
-                                            = 60;
-                                    amsgtype[t]
-                                            = 30;
-                                }
+                            if (atype[t] == 80 || atype[t]
+                                                  == 81) {
+                                amsgtm[t]
+                                        = 60;
+                                amsgtype[t]
+                                        = 30;
+                            }
 
-                                if (atype[t] == 82) {
-                                    amsgtm[t]
-                                            = 20;
-                                    amsgtype[t]
-                                            = rand(1)
-                                              + 31;
-                                    xx[24] = 900;
-                                    atype[t]
-                                            = 83;
-                                    aa[t] -= xx[24]
-                                             + 100;
-                                    ab[t] -= xx[24]
-                                             - 100 * 0;
-                                }    //82
+                            if (atype[t] == 82) {
+                                amsgtm[t]
+                                        = 20;
+                                amsgtype[t]
+                                        = rand(1)
+                                          + 31;
+                                xx[24] = 900;
+                                atype[t]
+                                        = 83;
+                                aa[t] -= xx[24]
+                                         + 100;
+                                ab[t] -= xx[24]
+                                         - 100 * 0;
+                            }    //82
 
-                                if (atype[t] == 84) {
-                                    mmsgtm = 30;
-                                    mmsgtype = 50;
-                                }
+                            if (atype[t] == 84) {
+                                mmsgtm = 30;
+                                mmsgtype = 50;
+                            }
 
-                                if (atype[t] == 85) {
-                                    amsgtm[t]
-                                            = 60;
-                                    amsgtype[t]
-                                            = rand(1)
-                                              + 85;
-                                }
+                            if (atype[t] == 85) {
+                                amsgtm[t]
+                                        = 60;
+                                amsgtype[t]
+                                        = rand(1)
+                                          + 85;
+                            }
 //雲
-                                if (atype[t] == 80) {
-                                    atype[t]
-                                            = 81;
-                                }
+                            if (atype[t] == 80) {
+                                atype[t]
+                                        = 81;
+                            }
 
-                            }    //marioHP==0
+                        }    //marioHP==0
 
 //こうら
-                            if (atype[t] == 2) {
+                        if (atype[t] == 2) {
 //if (axtype[t]==1 || axtype[t]==2){axtype[t]=0;}
-                                if (axtype[t] == 0) {
-                                    if (marioX + marioWidth > xx[8]
-                                                              + xx[0]
-                                                        * 2 && marioX < xx[8]
-                                                                        + anobia[t]
-                                                                      / 2 - xx[0]
-                                                                            * 4) {
-                                        axtype[t]
-                                                = 1;
-                                        amuki[t]
-                                                = 1;
-                                        aa[t] = marioX + marioWidth + fx + marioSpeedX;
-                                        mmutekitm = 5;
-                                    } else {
-                                        axtype[t]
-                                                = 1;
-                                        amuki[t]
-                                                = 0;
-                                        aa[t] = marioX - anobia[t] + fx - marioSpeedX;
-                                        mmutekitm = 5;
-                                    }
+                            if (axtype[t] == 0) {
+                                if (marioX + marioWidth > xx[8]
+                                                          + xx[0]
+                                                            * 2 && marioX < xx[8]
+                                                                            + anobia[t]
+                                                                              / 2 - xx[0]
+                                                                                    * 4) {
+                                    axtype[t]
+                                            = 1;
+                                    amuki[t]
+                                            = 1;
+                                    aa[t] = marioX + marioWidth + fx + marioSpeedX;
+                                    mmutekitm = 5;
                                 } else {
-                                    marioHP -= 1;
-                                }    //mmutekitm=40;}
-                            }
-
+                                    axtype[t]
+                                            = 1;
+                                    amuki[t]
+                                            = 0;
+                                    aa[t] = marioX - anobia[t] + fx - marioSpeedX;
+                                    mmutekitm = 5;
+                                }
+                            } else {
+                                marioHP -= 1;
+                            }    //mmutekitm=40;}
                         }
+
                     }
+                }
 //else if (mmutekitm>=0 && mmutekitm<=2){mmutekitm+=1;}
 //アイテム
-                    if (atype[t] >= 100 && atype[t] <= 199) {
+                if (atype[t] >= 100 && atype[t] <= 199) {
 
-                        if (atype[t] == 100 && axtype[t] == 0) {
-                            mmsgtm = 30;
-                            mmsgtype = 1;
-                            ot(oto[9]);
-                        }
-                        if (atype[t] == 100 && axtype[t] == 1) {
-                            mmsgtm = 30;
-                            mmsgtype = 2;
-                            ot(oto[9]);
-                        }
-                        if (atype[t] == 100 && axtype[t] == 2) {
-                            marioWidth = 5200;
-                            marioHeight = 7300;
-                            ot(oto[9]);
-                            marioX -= 1100;
-                            marioY -= 4000;
-                            marioType = MarioType::HUGE;
-                            marioHP = 50000000;
-                        }
+                    if (atype[t] == 100 && axtype[t] == 0) {
+                        mmsgtm = 30;
+                        mmsgtype = 1;
+                        ot(oto[9]);
+                    }
+                    if (atype[t] == 100 && axtype[t] == 1) {
+                        mmsgtm = 30;
+                        mmsgtype = 2;
+                        ot(oto[9]);
+                    }
+                    if (atype[t] == 100 && axtype[t] == 2) {
+                        marioWidth = 5200;
+                        marioHeight = 7300;
+                        ot(oto[9]);
+                        marioX -= 1100;
+                        marioY -= 4000;
+                        marioType = MarioType::HUGE;
+                        marioHP = 50000000;
+                    }
 
-                        if (atype[t] == 101) {
-                            marioHP -= 1;
-                            mmsgtm = 30;
-                            mmsgtype = 11;
-                        }
-                        if (atype[t] == 102) {
-                            marioHP -= 1;
-                            mmsgtm = 30;
-                            mmsgtype = 10;
-                        }
+                    if (atype[t] == 101) {
+                        marioHP -= 1;
+                        mmsgtm = 30;
+                        mmsgtype = 11;
+                    }
+                    if (atype[t] == 102) {
+                        marioHP -= 1;
+                        mmsgtm = 30;
+                        mmsgtype = 10;
+                    }
 //?ボール
-                        if (atype[t] == 105) {
-                            if (axtype[t] == 0) {
-                                ot(oto[4]);
-                                sgtype[26] = 6;
-                            }
-                            if (axtype[t] == 1) {
-                                blockXType[7] = 80;
-                                ot(oto[4]);
+                    if (atype[t] == 105) {
+                        if (axtype[t] == 0) {
+                            ot(oto[4]);
+                            sgtype[26] = 6;
+                        }
+                        if (axtype[t] == 1) {
+                            blockXType[7] = 80;
+                            ot(oto[4]);
 
 //ayobi(aa[t]-6*3000+1000,-3*3000,0,0,0,110,0);
-                                ayobi(aa[t] -
-                                      8 * 3000 -
-                                      1000, -4 * 3000, 0, 0, 0, 110, 0);
-                                ayobi(aa[t] -
-                                      10 *
-                                      3000 +
-                                      1000, -1 * 3000, 0, 0, 0, 110, 0);
+                            ayobi(aa[t] -
+                                  8 * 3000 -
+                                  1000, -4 * 3000, 0, 0, 0, 110, 0);
+                            ayobi(aa[t] -
+                                  10 *
+                                  3000 +
+                                  1000, -1 * 3000, 0, 0, 0, 110, 0);
 
-                                ayobi(aa[t] +
-                                      4 * 3000 +
-                                      1000, -2 * 3000, 0, 0, 0, 110, 0);
-                                ayobi(aa[t] +
-                                      5 * 3000 -
-                                      1000, -3 * 3000, 0, 0, 0, 110, 0);
-                                ayobi(aa[t] +
-                                      6 * 3000 +
-                                      1000, -4 * 3000, 0, 0, 0, 110, 0);
-                                ayobi(aa[t] +
-                                      7 * 3000 -
-                                      1000, -2 * 3000, 0, 0, 0, 110, 0);
-                                ayobi(aa[t] +
-                                      8 * 3000 +
-                                      1000,
-                                      -2 * 3000 - 1000, 0, 0, 0, 110, 0);
-                                blockY[0] += 3000 * 3;
-                            }
-                        }    //105
-
-                        if (atype[t] == 110) {
-                            marioHP -= 1;
-                            mmsgtm = 30;
-                            mmsgtype = 3;
+                            ayobi(aa[t] +
+                                  4 * 3000 +
+                                  1000, -2 * 3000, 0, 0, 0, 110, 0);
+                            ayobi(aa[t] +
+                                  5 * 3000 -
+                                  1000, -3 * 3000, 0, 0, 0, 110, 0);
+                            ayobi(aa[t] +
+                                  6 * 3000 +
+                                  1000, -4 * 3000, 0, 0, 0, 110, 0);
+                            ayobi(aa[t] +
+                                  7 * 3000 -
+                                  1000, -2 * 3000, 0, 0, 0, 110, 0);
+                            ayobi(aa[t] +
+                                  8 * 3000 +
+                                  1000,
+                                  -2 * 3000 - 1000, 0, 0, 0, 110, 0);
+                            blockY[0] += 3000 * 3;
                         }
+                    }    //105
+
+                    if (atype[t] == 110) {
+                        marioHP -= 1;
+                        mmsgtm = 30;
+                        mmsgtype = 3;
+                    }
 
 /*
 if (atype[t]==101){mmutekitm=120;mmutekion=1;}
@@ -3942,215 +3924,197 @@ if (atype[t]==132){msoubi=3;}
 if (atype[t]==133){msoubi=4;}
 
 */
-                        aa[t] = -90000000;
-                    }
+                    aa[t] = -90000000;
+                }
 
-                }        //(marioX
+            }        //(marioX
 
-            } else {
-                aa[t] = -9000000;
-            }
+        } else {
+            aa[t] = -9000000;
+        }
 
-        }            //t
+    }            //t
 
 //スクロール
 //xx[0]=xx[0];
 //x
-        if (kscroll != 1 && kscroll != 2) {
-            xx[2] = mascrollmax;
-            xx[3] = 0;
-            xx[1] = xx[2];
-            if (marioX > xx[1] && fzx < scrollx) {
-                xx[5] = marioX - xx[1];
-                marioX = xx[1];
-                fx += xx[5];
-                fzx += xx[5];
-                if (xx[1] <= 5000)
-                    xx[3] = 1;
-            }
+    if (kscroll != 1 && kscroll != 2) {
+        xx[2] = mascrollmax;
+        xx[3] = 0;
+        xx[1] = xx[2];
+        if (marioX > xx[1] && fzx < scrollx) {
+            xx[5] = marioX - xx[1];
+            marioX = xx[1];
+            fx += xx[5];
+            fzx += xx[5];
+            if (xx[1] <= 5000)
+                xx[3] = 1;
+        }
 //if (kscroll!=5){//戻りなし
 //xx[1]=xx[2]-500;if (marioX<xx[1] && fzx>700){xx[5]=xx[1]-marioX;marioX=xx[1];fx-=xx[5];fzx-=xx[5];}
 //}
 //if (xx[3]==1){if (tyuukan==1)tyuukan=1;}
-        }            //kscroll
+    }            //kscroll
 
-    }                //if (gameScene==1){
+}
 
-//スタッフロール
-    if (gameScene == GameScene::ALL_STAGE_CLEAR) {
-        gameSceneTimer++;
+void processSceneAllStageClear() {
+    gameSceneTimer++;
 
-        xx[7] = 46;
-        if (CheckHitKey(KEY_INPUT_1) == 1) {
-            end();
-        }
-        if (CheckHitKey(KEY_INPUT_SPACE) == 1) {
-            for (t = 0; t <= xx[7]; t += 1) {
-                xx[12 + t] -= 300;
-            }
-        }
-
-        if (gameSceneTimer <= 1) {
-            gameSceneTimer = 2;
-            bgmchange(otom[5]);
-            xx[10] = 0;
-            for (t = 0; t <= xx[7]; t += 1) {
-                xx[12 + t] = 980000;
-            }
-//for (t=0;t<=xx[7];t+=2){xx[12+t]=46000;}
-            xx[12] = 460;
-            xx[13] = 540;
-            xx[14] = 590;
-            xx[15] = 650;
-            xx[16] = 700;
-            xx[17] = 760;
-            xx[18] = 810;
-            xx[19] = 870;
-            xx[20] = 920;
-
-            xx[21] = 1000;
-            xx[22] = 1050;
-            xx[23] = 1100;
-            xx[24] = 1180;
-            xx[25] = 1230;
-
-            xx[26] = 1360;
-            xx[27] = 1410;
-            xx[28] = 1540;
-            xx[29] = 1590;
-
-            xx[30] = 1800;
-
-            for (t = 0; t <= xx[7]; t += 1) {
-                xx[12 + t] *= 100;
-            }
-        }
-
-        xx[10] += 1;
-        for (t = 0; t <= xx[7]; t += 1) {
-            xx[12 + t] -= 100;
-        }            //t
-
-        if (xx[30] == -200) {
-            bgmchange(otom[5]);
-        }
-        if (xx[30] <= -400) {
-            gameScene = GameScene::TITLE;
-            marioLife = 2;
-            gameSceneTimer = 0;
-            ending = 0;
-        }
-
-    }                //gameScene==2
-
-    if (gameScene == GameScene::LIFE_SPLASH) {
-        gameSceneTimer++;
-
-        if (fast == 1)
-            gameSceneTimer += 2;
-        if (gameSceneTimer >= 30) {
-            gameSceneTimer = 0;
-            gameScene = GameScene::IN_GAME;
-            zxon = 0;
-        }
-    }                //if (gameScene==10){
-
-//タイトル
-    if (gameScene == GameScene::TITLE) {
-        gameSceneTimer++;
-        xx[0] = 0;
-        if (gameSceneTimer <= 10) {
-            gameSceneTimer = 11;
-            sta = 1;
-            stb = 1;
-            stc = 0;
-            over = 0;
-        }
-
-        if (CheckHitKey(KEY_INPUT_1) == 1) {
-            sta = 1;
-            stb = 1;
-            stc = 0;
-        }
-        if (CheckHitKey(KEY_INPUT_2) == 1) {
-            sta = 1;
-            stb = 2;
-            stc = 0;
-        }
-        if (CheckHitKey(KEY_INPUT_3) == 1) {
-            sta = 1;
-            stb = 3;
-            stc = 0;
-        }
-        if (CheckHitKey(KEY_INPUT_4) == 1) {
-            sta = 1;
-            stb = 4;
-            stc = 0;
-        }
-        if (CheckHitKey(KEY_INPUT_5) == 1) {
-            sta = 2;
-            stb = 1;
-            stc = 0;
-        }
-        if (CheckHitKey(KEY_INPUT_6) == 1) {
-            sta = 2;
-            stb = 2;
-            stc = 0;
-        }
-        if (CheckHitKey(KEY_INPUT_7) == 1) {
-            sta = 2;
-            stb = 3;
-            stc = 0;
-        }
-        if (CheckHitKey(KEY_INPUT_8) == 1) {
-            sta = 2;
-            stb = 4;
-            stc = 0;
-        }
-        if (CheckHitKey(KEY_INPUT_9) == 1) {
-            sta = 3;
-            stb = 1;
-            stc = 0;
-        }
-        if (CheckHitKey(KEY_INPUT_0) == 1) {
-            xx[0] = 1;
-            over = 1;
-        }
-//if (CheckHitKeyAll() == 0){end();}
-        if (CheckHitKey(KEY_INPUT_RETURN) == 1) {
-            xx[0] = 1;
-        }
-//if (CheckHitKey(KEY_INPUT_SPACE)==1){xx[0]=1;}
-        if (CheckHitKey(KEY_INPUT_Z) == 1) {
-            xx[0] = 1;
-        }
-
-        if (xx[0] == 1) {
-            gameScene = GameScene::LIFE_SPLASH;
-            zxon = 0;
-            gameSceneTimer = 0;
-            marioLife = 2;
-
-            fast = 0;
-            trap = 0;
-            tyuukan = 0;
-        }
-
-    }                //100
-
-//描画
-    paint();
-
-//30-fps
-    xx[0] = 30;
-    if (CheckHitKey(KEY_INPUT_SPACE) == 1) {
-        xx[0] = 60;
+    xx[7] = 46;
+    if (CheckHitKey(KEY_INPUT_1) == 1) {
+        end();
     }
-    wait2(stime, long(GetNowCount()), 1000 / xx[0]);
+    if (CheckHitKey(KEY_INPUT_SPACE) == 1) {
+        for (t = 0; t <= xx[7]; t += 1) {
+            xx[12 + t] -= 300;
+        }
+    }
 
-//wait(20);
+    if (gameSceneTimer <= 1) {
+        gameSceneTimer = 2;
+        bgmchange(otom[5]);
+        xx[10] = 0;
+        for (t = 0; t <= xx[7]; t += 1) {
+            xx[12 + t] = 980000;
+        }
+//for (t=0;t<=xx[7];t+=2){xx[12+t]=46000;}
+        xx[12] = 460;
+        xx[13] = 540;
+        xx[14] = 590;
+        xx[15] = 650;
+        xx[16] = 700;
+        xx[17] = 760;
+        xx[18] = 810;
+        xx[19] = 870;
+        xx[20] = 920;
 
-}                //mainProgram()
+        xx[21] = 1000;
+        xx[22] = 1050;
+        xx[23] = 1100;
+        xx[24] = 1180;
+        xx[25] = 1230;
+
+        xx[26] = 1360;
+        xx[27] = 1410;
+        xx[28] = 1540;
+        xx[29] = 1590;
+
+        xx[30] = 1800;
+
+        for (t = 0; t <= xx[7]; t += 1) {
+            xx[12 + t] *= 100;
+        }
+    }
+
+    xx[10] += 1;
+    for (t = 0; t <= xx[7]; t += 1) {
+        xx[12 + t] -= 100;
+    }            //t
+
+    if (xx[30] == -200) {
+        bgmchange(otom[5]);
+    }
+    if (xx[30] <= -400) {
+        gameScene = GameScene::TITLE;
+        marioLife = 2;
+        gameSceneTimer = 0;
+        ending = 0;
+    }
+}
+
+void processSceneLifeSplash() {
+    gameSceneTimer++;
+
+    if (fast == 1)
+        gameSceneTimer += 2;
+    if (gameSceneTimer >= 30) {
+        gameSceneTimer = 0;
+        gameScene = GameScene::IN_GAME;
+        initialized = false;
+    }
+}
+
+void processSceneTitle() {
+    gameSceneTimer++;
+    xx[0] = 0;
+    if (gameSceneTimer <= 10) {
+        gameSceneTimer = 11;
+        sta = 1;
+        stb = 1;
+        stc = 0;
+        over = 0;
+    }
+
+    if (CheckHitKey(KEY_INPUT_1) == 1) {
+        sta = 1;
+        stb = 1;
+        stc = 0;
+    }
+    if (CheckHitKey(KEY_INPUT_2) == 1) {
+        sta = 1;
+        stb = 2;
+        stc = 0;
+    }
+    if (CheckHitKey(KEY_INPUT_3) == 1) {
+        sta = 1;
+        stb = 3;
+        stc = 0;
+    }
+    if (CheckHitKey(KEY_INPUT_4) == 1) {
+        sta = 1;
+        stb = 4;
+        stc = 0;
+    }
+    if (CheckHitKey(KEY_INPUT_5) == 1) {
+        sta = 2;
+        stb = 1;
+        stc = 0;
+    }
+    if (CheckHitKey(KEY_INPUT_6) == 1) {
+        sta = 2;
+        stb = 2;
+        stc = 0;
+    }
+    if (CheckHitKey(KEY_INPUT_7) == 1) {
+        sta = 2;
+        stb = 3;
+        stc = 0;
+    }
+    if (CheckHitKey(KEY_INPUT_8) == 1) {
+        sta = 2;
+        stb = 4;
+        stc = 0;
+    }
+    if (CheckHitKey(KEY_INPUT_9) == 1) {
+        sta = 3;
+        stb = 1;
+        stc = 0;
+    }
+    if (CheckHitKey(KEY_INPUT_0) == 1) {
+        xx[0] = 1;
+        over = 1;
+    }
+    //if (CheckHitKeyAll() == 0){end();}
+    if (CheckHitKey(KEY_INPUT_RETURN) == 1) {
+        xx[0] = 1;
+    }
+    //if (CheckHitKey(KEY_INPUT_SPACE)==1){xx[0]=1;}
+    if (CheckHitKey(KEY_INPUT_Z) == 1) {
+        xx[0] = 1;
+    }
+
+    if (xx[0] == 1) {
+        gameScene = GameScene::LIFE_SPLASH;
+        initialized = false;
+        gameSceneTimer = 0;
+        marioLife = 2;
+
+        fast = 0;
+        trap = 0;
+        tyuukan = 0;
+    }
+}
 
 void tekizimen() {
     //壁
@@ -4834,349 +4798,23 @@ void stagep() {
         stagecolor = 2;
 
 	byte stagedatex[17][1001] = {
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 97, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	     1, 1, 1,
-	     1, 1,
-	     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	     1, 1, 1,
-	     1, 1,
-	     1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 1, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1,
-	     1, 1, 1,
-	     1, 1,
-	     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 98, 0,
-	     1, 1,
-	     1, 1, 1,
-	     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
-	     0, 1, 0}
-	    ,
-	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     1, 1, 1,
-	     1, 1,
-	     1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 1, 0}
-	    ,
-	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     1, 1, 1,
-	     1, 1,
-	     1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 1, 0}
-	    ,
-	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     1, 1, 1,
-	     1, 1,
-	     1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 1, 0}
-	    ,
-	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 4, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     1, 1, 1,
-	     1, 1,
-	     1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 1, 0}
-	    ,
-	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     1, 1, 1,
-	     1, 1,
-	     1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 1, 0}
-	    ,
-	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 97, 44, 0, 0,
-	     1, 1,
-	     1, 1,
-	     1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 1,
-	     0}
-	    ,
-	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 7, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 54, 0, 1,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 97, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0,
-	     1, 1, 1,
-	     1, 1,
-	     1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 1, 0}
-	    ,
-	    {1, 0, 0, 0, 0, 0, 0, 98, 2, 2, 98, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     4, 7,
-	     7, 7, 7, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 98, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 4, 4, 4,
-	     1, 1, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1,
-	     1, 1, 1,
-	     1, 1,
-	     1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 1,
-	     0}
-	    ,
-	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 4,
-	     0, 0,
-	     0, 0, 4, 0, 4, 0, 51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 1, 1, 4, 4, 4, 4, 1,
-	     1, 1, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1,
-	     1, 1, 1,
-	     1, 1,
-	     1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 1, 0}
-	    ,
-	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0,
-	     4, 0, 4,
-	     0, 0,
-	     0, 0, 4, 0, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 40, 0, 0, 0, 0, 0, 0, 30, 0, 0,
-	     0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 4, 4, 4, 4,
-	     1, 1, 1,
-	     1, 0,
-	     0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1,
-	     1, 1, 1,
-	     1, 1,
-	     1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 1,
-	     0}
-	    ,
-	    {1, 0, 7, 0, 0, 0, 0, 0, 0, 0, 50, 0, 50, 0, 4, 0, 4, 0,
-	     4, 0,
-	     4, 0,
-	     50, 0, 0, 4, 0, 4, 0, 4, 0, 4, 0, 0, 0, 0, 50, 50, 50,
-	     7, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 4, 4, 4,
-	     4, 1, 1,
-	     1, 1,
-	     1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
-	     1, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1,
-	     1, 1, 1,
-	     1, 1,
-	     1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     1, 0}
-	    ,
-	    {5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	     5, 5, 0,
-	     0, 0,
-	     5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5, 5, 0, 0, 5, 5, 0, 0,
-	     0, 0, 5,
-	     5, 5,
-	     5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1,
-	     1, 1, 1,
-	     1, 1,
-	     1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	     5, 5, 0}
-	    ,
-	    {6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-	     6, 6, 6,
-	     6, 6,
-	     6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-	     6, 6, 0,
-	     0, 0,
-	     6, 6, 6, 0, 0, 0, 6, 6, 6, 6, 6, 6, 0, 0, 6, 6, 0, 0,
-	     0, 0, 6,
-	     6, 6,
-	     6, 6, 6, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-	     6, 6, 6,
-	     6, 6,
-	     6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1,
-	     1, 1, 1,
-	     1, 1,
-	     1, 1, 1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-	     6, 6, 0,
-	     0, 0,
-	     0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0}
-	    ,
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,97, 0, 0, 0, 0, 0, 0},
+	    {1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,98, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0},
+	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,97,44, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,54, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+	    {1, 0, 0, 0, 0, 0, 0,98, 2, 2,98, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 7, 7, 7, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,98, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 4, 4, 4, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 4, 0, 4, 0,51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 1, 1, 4, 4, 4, 4, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 4, 0, 4, 0, 0, 0, 0, 4, 0, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,40, 0, 0, 0, 0, 0, 0,30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 4, 4, 4, 4, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+	    {1, 0, 7, 0, 0, 0, 0, 0, 0, 0,50, 0,50, 0, 4, 0, 4, 0, 4, 0, 4, 0,50, 0, 0, 4, 0, 4, 0, 4, 0, 4, 0, 0, 0, 0,50,50,50, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 4, 4, 4, 4, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+	    {5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5, 5, 0, 0, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0},
+	    {6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 6, 6, 6, 0, 0, 0, 6, 6, 6, 6, 6, 6, 0, 0, 6, 6, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	};
-//{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
         blockCounter = 0;
         blockXType[blockCounter] = 2;
@@ -5434,125 +5072,22 @@ void stagep() {
         marioY = 3000 * 9;
 
 	byte stagedatex[17][1001] = {
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0,}
-	    ,
-	    {0, 82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0,}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 82, 0, 0, 0, 0,
-	     0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0,}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0,}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0,}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0,}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0,}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0,}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0,}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 83, 0, 0,}
-	    ,
-	    {0, 0, 40, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0,}
-	    ,
-	    {0, 0, 41, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-	     4, 4,
-	     4, 0, 0,
-	     0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 81,}
-	    ,
-	    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0,
-	     0, 5, 5,
-	     5, 5,
-	     5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 0,
-	     5, 5, 5, 5, 5, 5, 5}
-	    ,
-	    {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-	     6, 6, 6,
-	     6, 6,
-	     6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-	     6, 6, 6,
-	     6, 6,
-	     6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6,
-	     6, 6, 6,
-	     6, 6,
-	     6, 6, 6, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0,
-	     0, 6, 6,
-	     6, 6,
-	     6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-	     6, 6, 6,
-	     6, 6,
-	     6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-	     6, 6, 6,
-	     6, 0,
-	     6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,99, 0, 0, 0, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,83, 0, 0,},
+	    {0, 0,40, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {0, 0,41, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,81,},
+	    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5},
+	    {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	};
 
 /*
@@ -5617,321 +5152,22 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
 //marioX=3000;marioY=3000;
 
 	byte stagedatex[17][1001] = {	//                                                                                                                                                                                     中間
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 97,
-	     0, 0, 0,
-	     0, 0, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 82, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 57, 0, 0, 0, 84, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     82, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 84, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 51, 0, 0, 0, 84,
-	     0, 0,
-	     0, 0,
-	     0, 99, 0, 0, 0, 0, 0, 0, 82, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     97, 0, 0,
-	     0, 0, 0, 0, 57, 0, 0, 0, 0, 0, 0, 0, 97, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 58, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 1,
-	     1, 1,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 56, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     30, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     7, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 2, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 84, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     1, 1, 1,
-	     1, 1,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 97,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 97, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 30, 0, 0,
-	     0, 0,
-	     0, 0,
-	     85, 85, 0, 0, 0, 0, 0, 0, 0, 97, 0, 0, 0, 0, 4, 4, 4,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 81, 0, 0, 0, 0, 0, 0, 0, 0, 0, 81, 0, 0,
-	     0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 81, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-	     81, 0,
-	     0, 0,
-	     0, 50, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4,
-	     0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     81, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0}
-	    ,
-	    {5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5, 5,
-	     0, 0, 0,
-	     5, 5,
-	     5, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 6, 6, 6, 6, 6, 6,
-	     0, 0, 0,
-	     6, 6,
-	     6, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 6, 6, 6,
-	     6, 6, 6,
-	     6, 6,
-	     6, 6, 6, 6, 6, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 6, 6,
-	     6, 6,
-	     6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,97, 0, 0, 0, 0, 0,97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,57, 0, 0, 0,84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,51, 0, 0, 0,84, 0, 0, 0, 0, 0,99, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,97, 0, 0, 0, 0, 0, 0,57, 0, 0, 0, 0, 0, 0, 0,97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,58, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0,83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,97, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,30, 0, 0, 0, 0, 0, 0,85,85, 0, 0, 0, 0, 0, 0, 0,97, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0,81, 0, 0, 0, 0, 0, 0, 0, 0, 0,81, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,81, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,81, 0, 0, 0, 0,50, 0,50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,81, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0},
+	    {6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 6, 6, 6, 6, 6, 6, 0, 0, 0, 6, 6, 6, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	};
 
         blockCounter = 0;
@@ -6153,64 +5389,22 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         stagecolor = 2;
 
 	byte stagedatex[17][1001] = {
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,}
-	    ,
-	    {1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,}
-	    ,
-	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,}
-	    ,
-	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,}
-	    ,
-	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,}
-	    ,
-	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,}
-	    ,
-	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,}
-	    ,
-	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,}
-	    ,
-	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-	     0, 0}
-	    ,
-	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,}
-	    ,
-	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,}
-	    ,
-	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,}
-	    ,
-	    {1, 54, 0, 54, 0, 54, 0, 54, 0, 54, 0, 54, 0, 54, 0, 54,
-	     1, 0,}
-	    ,
-	    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 1, 8,
-	     8, 8, 8,}
-	    ,
-	    {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 1, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,},
+	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,},
+	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,},
+	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,},
+	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,},
+	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,},
+	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,},
+	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
+	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,},
+	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,},
+	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,},
+	    {1,54, 0,54, 0,54, 0,54, 0,54, 0,54, 0,54, 0,54, 1, 0,},
+	    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 1, 8, 8, 8, 8,},
+	    {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	};
 
         blockCounter = 0;
@@ -6240,62 +5434,22 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         stagepoint = 1;
 
 	byte stagedatex[17][1001] = {
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,}
-	    ,
-	    {0, 0, 9, 0, 9, 0, 9, 0, 9, 0, 9, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 9, 0, 9, 0, 9, 0, 9, 0, 0, 0, 0, 0,}
-	    ,
-	    {0, 0, 9, 0, 9, 0, 9, 0, 9, 0, 9, 0, 0, 0, 0,}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,}
-	    ,
-	    {8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 0, 0, 8, 8,
-	     8, 8, 8,}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {0, 0, 9, 0, 9, 0, 9, 0, 9, 0, 9, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 9, 0, 9, 0, 9, 0, 9, 0, 0, 0, 0, 0,},
+	    {0, 0, 9, 0, 9, 0, 9, 0, 9, 0, 9, 0, 0, 0, 0,},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
+	    {8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 0, 0, 8, 8, 8, 8, 8,},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	};
 
         sco = 0;
@@ -6342,373 +5496,22 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         stagecolor = 4;
 
 	byte stagedatex[17][1001] = {	//                                                                                                                                                                                     中間
-	    {5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0,
-	     0, 5, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0,
-	     0, 5, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     7, 7, 7, 7, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0}
-	    ,
-	    {5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0,
-	     0, 5, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 5,
-	     5, 5,
-	     5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0,
-	     0, 5, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 5,
-	     5, 5,
-	     5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     60, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 60, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 5, 0, 0,
-	     5, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 5, 3, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0,
-	     5, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     2, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     5, 5, 0,
-	     0, 0,
-	     0, 0, 0, 7, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
-	     5, 5, 5,
-	     0, 0,
-	     0, 3, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 7, 7, 2, 2, 7, 5,
-	     5, 5, 5,
-	     0, 0,
-	     0, 3, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0,
-	     5, 5, 5,
-	     5, 5,
-	     0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
-	     5, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0,
-	     0, 0, 0,
-	     59, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
-	     5, 5, 5,
-	     0, 0,
-	     0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5,
-	     5, 5, 5,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0,
-	     5, 5, 5,
-	     5, 5,
-	     0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
-	     5, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 5, 5, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
-	     5, 5, 5,
-	     0, 0,
-	     0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5,
-	     5, 5, 5,
-	     0, 0,
-	     0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0,
-	     5, 5, 5,
-	     5, 5,
-	     0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
-	     5, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 5, 5, 5,
-	     5, 5, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 59, 0, 5,
-	     5, 5,
-	     5, 0, 0,
-	     0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 0, 59, 0, 0, 0, 0, 0, 5,
-	     5, 5,
-	     5, 0, 0,
-	     0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0,
-	     5, 5, 5,
-	     5, 5,
-	     0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
-	     5, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 40, 0, 5, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 5, 5, 5,
-	     5, 5, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 41, 0, 5, 5, 5, 5, 5, 5,
-	     5, 5,
-	     5, 5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 86, 0, 0, 86, 0, 5, 5, 5,
-	     5, 5,
-	     86, 0,
-	     0, 86, 0, 0, 86, 0, 0, 86, 0, 0, 86, 0, 0, 86, 0, 0,
-	     86, 0, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 86, 0, 0, 86, 5,
-	     5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 86, 5, 5, 5, 5, 5, 86, 0, 0,
-	     86, 0, 0,
-	     5, 5,
-	     5, 5, 5, 5, 5, 86, 0, 0, 86, 5, 5, 5, 5, 86, 0, 0, 86,
-	     0, 5,
-	     5, 5, 5,
-	     5, 5, 5, 5, 5, 5, 86, 0, 5, 5, 86, 0, 0, 86, 0, 0, 86,
-	     0, 0,
-	     86, 0,
-	     0, 86, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	     41, 0,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	     5, 0, 0,
-	     0, 0,
-	     0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	    {5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 7, 7, 7, 7, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,60, 0, 0, 0, 0, 0, 0, 0, 0, 0,60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0,60, 0, 0, 0, 0, 0,60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,50, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 3, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0,30, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0,60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 3, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 7, 7, 2, 2, 7, 5, 5, 5, 5, 0, 0, 0, 3, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0,59, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,59, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 0,59, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,40, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,41, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 5, 5, 5,86, 0, 0,86, 0, 5, 5, 5, 5, 5,86, 0, 0,86, 0, 0,86, 0, 0,86, 0, 0,86, 0, 0,86, 0, 0,86, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,86, 0, 0,86, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,86, 5, 5, 5, 5, 5,86, 0, 0,86, 0, 0, 5, 5, 5, 5, 5, 5, 5,86, 0, 0,86, 5, 5, 5, 5,86, 0, 0,86, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,86, 0, 5, 5,86, 0, 0,86, 0, 0,86, 0, 0,86, 0, 0,86, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,41, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	};
 
         sco = 0;        //sco=140;
@@ -6972,249 +5775,22 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         scrollx = 2900 * (113 - 19);
         //
 	byte stagedatex[17][1001] = {
-	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     82, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 4, 4, 0, 0, 4, 0, 0, 4, 0, 0, 0, 0, 4, 0,
-	     0, 82,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 99, 0, 0, 0, 0, 0,
-	     0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4,
-	     4, 0,
-	     82, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 4, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0,
-	     0, 0, 4,
-	     4, 4,
-	     4, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 4, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 4,
-	     4, 0,
-	     0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 4, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,
-	     4, 4, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     4, 0,
-	     0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 4, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 4, 0, 0, 0, 4,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 7,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 4, 4, 4, 4,
-	     4, 0, 0,
-	     4, 7,
-	     7, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 2, 2, 98, 2, 4, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 10, 10, 0, 0, 10, 10,
-	     10, 10,
-	     4, 1,
-	     1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 4, 0,
-	     0, 0,
-	     0, 0, 0, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 7, 0, 4, 4,
-	     4, 4, 4,
-	     4, 4,
-	     4}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 98,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0,
-	     0, 0, 0,
-	     0, 4,
-	     4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 4, 7, 7, 7, 4, 4, 4, 0, 0, 0, 0,
-	     80, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 80, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0,
-	     0, 0, 0,
-	     4, 4,
-	     4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7,
-	     0, 0, 4,
-	     4, 4,
-	     4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 81, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 81, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     81, 0, 0, 0, 81, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 50,
-	     0, 0,
-	     50, 81,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 81, 0, 0, 0, 0, 0, 0,
-	     4, 0,
-	     0, 4, 4,
-	     4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0}
-	    ,
-
-	    {5, 5, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 0,
-	     0, 0, 0,
-	     0, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0,
-	     5, 5, 5}
-	    ,
-	    {6, 6, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-	     6, 6, 6,
-	     6, 6,
-	     6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 0,
-	     0, 0, 0,
-	     0, 6,
-	     6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-	     6, 6, 6,
-	     6, 6,
-	     6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0,
-	     6, 6, 6,
-	     6, 6,
-	     6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 6, 6, 0, 0, 0, 0, 0,
-	     6, 6, 6}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0}
+	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 4, 0, 0, 4, 0, 0, 0, 0, 4, 0, 0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,99, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 0, 4, 4, 4, 4, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 4, 4, 4, 4, 4, 0, 0, 4, 7, 7, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 2, 2,98, 2, 4, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,10,10,10,10, 0, 0,10,10,10,10, 4, 1, 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 7, 0, 4, 4, 4, 4, 4, 4, 4, 4},
+	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,98, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 4, 7, 7, 7, 4, 4, 4, 0, 0, 0, 0,80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 0, 0, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0,81, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,81, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,81, 0, 0, 0,81, 0, 0, 0, 0, 0, 0, 0, 0,50, 0, 0,50, 0, 0,50,81, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,81, 0, 0, 0, 0, 0, 0, 4, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {5, 5, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 5, 5, 5},
+	    {6, 6, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 6, 6, 0, 0, 0, 0, 0, 6, 6, 6},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	};
         //追加情報
         blockCounter = 0;
@@ -7329,22 +5905,22 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         scrollx = 2900 * (19 - 19);
         //
         byte stagedatex[17][1001] = {
-                {0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0},
-                {0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0},
-                {0, 0,  0, 0, 0, 0, 0, 0, 0, 82, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0},
-                {0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0},
-                {0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0},
-                {0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0},
-                {0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0},
-                {0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0},
-                {0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 7, 7, 0, 0, 0},
-                {0, 80, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0},
-                {0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0},
-                {0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0},
-                {5, 5,  5, 5, 5, 5, 5, 0, 0, 0,  0, 0, 0, 0, 5, 5, 5},
-                {6, 6,  6, 6, 6, 6, 6, 0, 0, 0,  0, 0, 0, 0, 6, 6, 6},
-                {0, 0,  0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0}
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 0, 0, 0},
+                {0,80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5},
+                {6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
         };
         //
         sa[sco] = 14 * 29 * 100 + 200;
@@ -7395,297 +5971,22 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         scrollx = 2900 * (137 - 19);
 //
 	byte stagedatex[17][1001] = {
-	    {0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-	     4, 4, 4,
-	     4, 4,
-	     4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4,
-	     4, 4, 4,
-	     4, 98,
-	     4, 4, 4, 4, 4, 4, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-	     4, 98, 1}
-	    ,
-	    {4, 0, 0, 0, 0, 0, 0, 10, 10, 10, 10, 10, 10, 10, 10,
-	     10, 10,
-	     10, 10,
-	     10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 7, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     10, 10,
-	     10, 10,
-	     10, 10, 10, 10, 10, 10, 10, 0, 0, 1, 1, 1, 1, 1, 1, 0,
-	     0, 0,
-	     10, 10,
-	     10, 10, 10, 10, 10, 10, 10, 0, 0, 1}
-	    ,
-	    {4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 1}
-	    ,
-	    {4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0,
-	     0, 0, 0,
-	     0, 7,
-	     0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 1}
-	    ,
-	    {4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 51, 0,
-	     0, 0,
-	     0, 0, 0,
-	     7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 1}
-	    ,
-	    {4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 10, 10, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4,
-	     4, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 1, 1, 1, 1, 1, 1, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     1}
-	    ,
-	    {4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0,
-	     0, 3, 0,
-	     0, 0,
-	     3, 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     1, 1, 1, 1, 1, 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 1}
-	    ,
-	    {4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 57,
-	     0, 0, 0,
-	     0, 0, 57, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4,
-	     4, 4, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 7,
-	     0, 0, 0, 0, 0, 0, 0, 0, 10, 4, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     44, 0,
-	     0, 1, 1, 1, 1, 1, 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     1}
-	    ,
-	    {4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 7, 7, 7,
-	     0, 97,
-	     0, 0, 0,
-	     1, 1, 1, 1, 1, 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 1}
-	    ,
-	    {4, 7, 7, 7, 7, 7, 7, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 1, 0, 0, 0,
-	     1, 1, 1,
-	     1, 1,
-	     1, 1, 1, 1, 1, 1, 4, 4, 0, 0, 0, 1, 1, 0, 0, 0, 0, 44,
-	     0, 0, 1}
-	    ,
-	    {4, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 1, 0, 0, 0,
-	     1, 1, 1,
-	     1, 1,
-	     1, 1, 1, 1, 1, 1, 4, 0, 0, 0, 0, 1, 1, 0, 0, 0, 97, 0,
-	     0, 0, 1}
-	    ,
-	    {4, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 1, 0, 0, 0,
-	     1, 1, 1,
-	     1, 1,
-	     1, 1, 1, 1, 1, 1, 4, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1,
-	     1, 1, 1}
-	    ,
-	    {4, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 1, 0, 0, 0,
-	     1, 1, 1,
-	     1, 1,
-	     1, 1, 1, 1, 1, 1, 4, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1,
-	     1, 1, 1}
-	    ,
-	    {5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 1, 0, 0, 0,
-	     1, 1, 1,
-	     1, 1,
-	     1, 1, 1, 1, 1, 1, 5, 5, 5, 0, 0, 1, 1, 0, 0, 0, 1, 1,
-	     1, 1, 1}
-	    ,
-	    {6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 1, 0, 0, 0,
-	     1, 1, 1,
-	     1, 1,
-	     1, 1, 1, 1, 1, 1, 6, 6, 6, 0, 0, 1, 1, 0, 0, 0, 1, 1,
-	     1, 1, 1}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0}
+	    {0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,98, 4, 4, 4, 4, 4, 4, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,98, 1},
+	    {4, 0, 0, 0, 0, 0, 0,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,10,10,10,10,10,10,10,10,10,10,10, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0,10,10,10,10,10,10,10,10,10, 0, 0, 1},
+	    {4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	    {4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	    {4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,51, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	    {4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,10,10,10,10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	    {4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 0, 0,30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	    {4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,57, 0, 0, 0, 0, 0,57, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0,10, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,44, 0, 0, 1, 1, 1, 1, 1, 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	    {4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 7, 7, 7, 0,97, 0, 0, 0, 1, 1, 1, 1, 1, 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	    {4, 7, 7, 7, 7, 7, 7, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 0, 0, 0, 1, 1, 0, 0, 0, 0,44, 0, 0, 1},
+	    {4, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 0, 0, 0, 0, 1, 1, 0, 0, 0,97, 0, 0, 0, 1},
+	    {4, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1},
+	    {4, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1},
+	    {5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1},
+	    {6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 6, 6, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	};
         //
         bco = 0;
@@ -7883,85 +6184,22 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         marioY = 3000 * 9;
 //
 	byte stagedatex[17][1001] = {
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 99, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50,
-	     51, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4,
-	     4, 4, 4,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4,
-	     4, 4, 4,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4,
-	     4, 4, 4,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 4, 4, 4, 4, 4,
-	     4, 4,
-	     4, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4,
-	     4, 4, 4,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4,
-	     4, 4, 4,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 40, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4,
-	     4, 4,
-	     4, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 41, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-	     4, 4,
-	     4, 0, 0,
-	     0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 54, 0, 0}
-	    ,
-	    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	     5, 5, 5,
-	     0, 0,
-	     0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5}
-	    ,
-	    {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-	     6, 6, 6,
-	     0, 0,
-	     0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,99, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,50,51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,50, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0,40, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0,41, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0,54, 0, 0},
+	    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+	    {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	};
         //
         bco = 0;
@@ -8053,277 +6291,22 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         scrollx = 2900 * (126 - 19);
         //
 	byte stagedatex[17][1001] = {
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     4, 4,
-	     4, 4, 4, 4, 4, 4, 4, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-	     4, 4, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     82, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 7, 0, 0,
-	     0, 0, 0,
-	     4, 4,
-	     4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 82, 0, 0,
-	     0, 0,
-	     0, 0,
-	     56, 0, 0, 0, 0, 0, 0, 0, 0, 4, 10, 10, 10, 10, 10, 10,
-	     10, 10,
-	     10,
-	     10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 99, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 51, 0, 1, 0,
-	     0, 0,
-	     0, 4, 4,
-	     4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 1, 0,
-	     0, 0,
-	     1, 0, 0, 0, 0, 0, 82, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     50, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 1, 0, 0, 0, 1,
-	     7, 0, 0,
-	     0, 4,
-	     4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     4, 4,
-	     4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     4, 4,
-	     4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 10, 4, 4, 4, 0, 54, 0,
-	     54, 0, 4,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 58, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 4, 4,
-	     4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 4, 0, 0, 4, 4, 4, 4,
-	     4, 4, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     7, 4,
-	     7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 4, 0, 0, 0, 0, 0, 0,
-	     0, 4, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 58, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 4, 0, 0, 0, 0, 0, 0,
-	     0, 4, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 7, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 4, 0, 0, 0, 0, 0, 0,
-	     0, 4, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 7, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 52, 0, 0, 0, 0, 4, 1, 1, 1, 4,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 0, 4, 0, 0, 0, 0, 0, 0,
-	     0, 4,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 7,
-	     0, 0, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 30, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0,
-	     0, 4, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 3,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0,
-	     0, 4, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 4, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5,
-	     5, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0,
-	     0, 4, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 5, 0, 5, 5, 5, 5, 5}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6,
-	     6, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0,
-	     0, 4, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 6, 6, 0, 6, 6, 6, 6, 6}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0}
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 7, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0,56, 0, 0, 0, 0, 0, 0, 0, 0, 4,10,10,10,10,10,10,10,10,10,10,10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,99, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,51, 0, 1, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0,82, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 1, 0, 0, 0, 1, 7, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0,10, 4, 4, 4, 0,54, 0,54, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,58, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 4, 0, 0, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,58, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,52, 0, 0, 0, 0, 4, 1, 1, 1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,10,10, 0, 4, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0,30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 5, 5, 5, 5, 5},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 0, 6, 6, 6, 6, 6},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	};
         //
         blockCounter = 0;
@@ -8435,85 +6418,22 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         scrollx = 2900 * (40 - 19);
         //
 	byte stagedatex[17][1001] = {
-	    {5, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}
-	    ,
-	    {5, 5, 5, 5, 5, 5, 5, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 10,
-	     0, 0,
-	     0, 10,
-	     10, 10, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5}
-	    ,
-	    {5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 7, 7, 10, 10, 10, 5, 5, 5, 5, 5}
-	    ,
-	    {5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5}
-	    ,
-	    {5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5}
-	    ,
-	    {5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 7,
-	     7, 7, 3,
-	     7, 0,
-	     7, 5, 0, 0, 5, 5, 5, 0, 58, 0, 5, 0, 0, 5, 5}
-	    ,
-	    {5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 0, 0, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5}
-	    ,
-	    {5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 0, 0, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5}
-	    ,
-	    {5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 0, 0, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5}
-	    ,
-	    {5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 0, 0, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5}
-	    ,
-	    {5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 0, 0, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5}
-	    ,
-	    {5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 59, 59, 0, 5, 5, 5, 5, 0,
-	     0, 0,
-	     0, 0,
-	     0, 0, 5, 0, 0, 0, 0, 5, 59, 0, 0, 5, 5, 5, 5, 5}
-	    ,
-	    {5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 0, 0, 0, 0, 5, 0, 0, 0, 5, 5, 5, 5, 5}
-	    ,
-	    {5, 5, 5, 5, 5, 5, 40, 0, 5, 0, 0, 0, 0, 5, 5, 5, 5, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 5, 0, 0, 0, 0, 5, 0, 59, 0, 5, 5, 5, 5, 5}
-	    ,
-	    {5, 86, 5, 5, 5, 5, 41, 0, 5, 86, 0, 0, 86, 5, 5, 5, 5,
-	     86, 0,
-	     0, 86,
-	     0, 0, 86, 5, 0, 86, 5, 5, 5, 86, 0, 0, 5, 5, 5, 5, 5}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 59, 59, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 59, 0, 0, 0, 0, 0}
+	    {5, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+	    {5, 5, 5, 5, 5, 5, 5, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,10, 0, 0, 0,10,10,10, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5},
+	    {5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7,10,10,10, 5, 5, 5, 5, 5},
+	    {5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5},
+	    {5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5},
+	    {5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 7, 7, 7, 3, 7, 0, 7, 5, 0, 0, 5, 5, 5, 0,58, 0, 5, 0, 0, 5, 5},
+	    {5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5},
+	    {5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5},
+	    {5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5},
+	    {5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5},
+	    {5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5},
+	    {5, 0, 0, 0, 0, 0, 0, 0, 0, 0,59,59, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5,59, 0, 0, 5, 5, 5, 5, 5},
+	    {5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 0, 5, 5, 5, 5, 5},
+	    {5, 5, 5, 5, 5, 5,40, 0, 5, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0,59, 0, 5, 5, 5, 5, 5},
+	    {5,86, 5, 5, 5, 5,41, 0, 5,86, 0, 0,86, 5, 5, 5, 5,86, 0, 0,86, 0, 0,86, 5, 0,86, 5, 5, 5,86, 0, 0, 5, 5, 5, 5, 5},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,59,59, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,59, 0, 0, 0, 0, 0}
 	};
         //
         blockCounter = 0;
@@ -8671,279 +6591,22 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         scrollx = 2900 * (128 - 19);
         //
 	byte stagedatex[17][1001] = {
-	    {5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}
-	    ,
-	    {5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 5, 0,
-	     0, 0,
-	     0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 5, 5,
-	     5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 5, 0,
-	     0, 0,
-	     0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 5, 5,
-	     5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 5, 0,
-	     0, 0,
-	     0, 5, 0, 5, 5, 5, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 5, 5,
-	     5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 7,
-	     7, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0,
-	     0, 5, 0,
-	     0, 5,
-	     0, 5, 0, 10, 10, 5, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0,
-	     0, 60, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 5,
-	     5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0,
-	     0, 5, 0,
-	     0, 5,
-	     0, 5, 0, 0, 0, 5, 0, 5, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     5, 5,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0,
-	     0, 5, 3,
-	     0, 5,
-	     0, 3, 0, 0, 0, 5, 0, 5, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     5, 5,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0,
-	     0, 5, 0,
-	     0, 5,
-	     0, 5, 5, 5, 0, 5, 0, 5, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 7, 7, 7, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     5, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {3, 0, 0, 3, 0, 0, 3, 7, 0, 3, 7, 7, 5, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 5, 0,
-	     5, 0, 0,
-	     0, 5,
-	     0, 5, 10, 10, 0, 5, 0, 5, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0,
-	     5, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 7, 7, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 5,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {5, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0,
-	     0, 0, 0,
-	     0, 5,
-	     0, 5, 0, 0, 0, 5, 0, 5, 7, 0, 0, 0, 0, 0, 5, 0, 0, 0,
-	     5, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 3, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {5, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0,
-	     0, 0, 0,
-	     0, 5,
-	     0, 0, 0, 30, 0, 5, 0, 0, 0, 0, 0, 0, 7, 7, 5, 0, 0, 0,
-	     5, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 5, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	    ,
-	    {5, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 5, 5,
-	     5, 5, 0,
-	     0, 5,
-	     0, 0, 7, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0,
-	     5, 0, 0,
-	     0, 5,
-	     5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 0, 0, 0, 5, 5, 5, 0, 0,
-	     0, 5, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}
-	    ,
-	    {5, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0,
-	     0, 0, 0,
-	     0, 5,
-	     0, 0, 0, 5, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0,
-	     5, 59,
-	     0, 59,
-	     5, 5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}
-	    ,
-	    {5, 40, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0,
-	     0, 0, 0,
-	     0, 5,
-	     0, 0, 0, 5, 0, 5, 0, 5, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0,
-	     5, 0,
-	     59, 0, 5,
-	     5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}
-	    ,
-	    {5, 41, 0, 5, 86, 0, 5, 86, 0, 5, 5, 5, 5, 86, 0, 0, 86,
-	     0, 0,
-	     86, 0,
-	     0, 86, 0, 0, 86, 0, 0, 86, 0, 0, 86, 0, 0, 86, 0, 0, 5,
-	     86, 0,
-	     0, 86,
-	     0, 0, 86, 5, 0, 86, 0, 5, 86, 5, 0, 5, 86, 0, 0, 5, 5,
-	     5, 5,
-	     86, 0,
-	     0, 5, 86, 59, 0, 5, 5, 5, 5, 5, 86, 0, 0, 86, 5, 5, 86,
-	     0, 0,
-	     86, 0,
-	     0, 86, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 86, 0, 0, 86,
-	     0, 0,
-	     86, 0, 0,
-	     86, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-	     5, 5,
-	     5, 5, 5}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     59, 0,
-	     0, 0, 0, 0, 59, 0, 59, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 59,
-	     0, 59,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	    {5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+	    {5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 5, 5, 5, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 5, 0, 0, 5, 0, 5, 0,10,10, 5, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,60, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 5, 0, 5, 0, 0, 0, 5, 0, 5, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 3, 0, 5, 0, 3, 0, 0, 0, 5, 0, 5, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 5, 0, 5, 5, 5, 0, 5, 0, 5, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 7, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {3, 0, 0, 3, 0, 0, 3, 7, 0, 3, 7, 7, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 5, 0, 5, 0, 0, 0, 5, 0, 5,10,10, 0, 5, 0, 5, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {5, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 5, 0, 0, 0, 5, 0, 5, 7, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {5, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0,30, 0, 5, 0, 0, 0, 0, 0, 0, 7, 7, 5, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {5, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 5, 5, 5, 5, 0, 0, 5, 0, 0, 7, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0, 5, 5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 0, 0, 0, 5, 5, 5, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+	    {5, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0, 5,59, 0,59, 5, 5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+	    {5,40, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 0, 5, 0, 5, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0, 5, 0,59, 0, 5, 5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+	    {5,41, 0, 5,86, 0, 5,86, 0, 5, 5, 5, 5,86, 0, 0,86, 0, 0,86, 0, 0,86, 0, 0,86, 0, 0,86, 0, 0,86, 0, 0,86, 0, 0, 5,86, 0, 0,86, 0, 0,86, 5, 0,86, 0, 5,86, 5, 0, 5,86, 0, 0, 5, 5, 5, 5,86, 0, 0, 5,86,59, 0, 5, 5, 5, 5, 5,86, 0, 0,86, 5, 5,86, 0, 0,86, 0, 0,86, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5,86, 0, 0,86, 0, 0,86, 0, 0,86, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,59, 0, 0, 0, 0, 0,59, 0,59, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,59, 0,59, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	};
         //
         blockCounter = 0;
@@ -9173,263 +6836,22 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         stagecolor = 5;
         scrollx = 2900 * (112 - 19);
 	byte stagedatex[17][1001] = {
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 7,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 4, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     82, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 4, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 4, 7,
-	     7, 7, 7,
-	     7, 7,
-	     7, 7, 7, 7, 7, 7, 7, 7, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 7, 0, 4, 4, 4,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 7, 7, 7, 4, 0,
-	     0, 82,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 10, 10, 0, 0, 10, 10,
-	     4, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 0, 4, 0, 0, 0, 0, 4,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0}
-	    ,
-	    {0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 7, 0, 0, 4,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 4, 0, 0, 0, 0, 4, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 4,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 4, 0, 0, 0, 0, 4, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 4,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 3, 4, 4, 4, 4, 4, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 4, 4, 4, 4, 0, 4,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 4, 4, 4, 4, 4, 4, 0,
-	     0, 0, 0,
-	     0, 0,
-	     4, 4, 4, 4, 0, 0, 0, 4, 0, 7, 7, 4, 4, 4, 4, 0, 4, 4,
-	     4, 4, 4,
-	     4, 4}
-	    ,
-	    {0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 4,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 7, 0, 0, 4, 0, 4, 4, 4, 4, 4, 4, 0,
-	     0, 0, 0,
-	     0, 4,
-	     4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4,
-	     4, 4, 4,
-	     4, 4}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 4, 4, 4, 4, 4, 4, 0,
-	     0, 0, 0,
-	     4, 4,
-	     4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4,
-	     4, 4, 4,
-	     4, 4}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30,
-	     0, 0,
-	     0, 0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 4,
-	     4, 4,
-	     4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4,
-	     4, 4, 4,
-	     4, 4}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     1, 0,
-	     51, 1, 0, 81, 0, 0, 1, 1, 1, 1, 1, 7, 0, 0, 0, 0, 0, 4,
-	     0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 7,
-	     0, 0, 4,
-	     4, 4,
-	     4, 4, 4, 4, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 4,
-	     4, 4, 4,
-	     4, 4,
-	     4}
-	    ,
-	    {0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 5, 5,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-	     0, 1, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 5, 5, 5, 5, 5, 0, 0, 7,
-	     5, 5, 5,
-	     5, 5,
-	     5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 5, 5, 5, 5, 5, 5, 5,
-	     5, 5, 5,
-	     5, 5}
-	    ,
-	    {0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     6, 6,
-	     6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 6, 6,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 6, 0, 0, 0, 6, 6, 6, 6, 6, 6, 0, 0, 0,
-	     6, 6, 6,
-	     6, 6,
-	     6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 6, 6, 6, 6, 6, 6, 6,
-	     6, 6, 6,
-	     6, 6}
-	    ,
-	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0,
-	     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	     0, 0, 0,
-	     0, 0}
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 7, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 7, 7, 7, 4, 0, 0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,10,10, 0, 0,10,10, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 7, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 3, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 4, 4, 4, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 0, 0, 0, 4, 0, 7, 7, 4, 4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 4},
+	    {0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 4, 0, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,51, 1, 0,81, 0, 0, 1, 1, 1, 1, 1, 7, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 7, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4},
+	    {0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 5, 5, 5, 5, 5, 0, 0, 7, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+	    {0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 6, 6, 6, 6, 6, 6, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6},
+	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	};
         //追加情報
         blockCounter = 0;

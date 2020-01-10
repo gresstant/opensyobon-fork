@@ -53,6 +53,11 @@ int stageonoff = 0;
 
 //メインプログラム
 void mainProgram();
+void processSceneInGame();
+void processSceneAllStageClear();
+void processSceneLifeSplash();
+void processSceneTitle();
+
 void paint();
 void paintMario();
 void paintBgItem(int index);
@@ -99,7 +104,7 @@ int t, tt, t1, t2, t3;
 
 
 //初期化
-int zxon, zzxon;
+bool initialized;
 
 //キーコンフィグ
 int key, keytm;
@@ -120,23 +125,7 @@ int sgtype[smax];
 // region プレイヤー Player
 
 int mainmsgtype;
-int marioX, marioY, marioWidth, marioHeight, marioHP;
-int marioSpeedX, marioSpeedY, atktm, marioLife = 3, mactp, marioActImg;
-
-enum class MarioType : int {
-    NORMAL = 0, HUGE = 1, AFTER_ORANGE_NOTE = 2, AFTER_SPRING = 3,
-    IN_PIPE = 100, DYING = 200,
-    _300 = 300, WIN_SWORD = 301, WIN_AUTO = 302,
-    _500 = 500, _2000 = 2000
-};
-
-MarioType marioType;
-int marioXType, mtm, mzz;
-bool marioOnGround;
-int mrzimen, mkasok, mmuki, mjumptm, mkeytm;
-int mmutekitm, mmutekion;
-int mztm, mztype;
-int actaon[7];
+// other fields have been moved to mario.cpp / mario.h
 
 // endregion
 

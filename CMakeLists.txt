@@ -9,7 +9,7 @@ project (OSAFork)
 add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
-add_executable(OSAFork main.cpp loadg.cpp DxLib.cpp draw.cpp draw.h)
+add_executable(OSAFork main.cpp loadg.cpp DxLib.cpp draw.cpp draw.h entities/mario.cpp entities/mario.h)
 
 # I'm listing versions that I uses to get it working.
 # But still you can try other versions that are different from mine.
