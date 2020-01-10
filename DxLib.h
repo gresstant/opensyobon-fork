@@ -1,6 +1,10 @@
 //This file is a reverse engineered "DxLib.h" to the extent that
 //Syobon Action uses it. Minor functions are just replaced with SDL
 //counterparts.
+
+#ifndef OSAFORK_DXLIB_H
+#define OSAFORK_DXLIB_H
+
 #include <SDL/SDL.h>
 #include <SDL/SDL_rotozoom.h>
 #include <SDL/SDL_gfxPrimitives.h>
@@ -98,3 +102,5 @@ SDL_Surface *DerivationGraph(int srcx, int srcy, int width, int height,
 
 //Noticably different than the original
 SDL_Surface *LoadGraph(const char *filename);
+
+#endif //OSAFORK_DXLIB_H
