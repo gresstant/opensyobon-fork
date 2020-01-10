@@ -4,7 +4,7 @@
 #define strcasecmp _stricmp
 #endif
 
-extern int ma, t, tt;
+extern int marioX, t, tt;
 extern SDL_Surface *grap[161][8];
 extern SDL_Surface *mgrap[51];
 int x1;
@@ -29,7 +29,7 @@ void loadg(void) {
     }}
     */
 
-    //ma-=100;//mb==5000;
+    //marioX-=100;//marioY==5000;
     //end();
 
 

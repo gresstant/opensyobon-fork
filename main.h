@@ -52,7 +52,7 @@ int stageonoff = 0;
 
 //メインプログラム
 void mainProgram();
-void rpaint();
+void paint();
 int maint;
 
 
@@ -135,16 +135,29 @@ int sgtype[smax];
 
 
 
-//プレイヤー
-int mainmsgtype;
-int ma, mb, mnobia, mnobib, mhp;
-int mc, md, macttype, atkon, atktm, mactsok, msstar, nokori = 3, mactp, mact;
+// region プレイヤー Player
 
-int mtype, mxtype, mtm, mzz;
-int mzimen, mrzimen, mkasok, mmuki, mmukitm, mjumptm, mkeytm, mcleartm;
+int mainmsgtype;
+int marioX, marioY, marioWidth, marioHeight, marioHP;
+int marioSpeedX, marioSpeedY, atktm, nokori = 3, mactp, marioActImg;
+
+enum MarioType {
+    _0 = 0, _1 = 1, _2 = 2, _3 = 3,
+    _100 = 100, _200 = 200,
+    _300 = 300, _301 = 301, _302 = 302,
+    _500 = 500,
+    _2000 = 2000
+};
+
+MarioType marioType;
+int marioXType, mtm, mzz;
+int mzimen, mrzimen, mkasok, mmuki, mjumptm, mkeytm;
 int mmutekitm, mmutekion;
 int mztm, mztype;
 int actaon[7];
+
+// endregion
+
 //メッセージ
 int mmsgtm, mmsgtype;
 
@@ -156,10 +169,10 @@ int mascrollmax = 21000;	//9000
 //ブロック
 void tyobi(int x, int y, int type);
 void brockbreak(int t);
-#define tmax 641
-int tco;
-int ta[tmax], tb[tmax], tc[tmax], td[tmax], thp[tmax], ttype[tmax];
-int titem[tmax], txtype[tmax];
+#define T_MAX 641
+int blockCounter;
+int blockX[T_MAX], blockY[T_MAX], blockType[T_MAX], blockXType[T_MAX];
+int thp[T_MAX], titem[T_MAX];
 
 //メッセージブロック
 int tmsgtm, tmsgtype, tmsgx, tmsgy, tmsgnobix, tmsgnobiy, tmsg;
