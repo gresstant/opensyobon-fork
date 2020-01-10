@@ -12,10 +12,16 @@ void parseArgs(int argc, char* argv[]);
 //main-10
 //タイトル-100
 
-//: This is unexcusable. How could someone in their right mind define
-//: a variable called 'main'!?
-//: The new define is after the main method
-int mainZ = 100, maintm = 0;
+// region game scene
+
+enum GameScene {
+    IN_GAME = 1, ALL_STAGE_CLEAR = 2, LIFE_SPLASH = 10, TITLE = 100
+};
+
+GameScene gameScene = TITLE;
+int gameSceneTimer = 0;
+
+// endregion
 
 //ステージ
 int stagecolor = 1;
@@ -132,8 +138,7 @@ int sgtype[smax];
 //プレイヤー
 int mainmsgtype;
 int ma, mb, mnobia, mnobib, mhp;
-int mc, md, macttype, atkon, atktm, mactsok, msstar, nokori =
-    3, mactp, mact;
+int mc, md, macttype, atkon, atktm, mactsok, msstar, nokori = 3, mactp, mact;
 
 int mtype, mxtype, mtm, mzz;
 int mzimen, mrzimen, mkasok, mmuki, mmukitm, mjumptm, mkeytm, mcleartm;
@@ -160,7 +165,7 @@ int titem[tmax], txtype[tmax];
 int tmsgtm, tmsgtype, tmsgx, tmsgy, tmsgnobix, tmsgnobiy, tmsg;
 void ttmsg();
 void txmsg(string x, int a);
-void setfont(int x, int y);
+void setFont(int size, int thickness);
 
 //効果を持たないグラ
 void eyobi(int xa, int xb, int xc, int xd, int xe, int xf, int xnobia,
