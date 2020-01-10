@@ -53,6 +53,12 @@ int stageonoff = 0;
 //メインプログラム
 void mainProgram();
 void paint();
+void paintMario();
+void paintBgItem(int index);
+void paintEffectItem(int index);
+void paintLift(int index);
+void paintEnemy(int index);
+void paintBlock(int index);
 int maint;
 
 
@@ -113,7 +119,7 @@ void stagep();
 
 
 //ループ
-int t, tt, t1, t2, t3, t4;
+int t, tt, t1, t2, t3;
 
 
 //初期化
@@ -151,7 +157,8 @@ enum MarioType {
 
 MarioType marioType;
 int marioXType, mtm, mzz;
-int mzimen, mrzimen, mkasok, mmuki, mjumptm, mkeytm;
+bool marioOnGround;
+int mrzimen, mkasok, mmuki, mjumptm, mkeytm;
 int mmutekitm, mmutekion;
 int mztm, mztype;
 int actaon[7];
