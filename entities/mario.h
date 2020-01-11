@@ -23,6 +23,6 @@ extern int mmutekitm, mmutekion;
 extern int mztm, mztype;
 extern int actaon[7];
 
-void paintMario();
+void paintSceneInGameMario();
 
 #endif //OSAFORK_MARIO_H

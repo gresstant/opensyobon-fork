@@ -28,7 +28,6 @@ int main(int argc, char *argv[]) {
 
 //メイン描画
 void paint() {
-
     //ダブルバッファリング
     setcolor(0, 0, 0);
     //if (stagecolor==1)setcolor(170,170,255);
@@ -51,504 +50,449 @@ void paint() {
     FillScreen();
 
     if (gameScene == GameScene::IN_GAME && initialized) {
-        for (int i = 0; i < nmax; i++) {
-            paintBgItem(i);
-        }
-
-        for (int i = 0; i < emax; i++) {
-            paintEffectItem(i);
-        }
-
-        for (int i = 0; i < srmax; i++) {
-            paintLift(i);
-        }
-
-        paintMario();
-
-        for (int i = 0; i < amax; i++) {
-            paintEnemy(i);
-        }
-
-        for (int i = 0; i < T_MAX; i++) {
-            paintBlock(i);
-        }
-
-        //地面(壁)//土管も
-        for (t = 0; t < smax; t++) {
-            if (sa[t] - fx + sc[t] >= -10 && sa[t] - fx <= fxmax + 1100) {
-
-                if (stype[t] == 0) {
-                    setcolor(40, 200, 40);
-                    fillrect((sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb, sc[t] / 100, sd[t] / 100);
-                    drawrect((sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb, sc[t] / 100, sd[t] / 100);
-                } else if (stype[t] == 1) {  // 土管  Tube
-                    setcolor(0, 230, 0);
-                    fillrect((sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb, sc[t] / 100, sd[t] / 100);
-                    setc0();
-                    drawrect((sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb, sc[t] / 100, sd[t] / 100);
-                } else if (stype[t] == 2) {  // 土管(下)  Tube (Downwards)
-                    setcolor(0, 230, 0);
-                    fillrect((sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb + 1, sc[t] / 100, sd[t] / 100);
-                    setc0();
-                    drawline((sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb, (sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb + sd[t] / 100);
-                    drawline((sa[t] - fx) / 100 + fma + sc[t] / 100, (sb[t] - fy) / 100 + fmb, (sa[t] - fx) / 100 + fma + sc[t] / 100, (sb[t] - fy) / 100 + fmb + sd[t] / 100);
-                } else if (stype[t] == 5) {  // 土管(横)  Tube (Horizontal)
-                    setcolor(0, 230, 0);
-                    fillrect((sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb + 1, sc[t] / 100, sd[t] / 100);
-                    setc0();
-                    drawline((sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb, (sa[t] - fx) / 100 + fma + sc[t] / 100, (sb[t] - fy) / 100 + fmb);
-                    drawline((sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb + sd[t] / 100, (sa[t] - fx) / 100 + fma + sc[t] / 100, (sb[t] - fy) / 100 + fmb + sd[t] / 100);
-                } else if (stype[t] == 51) {  // 落ちてくるブロック  Falling Block
-                    if (sxtype[t] == 0) {
-                        for (t3 = 0; t3 <= sc[t] / 3000; t3++) {
-                            drawimage(grap[1][1], (sa[t] -  fx) / 100 + fma + 29 * t3, (sb[t] - fy) / 100 + fmb);
-                        }
-                    } else if (sxtype[t] == 1 || sxtype[t] == 2) {
-                        for (t3 = 0; t3 <= sc[t] / 3000; t3++) {
-                            drawimage(grap[31][1], (sa[t] -  fx) / 100 + fma + 29 * t3, (sb[t] - fy) / 100 + fmb);
-                        }
-                    } else if (sxtype[t] == 3 || sxtype[t] == 4) {
-                        for (t3 = 0; t3 <= sc[t] / 3000; t3++) {
-                            for (t2 = 0; t2 <= sd[t] / 3000; t2++) {
-                                drawimage(grap[65][1], (sa[t] - fx) / 100 + fma + 29 * t3, (sb[t] - fy) / 100 + 29 * t2 + fmb);
-                            }
-                        }
-                    } else if (sxtype[t] == 10) {
-                        for (t3 = 0; t3 <= sc[t] / 3000; t3++) {
-                            drawimage(grap[65][1], (sa[t] - fx) / 100 + fma + 29 * t3, (sb[t] - fy) / 100 + fmb);
-                        }
-                    }
-                } else if (stype[t] == 52) {  // 落ちるやつ
-                    xx[29] = 0;
-                    if (stagecolor == 2) {
-                        xx[29] = 30;
-                    } else if (stagecolor == 4) {
-                        xx[29] = 60;
-                    } else if (stagecolor == 5) {
-                        xx[29] = 90;
-                    }
-
-                    for (t3 = 0; t3 <= sc[t] / 3000; t3++) {
-                        if (sxtype[t] == 0) {
-                            drawimage(grap[5 + xx[29]][1], (sa[t] - fx) / 100 + fma + 29 * t3, (sb[t] - fy) / 100 + fmb);
-                            if (stagecolor != 4) {
-                                drawimage(grap[6 + xx[29]][1], (sa[t] - fx) / 100 + fma + 29 * t3, (sb[t] - fy) / 100 + fmb + 29);
-                            } else {
-                                drawimage(grap[5 + xx[29]][1], (sa[t] - fx) / 100 + fma + 29 * t3, (sb[t] - fy) / 100 + fmb + 29);
-                            }
-                        } else if (sxtype[t] == 1) {
-                            for (t2 = 0; t2 <= sd[t] / 3000; t2++) {
-                                drawimage(grap[1 + xx[29]][1], (sa[t] - fx) / 100 + fma + 29 * t3, (sb[t] - fy) / 100 + fmb + 29 * t2);
-                            }
-                        } else if (sxtype[t] == 2) {
-                            for (t2 = 0; t2 <= sd[t] / 3000; t2++) {
-                                drawimage(grap[5 + xx[29]][1], (sa[t] - fx) / 100 + fma + 29 * t3, (sb[t] - fy) / 100 + fmb + 29 * t2);
-                            }
-                        }
-
-                    }
-                }
-
-                if (trap == 1) {  // ステージトラップ
-                    if (stype[t] >= 100 && stype[t] <= 299) {
-                        if (stagecolor == 1 || stagecolor == 3 || stagecolor == 5)
-                            setc0();
-                        if (stagecolor == 2 || stagecolor == 4)
-                            setc1();
-                        drawrect((sa[t] - fx) / 100 + fma, (sb[t] - fy) / 100 + fmb, sc[t] / 100, sd[t] / 100);
-                    }
-                }
-
-                if (stype[t] == 300) {  // ゴール
-                    setc1();
-                    fillrect((sa[t] - fx) / 100 + 10, (sb[t] - fy) / 100, 10, sd[t] / 100 - 8);
-                    setc0();
-                    drawrect((sa[t] - fx) / 100 + 10, (sb[t] - fy) / 100, 10, sd[t] / 100 - 8);
-                    setcolor(250, 250, 0);
-                    fillarc((sa[t] - fx) / 100 + 15 - 1, (sb[t] - fy) / 100, 10, 10);
-                    setc0();
-                    drawarc((sa[t] - fx) / 100 + 15 - 1, (sb[t] - fy) / 100, 10, 10);
-                } else if (stype[t] == 500) {  // 中間
-                    drawimage(grap[20][4], (sa[t] - fx) / 100, (sb[t] - fy) / 100);
-                }
-            }
-        }            //t
-
-//描画上書き(土管)
-        for (t = 0; t < smax; t++) {  // TODO merge smax loop
-            if (sa[t] - fx + sc[t] >= -10 && sa[t] - fx <= fxmax + 1100) {
-
-//入る土管(右)
-                if (stype[t] == 40) {
-                    setcolor(0, 230, 0);
-                    fillrect((sa[t] - fx) / 100 + fma,
-                             (sb[t] - fy) / 100 + fmb + 1,
-                             sc[t] / 100, sd[t] / 100);
-                    setc0();
-                    drawrect((sa[t] - fx) / 100 + fma,
-                             (sb[t] - fy) / 100 + fmb + 1,
-                             sc[t] / 100, sd[t] / 100);
-                }
-//とぶ土管
-                if (stype[t] == 50) {
-                    setcolor(0, 230, 0);
-                    fillrect((sa[t] - fx) / 100 + fma + 5,
-                             (sb[t] - fy) / 100 + fmb + 30,
-                             50, sd[t] / 100 - 30);
-                    setc0();
-                    drawline((sa[t] - fx) / 100 + 5 + fma,
-                             (sb[t] - fy) / 100 + fmb + 30,
-                             (sa[t] - fx) / 100 + fma + 5,
-                             (sb[t] - fy) / 100 + fmb + sd[t] / 100);
-                    drawline((sa[t] - fx) / 100 + 5 + fma +
-                             50,
-                             (sb[t] - fy) / 100 + fmb + 30,
-                             (sa[t] - fx) / 100 + fma + 50 +
-                             5, (sb[t] - fy) / 100 + fmb + sd[t] / 100);
-
-                    setcolor(0, 230, 0);
-                    fillrect((sa[t] - fx) / 100 + fma,
-                             (sb[t] - fy) / 100 + fmb + 1, 60, 30);
-                    setc0();
-                    drawrect((sa[t] - fx) / 100 + fma,
-                             (sb[t] - fy) / 100 + fmb + 1, 60, 30);
-                }
-//地面(ブロック)
-                if (stype[t] == 200) {
-                    for (t3 = 0; t3 <= sc[t] / 3000; t3++) {
-                        for (t2 = 0; t2 <= sd[t] / 3000; t2++) {
-                            drawimage(grap[65][1],
-                                      (sa[t] -
-                                       fx) / 100 +
-                                      fma + 29 * t3,
-                                      (sb[t] - fy) / 100 + 29 * t2 + fmb);
-                        }
-                    }
-                }
-
-            }
-        }            //t
-
-        // ファイアバー  Fireball
-        for (t = 0; t < amax; t++) {  // TODO merge this with the previous for loop of amax
-
-            xx[0] = aa[t] - fx;
-            xx[1] = ab[t] - fy;
-            xx[14] = 12000;
-            xx[16] = 0;
-            if (atype[t] == 87 || atype[t] == 88) {
-                if (xx[0] + xx[2] * 100 >= -10 - xx[14]
-                    && xx[1] <= fxmax + xx[14]
-                    && xx[1] + xx[3] * 100 >= -10 && xx[3] <= fymax) {
-
-                    for (tt = 0; tt <= axtype[t] % 100; tt++) {
-                        xx[26] = 18;
-                        xd[4] = tt * xx[26] * cos(atm[t] * pai / 180 / 2);
-                        xd[5] = tt * xx[26] * sin(atm[t] * pai / 180 / 2);
-                        xx[24] = (int) xd[4];
-                        xx[25] = (int) xd[5];
-                        setcolor(230, 120, 0);
-                        xx[23] = 8;
-                        if (atype[t] == 87) {
-                            fillarc(xx[0] / 100 + xx[24], xx[1] / 100 + xx[25], xx[23], xx[23]);
-                            setcolor(0, 0, 0);
-                            drawarc(xx[0] / 100 + xx[24], xx[1] / 100 + xx[25], xx[23], xx[23]);
-                        } else {
-                            fillarc(xx[0] / 100 - xx[24], xx[1] / 100 + xx[25], xx[23], xx[23]);
-                            setcolor(0, 0, 0);
-                            drawarc(xx[0] / 100 - xx[24], xx[1] / 100 + xx[25], xx[23], xx[23]);
-                        }
-                    }
-
-                }
-            }
-        }
-
-        //プレイヤーのメッセージ
-        setc0();
-        if (mmsgtm >= 1) {
-            mmsgtm--;
-            xs[0] = "";
-
-            if (mmsgtype == 1)
-                xs[0] = "お、おいしい!!";
-            if (mmsgtype == 2)
-                xs[0] = "毒は無いが……";
-            if (mmsgtype == 3)
-                xs[0] = "刺さった!!";
-            if (mmsgtype == 10)
-                xs[0] = "食べるべきではなかった!!";
-            if (mmsgtype == 11)
-                xs[0] = "俺は燃える男だ!!";
-            if (mmsgtype == 50)
-                xs[0] = "体が……焼ける……";
-            if (mmsgtype == 51)
-                xs[0] = "たーまやー!!";
-            if (mmsgtype == 52)
-                xs[0] = "見事にオワタ";
-            if (mmsgtype == 53)
-                xs[0] = "足が、足がぁ!!";
-            if (mmsgtype == 54)
-                xs[0] = "流石は摂氏800度!!";
-            if (mmsgtype == 55)
-                xs[0] = "溶岩と合体したい……";
-
-            setc0();
-            str(xs[0], (marioX + marioWidth + 300) / 100 - 1, marioY / 100 - 1);
-            str(xs[0], (marioX + marioWidth + 300) / 100 + 1, marioY / 100 + 1);
-            setc1();
-            str(xs[0], (marioX + marioWidth + 300) / 100, marioY / 100);
-
-        }            //mmsgtm
-
-        //敵キャラのメッセージ
-        setc0();
-        for (t = 0; t < amax; t++) {
-            if (amsgtm[t] >= 1) {
-                amsgtm[t]--;    //end();
-
-                xs[0] = "";
-
-                if (amsgtype[t] == 1001)
-                    xs[0] = "ヤッフー!!";
-                if (amsgtype[t] == 1002)
-                    xs[0] = "え?俺勝っちゃったの?";
-                if (amsgtype[t] == 1003)
-                    xs[0] = "貴様の死に場所はここだ!";
-                if (amsgtype[t] == 1004)
-                    xs[0] = "二度と会う事もないだろう";
-                if (amsgtype[t] == 1005)
-                    xs[0] = "俺、最強!!";
-                if (amsgtype[t] == 1006)
-                    xs[0] = "一昨日来やがれ!!";
-                if (amsgtype[t] == 1007)
-                    xs[0] = "漢に後退の二文字は無い!!";
-                if (amsgtype[t] == 1008)
-                    xs[0] = "ハッハァ!!";
-
-                if (amsgtype[t] == 1011)
-                    xs[0] = "ヤッフー!!";
-                if (amsgtype[t] == 1012)
-                    xs[0] = "え?俺勝っちゃったの?";
-                if (amsgtype[t] == 1013)
-                    xs[0] = "貴様の死に場所はここだ!";
-                if (amsgtype[t] == 1014)
-                    xs[0] = "身の程知らずが……";
-                if (amsgtype[t] == 1015)
-                    xs[0] = "油断が死を招く";
-                if (amsgtype[t] == 1016)
-                    xs[0] = "おめでたい奴だ";
-                if (amsgtype[t] == 1017)
-                    xs[0] = "屑が!!";
-                if (amsgtype[t] == 1018)
-                    xs[0] = "無謀な……";
-
-                if (amsgtype[t] == 1021)
-                    xs[0] = "ヤッフー!!";
-                if (amsgtype[t] == 1022)
-                    xs[0] = "え?俺勝っちゃったの?";
-                if (amsgtype[t] == 1023)
-                    xs[0] = "二度と会う事もないだろう";
-                if (amsgtype[t] == 1024)
-                    xs[0] = "身の程知らずが……";
-                if (amsgtype[t] == 1025)
-                    xs[0] = "僕は……負けない!!";
-                if (amsgtype[t] == 1026)
-                    xs[0] = "貴様に見切れる筋は無い";
-                if (amsgtype[t] == 1027)
-                    xs[0] =
-                            "今死ね、すぐ死ね、骨まで砕けろ!!";
-                if (amsgtype[t] == 1028)
-                    xs[0] = "任務完了!!";
-
-                if (amsgtype[t] == 1031)
-                    xs[0] = "ヤッフー!!";
-                if (amsgtype[t] == 1032)
-                    xs[0] = "え?俺勝っちゃったの?";
-                if (amsgtype[t] == 1033)
-                    xs[0] = "貴様の死に場所はここだ!";
-                if (amsgtype[t] == 1034)
-                    xs[0] = "身の程知らずが……";
-                if (amsgtype[t] == 1035)
-                    xs[0] = "油断が死を招く";
-                if (amsgtype[t] == 1036)
-                    xs[0] = "おめでたい奴だ";
-                if (amsgtype[t] == 1037)
-                    xs[0] = "屑が!!";
-                if (amsgtype[t] == 1038)
-                    xs[0] = "無謀な……";
-
-                if (amsgtype[t] == 15)
-                    xs[0] = "鉄壁!!よって、無敵!!";
-                if (amsgtype[t] == 16)
-                    xs[0] = "丸腰で勝てるとでも?";
-                if (amsgtype[t] == 17)
-                    xs[0] = "パリイ!!";
-                if (amsgtype[t] == 18)
-                    xs[0] = "自業自得だ";
-                if (amsgtype[t] == 20)
-                    xs[0] = "Zzz";
-                if (amsgtype[t] == 21)
-                    xs[0] = "ク、クマー";
-                if (amsgtype[t] == 24)
-                    xs[0] = "?";
-                if (amsgtype[t] == 25)
-                    xs[0] = "食べるべきではなかった!!";
-                if (amsgtype[t] == 30)
-                    xs[0] = "うめぇ!!";
-                if (amsgtype[t] == 31)
-                    xs[0] = "ブロックを侮ったな?";
-                if (amsgtype[t] == 32)
-                    xs[0] = "シャキーン";
-
-                if (amsgtype[t] == 50)
-                    xs[0] = "波動砲!!";
-                if (amsgtype[t] == 85)
-                    xs[0] = "裏切られたとでも思ったか?";
-                if (amsgtype[t] == 86)
-                    xs[0] = "ポールアターック!!";
-
-                if (amsgtype[t] != 31) {
-                    xx[5] = (aa[t] + anobia[t] + 300 - fx) / 100;
-                    xx[6] = (ab[t] - fy) / 100;
-                } else {
-                    xx[5] = (aa[t] + anobia[t] + 300 - fx) / 100;
-                    xx[6] = (ab[t] - fy - 800) / 100;
-                }
-
-                ChangeFontType(DX_FONTTYPE_EDGE);
-                setc1();
-                str(xs[0], xx[5], xx[6]);
-                ChangeFontType(DX_FONTTYPE_NORMAL);
-
-            }            //amsgtm
-        }            //amax
-
-        //メッセージブロック
-        if (tmsgtm > 0) {
-            ttmsg();
-            if (tmsgtype == 1) {
-                xx[0] = 1200;
-                tmsgy += xx[0];
-                if (tmsgtm == 1) {
-                    tmsgtm = 80000000;
-                    tmsgtype = 2;
-                }
-            }            //1
-
-            else if (tmsgtype == 2) {
-                tmsgy = 0;
-                tmsgtype = 3;
-                tmsgtm = 15 + 1;
-            } else if (tmsgtype == 3) {
-                xx[0] = 1200;
-                tmsgy += xx[0];
-                if (tmsgtm == 15)
-                    WaitKey();
-                if (tmsgtm == 1) {
-                    tmsgtm = 0;
-                    tmsgtype = 0;
-                    tmsgy = 0;
-                }
-            }            //1
-
-            tmsgtm--;
-        }            //tmsgtm
-
-        //メッセージ
-        if (mainmsgtype >= 1) {
-            setFont(20, 4);
-            if (mainmsgtype == 1) {
-                DrawFormatString(126, 100, GetColor(255, 255, 255), "WELCOME TO OWATA ZONE");
-                for (t2 = 0; t2 <= 2; t2++)
-                    DrawFormatString(88 + t2 * 143, 210, GetColor(255, 255, 255), "1");
-            }
-            setFont(20, 5);
-        }            //mainmsgtype>=1
-
-        //画面黒
-        if (blacktm > 0) {
-            blacktm--;
-            fillrect(0, 0, fxmax, fymax);
-            if (blacktm == 0) {
-                if (blackx == 1) {
-                    initialized = false;
-                }
-            }
-
-        }            //blacktm
+        paintSceneInGame();
+    } else if (gameScene == GameScene::ALL_STAGE_CLEAR) {
+        paintSceneAllStageClear();
+    } else if (gameScene == GameScene::LIFE_SPLASH) {  // Showing lives
+        paintSceneLifeSplash();
+    } else if (gameScene == GameScene::TITLE) {  // タイトル
+        paintSceneTitle();
     }
 
-    if (gameScene == GameScene::ALL_STAGE_CLEAR) {
-
-        setcolor(255, 255, 255);
-        str("制作・プレイに関わった方々",
-            240 - 13 * 20 / 2, xx[12] / 100);
-        str("ステージ１　プレイ", 240 - 9 * 20 / 2, xx[13] / 100);
-        //Theres an encoding error here, this is only temporary
-        //str("æy@]`y",240-6*20/2,xx[14]/100);
-        str("TODO: Fix this encoding error...", 240 - 6 * 20 / 2, xx[14] / 100);
-        str("ステージ２　プレイ", 240 - 9 * 20 / 2, xx[15] / 100);
-        str("友人　willowlet ", 240 - 8 * 20 / 2, xx[16] / 100);
-        str("ステージ３　プレイ", 240 - 9 * 20 / 2, xx[17] / 100);
-        str("友人　willowlet ", 240 - 8 * 20 / 2, xx[18] / 100);
-        str("ステージ４　プレイ", 240 - 9 * 20 / 2, xx[19] / 100);
-        str("友人２　ann ", 240 - 6 * 20 / 2, xx[20] / 100);
-        str("ご協力", 240 - 3 * 20 / 2, xx[21] / 100);
-        str("Ｔ先輩", 240 - 3 * 20 / 2, xx[22] / 100);
-        str("Ｓ先輩", 240 - 3 * 20 / 2, xx[23] / 100);
-        str("動画技術提供", 240 - 6 * 20 / 2, xx[24] / 100);
-        str("Ｋ先輩", 240 - 3 * 20 / 2, xx[25] / 100);
-        str("動画キャプチャ・編集・エンコード",
-            240 - 16 * 20 / 2, xx[26] / 100);
-        str("willowlet ", 240 - 5 * 20 / 2, xx[27] / 100);
-        str("プログラム・描画・ネタ・動画編集",
-            240 - 16 * 20 / 2, xx[28] / 100);
-        str("ちく", 240 - 2 * 20 / 2, xx[29] / 100);
-
-        str("プレイしていただき　ありがとうございました〜", 240 - 22 * 20 / 2, xx[30] / 100);
-    }
-//Showing lives
-    if (gameScene == GameScene::LIFE_SPLASH) {
-
-        setc0();
-        FillScreen();
-
-        SetFontSize(16);SetFontThickness(4);
-
-        drawimage(grap[0][0], 190, 190);
-        DrawFormatString(230, 200, GetColor(255, 255, 255), " × %d",
-                         marioLife);
-
-    }
-//タイトル
-    if (gameScene == GameScene::TITLE) {
-
-        setcolor(160, 180, 250);
-        fillrect(0, 0, fxmax, fymax);
-
-        drawimage(mgrap[30], 240 - 380 / 2, 60);
-
-        drawimage(grap[0][4], 12 * 30, 10 * 29 - 12);
-        drawimage(grap[1][4], 6 * 30, 12 * 29 - 12);
-
-//プレイヤー
-        drawimage(grap[0][0], 2 * 30, 12 * 29 - 12 - 6);
-        for (t = 0; t <= 16; t++) {
-            drawimage(grap[5][1], 29 * t, 13 * 29 - 12);
-            drawimage(grap[6][1], 29 * t, 14 * 29 - 12);
-        }
-
-        setcolor(0, 0, 0);
-        str("Enterキーを押せ!!", 240 - 8 * 20 / 2, 250);
-
-    }
     ScreenFlip();
-
 }                //paint()
 
+void paintSceneInGame() {
+    for (int i = 0; i < nmax; i++) {
+        paintSceneInGameBgItem(i);
+    }
+
+    for (int i = 0; i < emax; i++) {
+        paintSceneInGameEffectItem(i);
+    }
+
+    for (int i = 0; i < srmax; i++) {
+        paintSceneInGameLift(i);
+    }
+
+    paintSceneInGameMario();
+
+    for (int i = 0; i < amax; i++) {
+        paintSceneInGameEnemy(i);
+    }
+
+    for (int i = 0; i < T_MAX; i++) {
+        paintSceneInGameBlock(i);
+    }
+
+    //地面(壁)//土管も
+    for (int i = 0; i < smax; i++) {
+        if (sa[i] - fx + sc[i] >= -10 && sa[i] - fx <= fxmax + 1100) {
+
+            if (stype[i] == 0) {
+                setcolor(40, 200, 40);
+                fillrect((sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb, sc[i] / 100, sd[i] / 100);
+                drawrect((sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb, sc[i] / 100, sd[i] / 100);
+            } else if (stype[i] == 1) {  // 土管  Tube
+                setcolor(0, 230, 0);
+                fillrect((sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb, sc[i] / 100, sd[i] / 100);
+                setc0();
+                drawrect((sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb, sc[i] / 100, sd[i] / 100);
+            } else if (stype[i] == 2) {  // 土管(下)  Tube (Downwards)
+                setcolor(0, 230, 0);
+                fillrect((sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb + 1, sc[i] / 100, sd[i] / 100);
+                setc0();
+                drawline((sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb, (sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb + sd[i] / 100);
+                drawline((sa[i] - fx) / 100 + fma + sc[i] / 100, (sb[i] - fy) / 100 + fmb, (sa[i] - fx) / 100 + fma + sc[i] / 100, (sb[i] - fy) / 100 + fmb + sd[i] / 100);
+            } else if (stype[i] == 5) {  // 土管(横)  Tube (Horizontal)
+                setcolor(0, 230, 0);
+                fillrect((sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb + 1, sc[i] / 100, sd[i] / 100);
+                setc0();
+                drawline((sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb, (sa[i] - fx) / 100 + fma + sc[i] / 100, (sb[i] - fy) / 100 + fmb);
+                drawline((sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb + sd[i] / 100, (sa[i] - fx) / 100 + fma + sc[i] / 100, (sb[i] - fy) / 100 + fmb + sd[i] / 100);
+            } else if (stype[i] == 51) {  // 落ちてくるブロック  Falling Block
+                if (sxtype[i] == 0) {
+                    for (t3 = 0; t3 <= sc[i] / 3000; t3++) {
+                        drawimage(grap[1][1], (sa[i] - fx) / 100 + fma + 29 * t3, (sb[i] - fy) / 100 + fmb);
+                    }
+                } else if (sxtype[i] == 1 || sxtype[i] == 2) {
+                    for (t3 = 0; t3 <= sc[i] / 3000; t3++) {
+                        drawimage(grap[31][1], (sa[i] - fx) / 100 + fma + 29 * t3, (sb[i] - fy) / 100 + fmb);
+                    }
+                } else if (sxtype[i] == 3 || sxtype[i] == 4) {
+                    for (t3 = 0; t3 <= sc[i] / 3000; t3++) {
+                        for (t2 = 0; t2 <= sd[i] / 3000; t2++) {
+                            drawimage(grap[65][1], (sa[i] - fx) / 100 + fma + 29 * t3, (sb[i] - fy) / 100 + 29 * t2 + fmb);
+                        }
+                    }
+                } else if (sxtype[i] == 10) {
+                    for (t3 = 0; t3 <= sc[i] / 3000; t3++) {
+                        drawimage(grap[65][1], (sa[i] - fx) / 100 + fma + 29 * t3, (sb[i] - fy) / 100 + fmb);
+                    }
+                }
+            } else if (stype[i] == 52) {  // 落ちるやつ
+                xx[29] = 0;
+                if (stagecolor == 2) {
+                    xx[29] = 30;
+                } else if (stagecolor == 4) {
+                    xx[29] = 60;
+                } else if (stagecolor == 5) {
+                    xx[29] = 90;
+                }
+
+                for (t3 = 0; t3 <= sc[i] / 3000; t3++) {
+                    if (sxtype[i] == 0) {
+                        drawimage(grap[5 + xx[29]][1], (sa[i] - fx) / 100 + fma + 29 * t3, (sb[i] - fy) / 100 + fmb);
+                        if (stagecolor != 4) {
+                            drawimage(grap[6 + xx[29]][1], (sa[i] - fx) / 100 + fma + 29 * t3, (sb[i] - fy) / 100 + fmb + 29);
+                        } else {
+                            drawimage(grap[5 + xx[29]][1], (sa[i] - fx) / 100 + fma + 29 * t3, (sb[i] - fy) / 100 + fmb + 29);
+                        }
+                    } else if (sxtype[i] == 1) {
+                        for (t2 = 0; t2 <= sd[i] / 3000; t2++) {
+                            drawimage(grap[1 + xx[29]][1], (sa[i] - fx) / 100 + fma + 29 * t3, (sb[i] - fy) / 100 + fmb + 29 * t2);
+                        }
+                    } else if (sxtype[i] == 2) {
+                        for (t2 = 0; t2 <= sd[i] / 3000; t2++) {
+                            drawimage(grap[5 + xx[29]][1], (sa[i] - fx) / 100 + fma + 29 * t3, (sb[i] - fy) / 100 + fmb + 29 * t2);
+                        }
+                    }
+
+                }
+            }
+
+            if (trap == 1) {  // ステージトラップ
+                if (stype[i] >= 100 && stype[i] <= 299) {
+                    if (stagecolor == 1 || stagecolor == 3 || stagecolor == 5)
+                        setc0();
+                    if (stagecolor == 2 || stagecolor == 4)
+                        setc1();
+                    drawrect((sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb, sc[i] / 100, sd[i] / 100);
+                }
+            }
+
+            if (stype[i] == 300) {  // ゴール
+                setc1();
+                fillrect((sa[i] - fx) / 100 + 10, (sb[i] - fy) / 100, 10, sd[i] / 100 - 8);
+                setc0();
+                drawrect((sa[i] - fx) / 100 + 10, (sb[i] - fy) / 100, 10, sd[i] / 100 - 8);
+                setcolor(250, 250, 0);
+                fillarc((sa[i] - fx) / 100 + 15 - 1, (sb[i] - fy) / 100, 10, 10);
+                setc0();
+                drawarc((sa[i] - fx) / 100 + 15 - 1, (sb[i] - fy) / 100, 10, 10);
+            } else if (stype[i] == 500) {  // 中間
+                drawimage(grap[20][4], (sa[i] - fx) / 100, (sb[i] - fy) / 100);
+            }
+        }
+    }            //t
+
+    //描画上書き(土管)
+    for (int i = 0; i < smax; i++) {  // TODO merge smax loop
+        if (sa[i] - fx + sc[i] >= -10 && sa[i] - fx <= fxmax + 1100) {
+
+//入る土管(右)
+            if (stype[i] == 40) {
+                setcolor(0, 230, 0);
+                fillrect((sa[i] - fx) / 100 + fma,
+                         (sb[i] - fy) / 100 + fmb + 1,
+                         sc[i] / 100, sd[i] / 100);
+                setc0();
+                drawrect((sa[i] - fx) / 100 + fma,
+                         (sb[i] - fy) / 100 + fmb + 1,
+                         sc[i] / 100, sd[i] / 100);
+            }
+//とぶ土管
+            if (stype[i] == 50) {
+                setcolor(0, 230, 0);
+                fillrect((sa[i] - fx) / 100 + fma + 5,
+                         (sb[i] - fy) / 100 + fmb + 30,
+                         50, sd[i] / 100 - 30);
+                setc0();
+                drawline((sa[i] - fx) / 100 + 5 + fma,
+                         (sb[i] - fy) / 100 + fmb + 30,
+                         (sa[i] - fx) / 100 + fma + 5,
+                         (sb[i] - fy) / 100 + fmb + sd[i] / 100);
+                drawline((sa[i] - fx) / 100 + 5 + fma +
+                         50,
+                         (sb[i] - fy) / 100 + fmb + 30,
+                         (sa[i] - fx) / 100 + fma + 50 +
+                         5, (sb[i] - fy) / 100 + fmb + sd[i] / 100);
+
+                setcolor(0, 230, 0);
+                fillrect((sa[i] - fx) / 100 + fma,
+                         (sb[i] - fy) / 100 + fmb + 1, 60, 30);
+                setc0();
+                drawrect((sa[i] - fx) / 100 + fma,
+                         (sb[i] - fy) / 100 + fmb + 1, 60, 30);
+            }
+//地面(ブロック)
+            if (stype[i] == 200) {
+                for (t3 = 0; t3 <= sc[i] / 3000; t3++) {
+                    for (t2 = 0; t2 <= sd[i] / 3000; t2++) {
+                        drawimage(grap[65][1],
+                                  (sa[i] -
+                                   fx) / 100 +
+                                  fma + 29 * t3,
+                                  (sb[i] - fy) / 100 + 29 * t2 + fmb);
+                    }
+                }
+            }
+
+        }
+    }            //t
+
+        // ファイアバー  Fireball
+    for (t = 0; t < amax; t++) {
+
+        xx[0] = aa[t] - fx;
+        xx[1] = ab[t] - fy;
+        xx[14] = 12000;
+        xx[16] = 0;
+        if (atype[t] == 87 || atype[t] == 88) {
+            if (xx[0] + xx[2] * 100 >= -10 - xx[14]
+                && xx[1] <= fxmax + xx[14]
+                && xx[1] + xx[3] * 100 >= -10 && xx[3] <= fymax) {
+
+                for (tt = 0; tt <= axtype[t] % 100; tt++) {
+                    xx[26] = 18;
+                    xd[4] = tt * xx[26] * cos(atm[t] * pai / 180 / 2);
+                    xd[5] = tt * xx[26] * sin(atm[t] * pai / 180 / 2);
+                    xx[24] = (int) xd[4];
+                    xx[25] = (int) xd[5];
+                    setcolor(230, 120, 0);
+                    xx[23] = 8;
+                    if (atype[t] == 87) {
+                        fillarc(xx[0] / 100 + xx[24], xx[1] / 100 + xx[25], xx[23], xx[23]);
+                        setcolor(0, 0, 0);
+                        drawarc(xx[0] / 100 + xx[24], xx[1] / 100 + xx[25], xx[23], xx[23]);
+                    } else {
+                        fillarc(xx[0] / 100 - xx[24], xx[1] / 100 + xx[25], xx[23], xx[23]);
+                        setcolor(0, 0, 0);
+                        drawarc(xx[0] / 100 - xx[24], xx[1] / 100 + xx[25], xx[23], xx[23]);
+                    }
+                }
+
+            }
+        }
+    }
+
+    //プレイヤーのメッセージ
+    setc0();
+    if (mmsgtm >= 1) {
+        mmsgtm--;
+        xs[0] = "";
+
+        if (mmsgtype == 1)
+            xs[0] = "お、おいしい!!";
+        if (mmsgtype == 2)
+            xs[0] = "毒は無いが……";
+        if (mmsgtype == 3)
+            xs[0] = "刺さった!!";
+        if (mmsgtype == 10)
+            xs[0] = "食べるべきではなかった!!";
+        if (mmsgtype == 11)
+            xs[0] = "俺は燃える男だ!!";
+        if (mmsgtype == 50)
+            xs[0] = "体が……焼ける……";
+        if (mmsgtype == 51)
+            xs[0] = "たーまやー!!";
+        if (mmsgtype == 52)
+            xs[0] = "見事にオワタ";
+        if (mmsgtype == 53)
+            xs[0] = "足が、足がぁ!!";
+        if (mmsgtype == 54)
+            xs[0] = "流石は摂氏800度!!";
+        if (mmsgtype == 55)
+            xs[0] = "溶岩と合体したい……";
+
+        setc0();
+        str(xs[0], (marioX + marioWidth + 300) / 100 - 1, marioY / 100 - 1);
+        str(xs[0], (marioX + marioWidth + 300) / 100 + 1, marioY / 100 + 1);
+        setc1();
+        str(xs[0], (marioX + marioWidth + 300) / 100, marioY / 100);
+
+    }            //mmsgtm
+
+    //敵キャラのメッセージ
+    setc0();
+    for (int i = 0; i < amax; i++) {
+        if (amsgtm[i] >= 1) {
+            amsgtm[i]--;    //end();
+
+            xs[0] = "";
+
+            if (amsgtype[i] == 1001)
+                xs[0] = "ヤッフー!!";
+            if (amsgtype[i] == 1002)
+                xs[0] = "え?俺勝っちゃったの?";
+            if (amsgtype[i] == 1003)
+                xs[0] = "貴様の死に場所はここだ!";
+            if (amsgtype[i] == 1004)
+                xs[0] = "二度と会う事もないだろう";
+            if (amsgtype[i] == 1005)
+                xs[0] = "俺、最強!!";
+            if (amsgtype[i] == 1006)
+                xs[0] = "一昨日来やがれ!!";
+            if (amsgtype[i] == 1007)
+                xs[0] = "漢に後退の二文字は無い!!";
+            if (amsgtype[i] == 1008)
+                xs[0] = "ハッハァ!!";
+
+            if (amsgtype[i] == 1011)
+                xs[0] = "ヤッフー!!";
+            if (amsgtype[i] == 1012)
+                xs[0] = "え?俺勝っちゃったの?";
+            if (amsgtype[i] == 1013)
+                xs[0] = "貴様の死に場所はここだ!";
+            if (amsgtype[i] == 1014)
+                xs[0] = "身の程知らずが……";
+            if (amsgtype[i] == 1015)
+                xs[0] = "油断が死を招く";
+            if (amsgtype[i] == 1016)
+                xs[0] = "おめでたい奴だ";
+            if (amsgtype[i] == 1017)
+                xs[0] = "屑が!!";
+            if (amsgtype[i] == 1018)
+                xs[0] = "無謀な……";
+
+            if (amsgtype[i] == 1021)
+                xs[0] = "ヤッフー!!";
+            if (amsgtype[i] == 1022)
+                xs[0] = "え?俺勝っちゃったの?";
+            if (amsgtype[i] == 1023)
+                xs[0] = "二度と会う事もないだろう";
+            if (amsgtype[i] == 1024)
+                xs[0] = "身の程知らずが……";
+            if (amsgtype[i] == 1025)
+                xs[0] = "僕は……負けない!!";
+            if (amsgtype[i] == 1026)
+                xs[0] = "貴様に見切れる筋は無い";
+            if (amsgtype[i] == 1027)
+                xs[0] =
+                        "今死ね、すぐ死ね、骨まで砕けろ!!";
+            if (amsgtype[i] == 1028)
+                xs[0] = "任務完了!!";
+
+            if (amsgtype[i] == 1031)
+                xs[0] = "ヤッフー!!";
+            if (amsgtype[i] == 1032)
+                xs[0] = "え?俺勝っちゃったの?";
+            if (amsgtype[i] == 1033)
+                xs[0] = "貴様の死に場所はここだ!";
+            if (amsgtype[i] == 1034)
+                xs[0] = "身の程知らずが……";
+            if (amsgtype[i] == 1035)
+                xs[0] = "油断が死を招く";
+            if (amsgtype[i] == 1036)
+                xs[0] = "おめでたい奴だ";
+            if (amsgtype[i] == 1037)
+                xs[0] = "屑が!!";
+            if (amsgtype[i] == 1038)
+                xs[0] = "無謀な……";
+
+            if (amsgtype[i] == 15)
+                xs[0] = "鉄壁!!よって、無敵!!";
+            if (amsgtype[i] == 16)
+                xs[0] = "丸腰で勝てるとでも?";
+            if (amsgtype[i] == 17)
+                xs[0] = "パリイ!!";
+            if (amsgtype[i] == 18)
+                xs[0] = "自業自得だ";
+            if (amsgtype[i] == 20)
+                xs[0] = "Zzz";
+            if (amsgtype[i] == 21)
+                xs[0] = "ク、クマー";
+            if (amsgtype[i] == 24)
+                xs[0] = "?";
+            if (amsgtype[i] == 25)
+                xs[0] = "食べるべきではなかった!!";
+            if (amsgtype[i] == 30)
+                xs[0] = "うめぇ!!";
+            if (amsgtype[i] == 31)
+                xs[0] = "ブロックを侮ったな?";
+            if (amsgtype[i] == 32)
+                xs[0] = "シャキーン";
+
+            if (amsgtype[i] == 50)
+                xs[0] = "波動砲!!";
+            if (amsgtype[i] == 85)
+                xs[0] = "裏切られたとでも思ったか?";
+            if (amsgtype[i] == 86)
+                xs[0] = "ポールアターック!!";
+
+            if (amsgtype[i] != 31) {
+                xx[5] = (aa[i] + anobia[i] + 300 - fx) / 100;
+                xx[6] = (ab[i] - fy) / 100;
+            } else {
+                xx[5] = (aa[i] + anobia[i] + 300 - fx) / 100;
+                xx[6] = (ab[i] - fy - 800) / 100;
+            }
+
+            ChangeFontType(DX_FONTTYPE_EDGE);
+            setc1();
+            str(xs[0], xx[5], xx[6]);
+            ChangeFontType(DX_FONTTYPE_NORMAL);
+
+        }            //amsgtm
+    }            //amax
+
+    //メッセージブロック
+    if (tmsgtm > 0) {
+        ttmsg();
+        if (tmsgtype == 1) {
+            xx[0] = 1200;
+            tmsgy += xx[0];
+            if (tmsgtm == 1) {
+                tmsgtm = 80000000;
+                tmsgtype = 2;
+            }
+        }            //1
+
+        else if (tmsgtype == 2) {
+            tmsgy = 0;
+            tmsgtype = 3;
+            tmsgtm = 15 + 1;
+        } else if (tmsgtype == 3) {
+            xx[0] = 1200;
+            tmsgy += xx[0];
+            if (tmsgtm == 15)
+                WaitKey();
+            if (tmsgtm == 1) {
+                tmsgtm = 0;
+                tmsgtype = 0;
+                tmsgy = 0;
+            }
+        }            //1
+
+        tmsgtm--;
+    }            //tmsgtm
+
+    //メッセージ
+    if (mainmsgtype >= 1) {
+        setFont(20, 4);
+        if (mainmsgtype == 1) {
+            DrawFormatString(126, 100, GetColor(255, 255, 255), "WELCOME TO OWATA ZONE");
+            for (int i = 0; i <= 2; i++)
+                DrawFormatString(88 + i * 143, 210, GetColor(255, 255, 255), "1");
+        }
+        setFont(20, 5);
+    }            //mainmsgtype>=1
+
+    //画面黒
+    if (blacktm > 0) {
+        blacktm--;
+        fillrect(0, 0, fxmax, fymax);
+        if (blacktm == 0) {
+            if (blackx == 1) {
+                initialized = false;
+            }
+        }
+
+    }            //blacktm
+}
+
 // 背景
-void paintBgItem(int index) {
+void paintSceneInGameBgItem(int index) {
     int screenX = na[index] - fx;
     int screenY = nb[index] - fy;
     int width = 16000;  // = ne[ntype[index]] * 100;
@@ -577,7 +521,7 @@ void paintBgItem(int index) {
 }
 
 // グラ
-void paintEffectItem(int index) {
+void paintSceneInGameEffectItem(int index) {
     int screenX = ea[index] - fx;
     int screenY = eb[index] - fy;
     int width = enobia[index] / 100;
@@ -616,7 +560,7 @@ void paintEffectItem(int index) {
 }
 
 // リフト
-void paintLift(int index) {
+void paintSceneInGameLift(int index) {
     int screenX = sra[index] - fx;
     int screenY = srb[index] - fy;
 
@@ -664,8 +608,8 @@ void paintLift(int index) {
     }
 }
 
-// 敵キャラ
-void paintEnemy(int index) {
+// 敵キャラとファイアバー
+void paintSceneInGameEnemy(int index) {
     int screenX = aa[index] - fx;
     int screenY = ab[index] - fy;
     int width = anobia[index] / 100;
@@ -794,7 +738,7 @@ void paintEnemy(int index) {
 }
 
 // ブロック描画
-void paintBlock(int index) {
+void paintSceneInGameBlock(int index) {
     int screenX = blockX[index] - fx;
     int screenY = blockY[index] - fy;
     int width = 32;
@@ -857,6 +801,67 @@ void paintBlock(int index) {
             drawimage(grap[0][2], screenX / 100 + 2, screenY / 100 + 1);
         }
     }
+}
+
+void paintSceneAllStageClear() {
+
+    setcolor(255, 255, 255);
+    str("制作・プレイに関わった方々",
+        240 - 13 * 20 / 2, xx[12] / 100);
+    str("ステージ１　プレイ", 240 - 9 * 20 / 2, xx[13] / 100);
+    //Theres an encoding error here, this is only temporary
+    //str("æy@]`y",240-6*20/2,xx[14]/100);
+    str("TODO: Fix this encoding error...", 240 - 6 * 20 / 2, xx[14] / 100);
+    str("ステージ２　プレイ", 240 - 9 * 20 / 2, xx[15] / 100);
+    str("友人　willowlet ", 240 - 8 * 20 / 2, xx[16] / 100);
+    str("ステージ３　プレイ", 240 - 9 * 20 / 2, xx[17] / 100);
+    str("友人　willowlet ", 240 - 8 * 20 / 2, xx[18] / 100);
+    str("ステージ４　プレイ", 240 - 9 * 20 / 2, xx[19] / 100);
+    str("友人２　ann ", 240 - 6 * 20 / 2, xx[20] / 100);
+    str("ご協力", 240 - 3 * 20 / 2, xx[21] / 100);
+    str("Ｔ先輩", 240 - 3 * 20 / 2, xx[22] / 100);
+    str("Ｓ先輩", 240 - 3 * 20 / 2, xx[23] / 100);
+    str("動画技術提供", 240 - 6 * 20 / 2, xx[24] / 100);
+    str("Ｋ先輩", 240 - 3 * 20 / 2, xx[25] / 100);
+    str("動画キャプチャ・編集・エンコード",
+        240 - 16 * 20 / 2, xx[26] / 100);
+    str("willowlet ", 240 - 5 * 20 / 2, xx[27] / 100);
+    str("プログラム・描画・ネタ・動画編集",
+        240 - 16 * 20 / 2, xx[28] / 100);
+    str("ちく", 240 - 2 * 20 / 2, xx[29] / 100);
+
+    str("プレイしていただき　ありがとうございました〜", 240 - 22 * 20 / 2, xx[30] / 100);
+}
+
+void paintSceneLifeSplash() {
+    setc0();
+    FillScreen();
+
+    SetFontSize(16);
+    SetFontThickness(4);
+
+    drawimage(grap[0][0], 190, 190);
+    DrawFormatString(230, 200, GetColor(255, 255, 255), " × %d", marioLife);
+}
+
+void paintSceneTitle() {
+    setcolor(160, 180, 250);
+    fillrect(0, 0, fxmax, fymax);
+
+    drawimage(mgrap[30], 240 - 380 / 2, 60);
+
+    drawimage(grap[0][4], 12 * 30, 10 * 29 - 12);
+    drawimage(grap[1][4], 6 * 30, 12 * 29 - 12);
+
+    //プレイヤー
+    drawimage(grap[0][0], 2 * 30, 12 * 29 - 12 - 6);
+    for (t = 0; t <= 16; t++) {
+        drawimage(grap[5][1], 29 * t, 13 * 29 - 12);
+        drawimage(grap[6][1], 29 * t, 14 * 29 - 12);
+    }
+
+    setcolor(0, 0, 0);
+    str("Enterキーを押せ!!", 240 - 8 * 20 / 2, 250);
 }
 
 //メインプログラム

@@ -17,7 +17,7 @@ int mztm, mztype;
 int actaon[7];
 
 // プレイヤー描画
-void paintMario() {
+void paintSceneInGameMario() {
     setcolor(0, 0, 255);
 
     if (mactp >= 2000) {

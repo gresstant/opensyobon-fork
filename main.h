@@ -59,12 +59,17 @@ void processSceneLifeSplash();
 void processSceneTitle();
 
 void paint();
-void paintMario();
-void paintBgItem(int index);
-void paintEffectItem(int index);
-void paintLift(int index);
-void paintEnemy(int index);
-void paintBlock(int index);
+void paintSceneInGame();
+void paintSceneInGameMario();
+void paintSceneInGameBgItem(int index);
+void paintSceneInGameEffectItem(int index);
+void paintSceneInGameLift(int index);
+void paintSceneInGameEnemy(int index);
+void paintSceneInGameBlock(int index);
+void paintSceneAllStageClear();
+void paintSceneLifeSplash();
+void paintSceneTitle();
+
 int maint;
 
 
