@@ -157,8 +157,8 @@ void txmsg(string x, int a);
 void setFont(int size, int thickness);
 
 //効果を持たないグラ
-void eyobi(int xa, int xb, int xc, int xd, int xe, int xf, int xnobia,
-	   int xnobib, int xgtype, int xtm);
+void eyobi(int x, int y, int xc, int xd, int xe, int xf, int width,
+           int height, int gtype, int tm);
 #define emax 201
 int eco;
 int ea[emax], eb[emax], enobia[emax], enobib[emax], ec[emax], ed[emax];
@@ -168,8 +168,8 @@ int egtype[emax];
 
 
 //敵キャラ
-void ayobi(int xa, int xb, int xc, int xd, int xnotm, int xtype,
-	   int xxtype);
+void ayobi(int x, int y, int c, int d, int xnotm, int type,
+           int xtype);
 void tekizimen();
 #define amax 24
 int aco;

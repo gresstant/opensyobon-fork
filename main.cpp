@@ -1665,30 +1665,21 @@ if (mtm==250)end();
                                         if (blockX[t] >= -20000) {
 //if (marioX+marioWidth>xx[8] && marioX<xx[8]+xx[2] && marioY+marioHeight>xx[9]+xx[1]/2-xx[0] &&){
                                             if (marioX + marioWidth > xx[8]
-                                                && marioX < xx[8]
-                                                            + xx[2]
-                                                && marioY + marioHeight > xx[9]
-                                                                          + xx[1]
-                                                                            / 2 - xx[0]
-                                                && marioY < xx[9]
-                                                            + xx[2]
-                                                && marioSpeedX >= 0) {
+                                                    && marioX < xx[8] + xx[2]
+                                                    && marioY + marioHeight > xx[9] + xx[1] / 2 - xx[0]
+                                                    && marioY < xx[9] + xx[2]
+                                                    && marioSpeedX >= 0) {
                                                 marioX = xx[8] - marioWidth;
                                                 marioSpeedX = 0;
                                                 xx[16] = 1;
 //if (blockType[t]!=4){marioX=xx[8]-marioWidth;marioSpeedX=0;xx[16]=1;}
 //if (blockType[t]==4){marioX=xx[8]-marioWidth;marioSpeedX=-marioSpeedX*4/4;}
                                             }
-                                            if (marioX + marioWidth >
-                                                xx[8] + xx[2]
-                                                && marioX < xx[8]
-                                                            + xx[1]
-                                                && marioY + marioHeight > xx[9]
-                                                                          + xx[1]
-                                                                            / 2 - xx[0]
-                                                && marioY < xx[9]
-                                                            + xx[2]
-                                                && marioSpeedX <= 0) {
+                                            if (marioX + marioWidth > xx[8] + xx[2]
+                                                    && marioX < xx[8] + xx[1]
+                                                    && marioY + marioHeight > xx[9] + xx[1] / 2 - xx[0]
+                                                    && marioY < xx[9] + xx[2]
+                                                    && marioSpeedX <= 0) {
                                                 marioX = xx[8] + xx[1];
                                                 marioSpeedX = 0;
                                                 xx[16] = 1;    //end();
@@ -1789,8 +1780,7 @@ if (mtm==250)end();
                             ayobi(blockX[t], blockY[t], 0, 0, 0, 101, 0);
                         if (blockXType[t] == 4) {
                             abrocktm[aco] = 20;
-                            ayobi(blockX[t] -
-                                  400, blockY[t] - 1600, 0, 0, 0, 6, 0);
+                            ayobi(blockX[t] - 400, blockY[t] - 1600, 0, 0, 0, 6, 0);
                         }
                         if (blockXType[t] == 10)
                             ayobi(blockX[t], blockY[t], 0, 0, 0, 101, 0);
@@ -2294,17 +2284,13 @@ if (mtm==250)end();
                     if (stype[t] == 102) {
                         if (sxtype[t] == 0) {
                             for (t3 = 0; t3 <= 3; t3++) {
-                                ayobi(sa[t]
-                                      +
-                                      t3 * 3000, -3000, 0, 0, 0, 0, 0);
+                                ayobi(sa[t] + t3 * 3000, -3000, 0, 0, 0, 0, 0);
                             }
                         }
                         if (sxtype[t] == 1 && marioY >= 16000) {
-                            ayobi(sa[t] +
-                                  1500, 44000, 0, -2000, 0, 4, 0);
+                            ayobi(sa[t] + 1500, 44000, 0, -2000, 0, 4, 0);
                         } else if (sxtype[t] == 2) {
-                            ayobi(sa[t] +
-                                  4500, 30000, 0, -1600, 0, 5, 0);
+                            ayobi(sa[t] + 4500, 30000, 0, -1600, 0, 5, 0);
                             ot(oto[10]);
                             sxtype[t] = 3;
                             sa[t] -= 12000;
@@ -2312,27 +2298,18 @@ if (mtm==250)end();
                             sa[t] += 12000;
                             sxtype[t] = 4;
                         } else if (sxtype[t] == 4) {
-                            ayobi(sa[t] +
-                                  4500, 30000, 0, -1600, 0, 5, 0);
+                            ayobi(sa[t] + 4500, 30000, 0, -1600, 0, 5, 0);
                             ot(oto[10]);
                             sxtype[t] = 5;
                             sxtype[t] = 0;
                         } else if (sxtype[t] == 7) {
                             mainmsgtype = 1;
                         } else if (sxtype[t] == 8) {
-                            ayobi(sa[t] -
-                                  5000 -
-                                  3000 * 1, 26000, 0, -1600, 0, 5, 0);
+                            ayobi(sa[t] - 5000 - 3000 * 1, 26000, 0, -1600, 0, 5, 0);
                             ot(oto[10]);
                         } else if (sxtype[t] == 9) {
                             for (t3 = 0; t3 <= 2; t3++) {
-                                ayobi(sa[t]
-                                      +
-                                      t3
-                                      *
-                                      3000
-                                      +
-                                      3000, 48000, 0, -6000, 0, 3, 0);
+                                ayobi(sa[t] + t3 * 3000 + 3000, 48000, 0, -6000, 0, 3, 0);
                             }
                         }
                         if (sxtype[t] == 10) {
@@ -2342,13 +2319,7 @@ if (mtm==250)end();
 
                         if (sxtype[t] == 12) {
                             for (t3 = 1; t3 <= 3; t3++) {
-                                ayobi(sa[t]
-                                      +
-                                      t3
-                                      *
-                                      3000
-                                      -
-                                      1000, 40000, 0, -2600, 0, 9, 0);
+                                ayobi(sa[t] + t3 * 3000 - 1000, 40000, 0, -2600, 0, 9, 0);
                             }
                         }
 //スクロール消し
@@ -2375,16 +2346,14 @@ if (mtm==250)end();
                         if (sxtype[t] == 0) {
                             amsgtm[aco] = 10;
                             amsgtype[aco] = 50;
-                            ayobi(sa[t] +
-                                  9000, sb[t] + 2000, 0, 0, 0, 79, 0);
+                            ayobi(sa[t] + 9000, sb[t] + 2000, 0, 0, 0, 79, 0);
                             sa[t] = -800000000;
                         }
 
                         if (sxtype[t] == 1 && blockType[6] <= 6) {
                             amsgtm[aco] = 10;
                             amsgtype[aco] = 50;
-                            ayobi(sa[t] -
-                                  12000, sb[t] + 2000, 0, 0, 0, 79, 0);
+                            ayobi(sa[t] - 12000, sb[t] + 2000, 0, 0, 0, 79, 0);
                             sa[t] = -800000000;
                             blockXType[9] = 500;    //blockType[9]=1;
                         }
@@ -2392,21 +2361,11 @@ if (mtm==250)end();
 
                     if (stype[t] == 104) {
                         if (sxtype[t] == 0) {
-                            ayobi(sa[t] +
-                                  12000,
-                                  sb[t] + 2000 + 3000, 0, 0, 0, 79, 0);
-                            ayobi(sa[t] +
-                                  12000,
-                                  sb[t] + 2000 + 3000, 0, 0, 0, 79, 1);
-                            ayobi(sa[t] +
-                                  12000,
-                                  sb[t] + 2000 + 3000, 0, 0, 0, 79, 2);
-                            ayobi(sa[t] +
-                                  12000,
-                                  sb[t] + 2000 + 3000, 0, 0, 0, 79, 3);
-                            ayobi(sa[t] +
-                                  12000,
-                                  sb[t] + 2000 + 3000, 0, 0, 0, 79, 4);
+                            ayobi(sa[t] + 12000, sb[t] + 2000 + 3000, 0, 0, 0, 79, 0);
+                            ayobi(sa[t] + 12000, sb[t] + 2000 + 3000, 0, 0, 0, 79, 1);
+                            ayobi(sa[t] + 12000, sb[t] + 2000 + 3000, 0, 0, 0, 79, 2);
+                            ayobi(sa[t] + 12000, sb[t] + 2000 + 3000, 0, 0, 0, 79, 3);
+                            ayobi(sa[t] + 12000, sb[t] + 2000 + 3000, 0, 0, 0, 79, 4);
                             sa[t] = -800000000;
                         }
                     }
@@ -2439,9 +2398,7 @@ if (mtm==250)end();
                     sr[t]++;
                     if (sr[t] >= sgtype[t]) {
                         sr[t] = 0;
-                        ayobi(sa[t], 30000,
-                              rand(600) - 300,
-                              -1600 - rand(900), 0, 84, 0);
+                        ayobi(sa[t], 30000, rand(600) - 300, -1600 - rand(900), 0, 84, 0);
                     }
                 }
 
@@ -3877,30 +3834,14 @@ break;
                             ot(oto[4]);
 
 //ayobi(aa[t]-6*3000+1000,-3*3000,0,0,0,110,0);
-                            ayobi(aa[t] -
-                                  8 * 3000 -
-                                  1000, -4 * 3000, 0, 0, 0, 110, 0);
-                            ayobi(aa[t] -
-                                  10 *
-                                  3000 +
-                                  1000, -1 * 3000, 0, 0, 0, 110, 0);
+                            ayobi(aa[t] - 8 * 3000 - 1000, -4 * 3000, 0, 0, 0, 110, 0);
+                            ayobi(aa[t] - 10 * 3000 + 1000, -1 * 3000, 0, 0, 0, 110, 0);
 
-                            ayobi(aa[t] +
-                                  4 * 3000 +
-                                  1000, -2 * 3000, 0, 0, 0, 110, 0);
-                            ayobi(aa[t] +
-                                  5 * 3000 -
-                                  1000, -3 * 3000, 0, 0, 0, 110, 0);
-                            ayobi(aa[t] +
-                                  6 * 3000 +
-                                  1000, -4 * 3000, 0, 0, 0, 110, 0);
-                            ayobi(aa[t] +
-                                  7 * 3000 -
-                                  1000, -2 * 3000, 0, 0, 0, 110, 0);
-                            ayobi(aa[t] +
-                                  8 * 3000 +
-                                  1000,
-                                  -2 * 3000 - 1000, 0, 0, 0, 110, 0);
+                            ayobi(aa[t] + 4 * 3000 + 1000, -2 * 3000, 0, 0, 0, 110, 0);
+                            ayobi(aa[t] + 5 * 3000 - 1000, -3 * 3000, 0, 0, 0, 110, 0);
+                            ayobi(aa[t] + 6 * 3000 + 1000, -4 * 3000, 0, 0, 0, 110, 0);
+                            ayobi(aa[t] + 7 * 3000 - 1000, -2 * 3000, 0, 0, 0, 110, 0);
+                            ayobi(aa[t] + 8 * 3000 + 1000, -2 * 3000 - 1000, 0, 0, 0, 110, 0);
                             blockY[0] += 3000 * 3;
                         }
                     }    //105
@@ -7103,17 +7044,17 @@ void setFont(int size, int thickness) {
 }
 
 //グラ作成
-void eyobi(int xa, int xb, int xc, int xd, int xe, int xf, int xnobia, int xnobib, int xgtype, int xtm) {
-    ea[eco] = xa;
-    eb[eco] = xb;
+void eyobi(int x, int y, int xc, int xd, int xe, int xf, int width, int height, int gtype, int tm) {
+    ea[eco] = x;
+    eb[eco] = y;
     ec[eco] = xc;
     ed[eco] = xd;
     ee[eco] = xe;
     ef[eco] = xf;
-    egtype[eco] = xgtype;
-    etm[eco] = xtm;
-    enobia[eco] = xnobia;
-    enobib[eco] = xnobib;
+    egtype[eco] = gtype;
+    etm[eco] = tm;
+    enobia[eco] = width;
+    enobib[eco] = height;
 
     eco++;
     if (eco >= emax)
@@ -7121,7 +7062,7 @@ void eyobi(int xa, int xb, int xc, int xd, int xe, int xf, int xnobia, int xnobi
 }                //eyobi
 
 //敵キャラ、アイテム作成
-void ayobi(int xa, int xb, int xc, int xd, int xnotm, int xtype, int xxtype) {
+void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype) {
     int rz = 0;
     for (t1 = 0; t1 <= 1; t1++) {
         t1 = 2;
@@ -7132,20 +7073,20 @@ void ayobi(int xa, int xb, int xc, int xd, int xnotm, int xtype, int xxtype) {
         if (rz <= amax) {
             t1 = 3;
 
-            aa[aco] = xa;
-            ab[aco] = xb;    //ag[aco]=0;ah[aco]=0;ai[aco]=bb[t];//ad[t]=0;aeon[t]=1;
-            ac[aco] = xc;
-            ad[aco] = xd;
-            if (xxtype > 100)
-                ac[aco] = xxtype;
+            aa[aco] = x;
+            ab[aco] = y;    //ag[aco]=0;ah[aco]=0;ai[aco]=bb[t];//ad[t]=0;aeon[t]=1;
+            ac[aco] = c;
+            ad[aco] = d;
+            if (xtype > 100)
+                ac[aco] = xtype;
             //ae[aco]=0;af[aco]=0;
-            atype[aco] = xtype;
-            if (xxtype >= 0 && xxtype <= 99100)
-                axtype[aco] = xxtype;    //ahp[aco]=iz[bxtype[t]];aytm[aco]=0;
-            //if (xxtype==1)end();
+            atype[aco] = type;
+            if (xtype >= 0 && xtype <= 99100)
+                axtype[aco] = xtype;    //ahp[aco]=iz[bxtype[t]];aytm[aco]=0;
+            //if (xtype==1)end();
             anotm[aco] = xnotm;
             if (aa[aco] - fx <= marioX + marioWidth / 2)
-                amuki[aco] = 1;
+                amuki[aco] = 1;  // "muki" means direction
             if (aa[aco] - fx > marioX + marioWidth / 2)
                 amuki[aco] = 0;
             if (abrocktm[aco] >= 1)
@@ -7153,15 +7094,15 @@ void ayobi(int xa, int xb, int xc, int xd, int xnotm, int xtype, int xxtype) {
             if (abrocktm[aco] == 20)
                 amuki[aco] = 0;
 
-            anobia[aco] = anx[atype[aco]];
-            anobib[aco] = any[atype[aco]];
+            anobia[aco] = anx[type];
+            anobib[aco] = any[type];
 
             //大砲音
-            if (xtype == 7 && CheckSoundMem(oto[10]) == 0) {
+            if (type == 7 && CheckSoundMem(oto[10]) == 0) {
                 ot(oto[10]);
             }
             //ファイア音
-            if (xtype == 10 && CheckSoundMem(oto[18]) == 0) {
+            if (type == 10 && CheckSoundMem(oto[18]) == 0) {
                 ot(oto[18]);
             }
 
@@ -7195,7 +7136,7 @@ void ayobi(int xa, int xb, int xc, int xd, int xnotm, int xtype, int xxtype) {
                     break;*/
             }
 
-            if (xtype == 87) {
+            if (type == 87) {
                 atm[aco] = rand(179) + (-90);
             }
 
