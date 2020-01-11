@@ -746,37 +746,40 @@ void paintSceneInGameBlock(int index) {
     
     if (screenX + width * 100 >= -10 && screenY <= fxmax) {
 
-        xx[9] = 0;
+        // xx6 is being used to select graph that fits the level color style
+        // xx9 is being used to calculate xx6
+        int xx6, xx9 = 0;
+
         if (stagecolor == 2) {
-            xx[9] = 30;
+            xx9 = 30;
         } else if (stagecolor == 4) {
-            xx[9] = 60;
+            xx9 = 60;
         } else if (stagecolor == 5) {
-            xx[9] = 90;
+            xx9 = 90;
         }
 
         if (blockType[index] < 100) {
-            xx[6] = blockType[index] + xx[9];
-            drawimage(grap[xx[6]][1], screenX / 100, screenY / 100);
+            xx6 = blockType[index] + xx9;
+            drawimage(grap[xx6][1], screenX / 100, screenY / 100);
         }
 
         if (blockXType[index] != 10) {
             if (blockType[index] == 100 || blockType[index] == 101 || blockType[index] == 102 || blockType[index] == 103
                 || (blockType[index] == 104 && blockXType[index] == 1) || (blockType[index] == 114 && blockXType[index] == 1) || blockType[index] == 116) {
-                xx[6] = 2 + xx[9];
-                drawimage(grap[xx[6]][1], screenX / 100, screenY / 100);
+                xx6 = 2 + xx9;
+                drawimage(grap[xx6][1], screenX / 100, screenY / 100);
             } else if (blockType[index] == 112 || (blockType[index] == 104 && blockXType[index] == 0) || (blockType[index] == 115 && blockXType[index] == 1)) {
-                xx[6] = 1 + xx[9];
-                drawimage(grap[xx[6]][1], screenX / 100, screenY / 100);
+                xx6 = 1 + xx9;
+                drawimage(grap[xx6][1], screenX / 100, screenY / 100);
             } else if (blockType[index] == 111 || blockType[index] == 113 || (blockType[index] == 115 && blockXType[index] == 0) || blockType[index] == 124) {
-                xx[6] = 3 + xx[9];
-                drawimage(grap[xx[6]][1], screenX / 100, screenY / 100);
+                xx6 = 3 + xx9;
+                drawimage(grap[xx6][1], screenX / 100, screenY / 100);
             }
         }
 
         if (blockType[index] == 115 && blockXType[index] == 3) {
-            xx[6] = 1 + xx[9];
-            drawimage(grap[xx[6]][1], screenX / 100, screenY / 100);
+            xx6 = 1 + xx9;
+            drawimage(grap[xx6][1], screenX / 100, screenY / 100);
         } else if (blockType[index] == 117 && blockXType[index] == 1) {
             drawimage(grap[4][5], screenX / 100, screenY / 100);
         } else if (blockType[index] == 117 && blockXType[index] >= 3) {
@@ -928,7 +931,7 @@ void processSceneInGame() {
         stage();
 
         //ランダムにさせる
-        if (over == 1) {
+        if (zeroMode) {
             for (int i = 0; i < T_MAX; i++) {
                 if (rand(3) <= 1) {
                     blockX[i] = (rand(500) - 1) * 29 * 100;
@@ -1540,12 +1543,12 @@ if (mtm==250)end();
             if (marioType != MarioType::DYING && marioType != MarioType::HUGE && marioType != MarioType::AFTER_ORANGE_NOTE) {
                 if (blockType[t] < 1000 && blockType[t] != 800 && blockType[t] != 140 && blockType[t] != 141) {    // && blockType[t]!=5){
                     //if (!(mztm>=1 && mztype==1 && actaon[3]==1)){
-                    if (!(mztype == 1)) {
+                    if (mztype != 1) {
                         xx[16] = 0;
                         xx[17] = 0;
 
                         //上
-                        if (blockType[t] != 7 && blockType[t] != 110 && !(blockType[t] == 114)) {
+                        if (blockType[t] != 7 && blockType[t] != 110 && blockType[t] != 114) {
                             if (marioX + marioWidth > xx[8] + xx[0] * 2 + 100 && marioX < xx[8] + xx[1] - xx[0] * 2 - 100 &&
                                 marioY + marioHeight > xx[9] && marioY + marioHeight < xx[9] + xx[1] && marioSpeedY >= -100) {
                                 if (blockType[t] != 115 && blockType[t] != 400
@@ -1563,9 +1566,7 @@ if (mtm==250)end();
                                     eyobi(blockX[t] + 1200, blockY[t] + 1200, 240, -1400, 0, 160, 1000, 1000, 1, 120);
                                     eyobi(blockX[t] + 1200, blockY[t] + 1200, -240, -1400, 0, 160, 1000, 1000, 1, 120);
                                     brockbreak(t);
-                                }
-                                    //Pスイッチ
-                                else if (blockType[t] == 400) {
+                                } else if (blockType[t] == 400) {  // Pスイッチ
                                     marioSpeedY = 0;
                                     blockX[t] = -8000000;
                                     ot(oto[13]);
@@ -1575,9 +1576,7 @@ if (mtm==250)end();
                                         }
                                     }
                                     Mix_HaltMusic();
-                                }
-                                    //音符+
-                                else if (blockType[t] == 117) {
+                                } else if (blockType[t] == 117) {  // 音符+
                                     ot(oto[14]);
                                     marioSpeedY = -1500;
                                     marioType = MarioType::AFTER_ORANGE_NOTE;
@@ -1589,15 +1588,12 @@ if (mtm==250)end();
                                     }
                                     if (blockXType[t] == 0)
                                         blockXType[t] = 1;
-                                }
-                                    //ジャンプ台
-                                else if (blockType[t] == 120) {
+                                } else if (blockType[t] == 120) {  // ジャンプ台
                                     //blockXType[t]=0;
                                     marioSpeedY = -2400;
                                     marioType = MarioType::AFTER_SPRING;
                                     mtm = 0;
                                 }
-
                             }
                         }
                     }    //!
@@ -3989,7 +3985,7 @@ void processSceneTitle() {
         sta = 1;
         stb = 1;
         stc = 0;
-        over = 0;
+        zeroMode = false;
     }
 
     if (CheckHitKey(KEY_INPUT_1) == 1) {
@@ -4039,7 +4035,7 @@ void processSceneTitle() {
     }
     if (CheckHitKey(KEY_INPUT_0) == 1) {
         xx[0] = 1;
-        over = 1;
+        zeroMode = true;
     }
     //if (CheckHitKeyAll() == 0){end();}
     if (CheckHitKey(KEY_INPUT_RETURN) == 1) {
