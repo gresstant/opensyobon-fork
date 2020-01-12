@@ -1,4 +1,5 @@
 #include "draw.h"
+#include "entities/block.h"
 
 using namespace std;
 
@@ -65,7 +66,7 @@ void paintSceneInGameBgItem(int index);
 void paintSceneInGameEffectItem(int index);
 void paintSceneInGameLift(int index);
 void paintSceneInGameEnemy(int index);
-void paintSceneInGameBlock(int index);
+void paintSceneInGameBlock(int index /*IBlock& block*/);
 void paintSceneAllStageClear();
 void paintSceneLifeSplash();
 void paintSceneTitle();
@@ -78,7 +79,7 @@ int maint;
 #define wait(i) SDL_Delay(i)
 void wait2(long stime, long etime, int FLAME_TIME);
 int rand(int Rand);
-#define end() exit(0)
+//#define end() exit(0)  // this line made it impossible to use iterators
 
 void setre();
 void setre2();
@@ -143,12 +144,20 @@ int mascrollmax = 21000;	//9000
 
 
 //ブロック
+#include "entities/block.h"
+#include <vector>
+#include <memory>
+using std::vector;
+using std::unique_ptr;
 void tyobi(int x, int y, int type);
 void brockbreak(int t);
 #define T_MAX 641
+//vector<unique_ptr<IBlock>> blocks;
+// region TODO comment
 int blockCounter;
 int blockX[T_MAX], blockY[T_MAX], blockType[T_MAX], blockXType[T_MAX];
 int thp[T_MAX], titem[T_MAX];
+// endregion
 
 //メッセージブロック
 int tmsgtm, tmsgtype, tmsgx, tmsgy, tmsgnobix, tmsgnobiy, tmsg;
