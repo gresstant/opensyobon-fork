@@ -29,25 +29,18 @@ int main(int argc, char *argv[]) {
 //メイン描画
 void paint() {
     //ダブルバッファリング
-    setcolor(0, 0, 0);
-    //if (stagecolor==1)setcolor(170,170,255);
-    if (stagecolor == 1)
-        setcolor(160, 180, 250);
-    if (stagecolor == 2)
-        setcolor(10, 10, 10);
-    if (stagecolor == 3)
-        setcolor(160, 180, 250);
-    if (stagecolor == 4)
-        setcolor(10, 10, 10);
-    if (stagecolor == 5) {
-        setcolor(160, 180, 250);
-        mrzimen = 1;
+    if (stagecolor == 1 || stagecolor == 3 || stagecolor == 5) {
+        setColor(160, 180, 250);
+    } else if (stagecolor == 2 || stagecolor == 4) {
+        setColor(10, 10, 10);
     } else {
-        mrzimen = 0;
+        setColor(0, 0, 0);
     }
 
+    level9ground = stagecolor == 5;
+
     //: Clear screen
-    FillScreen();
+    fillScreen();
 
     if (gameScene == GameScene::IN_GAME && initialized) {
         paintSceneInGame();
@@ -63,74 +56,82 @@ void paint() {
 }                //paint()
 
 void paintSceneInGame() {
-    for (int i = 0; i < nmax; i++) {
+    for (int i = 0; i < BG_MAX; i++) {
         paintSceneInGameBgItem(i);
     }
 
-    for (int i = 0; i < emax; i++) {
+    for (int i = 0; i < EFFECT_MAX; i++) {
         paintSceneInGameEffectItem(i);
     }
 
-    for (int i = 0; i < srmax; i++) {
+    for (int i = 0; i < LIFT_MAX; i++) {
         paintSceneInGameLift(i);
     }
 
     paintSceneInGameMario();
 
-    for (int i = 0; i < amax; i++) {
+    for (int i = 0; i < ENEMY_MAX; i++) {
         paintSceneInGameEnemy(i);
     }
 
 //    for (auto& ptrToBlock : blocks) {  // TODO
 //        paintSceneInGameBlock(*ptrToBlock);
 //    }
-    for (int i = 0; i < T_MAX; i++) {
+    for (int i = 0; i < BLOCK_MAX; i++) {
         paintSceneInGameBlock(i);
     }
 
     //地面(壁)//土管も
     for (int i = 0; i < smax; i++) {
-        if (sa[i] - fx + sc[i] >= -10 && sa[i] - fx <= fxmax + 1100) {
+        int screenX = sa[i] - fx;
+        int screenY = sb[i] - fy;
+        
+        if (screenX + sc[i] >= -10 && screenX <= fxmax + 1100) {
 
             if (stype[i] == 0) {
-                setcolor(40, 200, 40);
-                fillrect((sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb, sc[i] / 100, sd[i] / 100);
-                drawrect((sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb, sc[i] / 100, sd[i] / 100);
+                setColor(40, 200, 40);
+                fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb, sc[i] / 100, sd[i] / 100);
+                drawRect(screenX / 100 + fmaZ, screenY / 100 + fmb, sc[i] / 100, sd[i] / 100);
             } else if (stype[i] == 1) {  // 土管  Tube
-                setcolor(0, 230, 0);
-                fillrect((sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb, sc[i] / 100, sd[i] / 100);
-                setc0();
-                drawrect((sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb, sc[i] / 100, sd[i] / 100);
+                setColor(0, 230, 0);
+                fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb, sc[i] / 100, sd[i] / 100);
+                setColorToBlack();
+                drawRect(screenX / 100 + fmaZ, screenY / 100 + fmb, sc[i] / 100, sd[i] / 100);
             } else if (stype[i] == 2) {  // 土管(下)  Tube (Downwards)
-                setcolor(0, 230, 0);
-                fillrect((sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb + 1, sc[i] / 100, sd[i] / 100);
-                setc0();
-                drawline((sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb, (sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb + sd[i] / 100);
-                drawline((sa[i] - fx) / 100 + fma + sc[i] / 100, (sb[i] - fy) / 100 + fmb, (sa[i] - fx) / 100 + fma + sc[i] / 100, (sb[i] - fy) / 100 + fmb + sd[i] / 100);
+                setColor(0, 230, 0);
+                fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb + 1, sc[i] / 100, sd[i] / 100);
+                setColorToBlack();
+                drawLine(screenX / 100 + fmaZ, screenY / 100 + fmb, screenX / 100 + fmaZ,
+                         screenY / 100 + fmb + sd[i] / 100);
+                drawLine(screenX / 100 + fmaZ + sc[i] / 100, screenY / 100 + fmb,
+                         screenX / 100 + fmaZ + sc[i] / 100, screenY / 100 + fmb + sd[i] / 100);
             } else if (stype[i] == 5) {  // 土管(横)  Tube (Horizontal)
-                setcolor(0, 230, 0);
-                fillrect((sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb + 1, sc[i] / 100, sd[i] / 100);
-                setc0();
-                drawline((sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb, (sa[i] - fx) / 100 + fma + sc[i] / 100, (sb[i] - fy) / 100 + fmb);
-                drawline((sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb + sd[i] / 100, (sa[i] - fx) / 100 + fma + sc[i] / 100, (sb[i] - fy) / 100 + fmb + sd[i] / 100);
+                setColor(0, 230, 0);
+                fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb + 1, sc[i] / 100, sd[i] / 100);
+                setColorToBlack();
+                drawLine(screenX / 100 + fmaZ, screenY / 100 + fmb, screenX / 100 + fmaZ + sc[i] / 100,
+                         screenY / 100 + fmb);
+                drawLine(screenX / 100 + fmaZ, screenY / 100 + fmb + sd[i] / 100,
+                         screenX / 100 + fmaZ + sc[i] / 100, screenY / 100 + fmb + sd[i] / 100);
             } else if (stype[i] == 51) {  // 落ちてくるブロック  Falling Block
                 if (sxtype[i] == 0) {
                     for (t3 = 0; t3 <= sc[i] / 3000; t3++) {
-                        drawimage(grap[1][1], (sa[i] - fx) / 100 + fma + 29 * t3, (sb[i] - fy) / 100 + fmb);
+                        drawImage(grap[1][1], screenX / 100 + fmaZ + 29 * t3, screenY / 100 + fmb);
                     }
                 } else if (sxtype[i] == 1 || sxtype[i] == 2) {
                     for (t3 = 0; t3 <= sc[i] / 3000; t3++) {
-                        drawimage(grap[31][1], (sa[i] - fx) / 100 + fma + 29 * t3, (sb[i] - fy) / 100 + fmb);
+                        drawImage(grap[31][1], screenX / 100 + fmaZ + 29 * t3, screenY / 100 + fmb);
                     }
                 } else if (sxtype[i] == 3 || sxtype[i] == 4) {
                     for (t3 = 0; t3 <= sc[i] / 3000; t3++) {
                         for (t2 = 0; t2 <= sd[i] / 3000; t2++) {
-                            drawimage(grap[65][1], (sa[i] - fx) / 100 + fma + 29 * t3, (sb[i] - fy) / 100 + 29 * t2 + fmb);
+                            drawImage(grap[65][1], screenX / 100 + fmaZ + 29 * t3,
+                                      screenY / 100 + 29 * t2 + fmb);
                         }
                     }
                 } else if (sxtype[i] == 10) {
                     for (t3 = 0; t3 <= sc[i] / 3000; t3++) {
-                        drawimage(grap[65][1], (sa[i] - fx) / 100 + fma + 29 * t3, (sb[i] - fy) / 100 + fmb);
+                        drawImage(grap[65][1], screenX / 100 + fmaZ + 29 * t3, screenY / 100 + fmb);
                     }
                 }
             } else if (stype[i] == 52) {  // 落ちるやつ
@@ -143,21 +144,25 @@ void paintSceneInGame() {
                     xx[29] = 90;
                 }
 
-                for (t3 = 0; t3 <= sc[i] / 3000; t3++) {
+                for (int j = 0; j <= sc[i] / 3000; j++) {
                     if (sxtype[i] == 0) {
-                        drawimage(grap[5 + xx[29]][1], (sa[i] - fx) / 100 + fma + 29 * t3, (sb[i] - fy) / 100 + fmb);
+                        drawImage(grap[5 + xx[29]][1], screenX / 100 + fmaZ + 29 * j, screenY / 100 + fmb);
                         if (stagecolor != 4) {
-                            drawimage(grap[6 + xx[29]][1], (sa[i] - fx) / 100 + fma + 29 * t3, (sb[i] - fy) / 100 + fmb + 29);
+                            drawImage(grap[6 + xx[29]][1], screenX / 100 + fmaZ + 29 * j,
+                                      screenY / 100 + fmb + 29);
                         } else {
-                            drawimage(grap[5 + xx[29]][1], (sa[i] - fx) / 100 + fma + 29 * t3, (sb[i] - fy) / 100 + fmb + 29);
+                            drawImage(grap[5 + xx[29]][1], screenX / 100 + fmaZ + 29 * j,
+                                      screenY / 100 + fmb + 29);
                         }
                     } else if (sxtype[i] == 1) {
-                        for (t2 = 0; t2 <= sd[i] / 3000; t2++) {
-                            drawimage(grap[1 + xx[29]][1], (sa[i] - fx) / 100 + fma + 29 * t3, (sb[i] - fy) / 100 + fmb + 29 * t2);
+                        for (int k = 0; k <= sd[i] / 3000; k++) {
+                            drawImage(grap[1 + xx[29]][1], screenX / 100 + fmaZ + 29 * j,
+                                      screenY / 100 + fmb + 29 * k);
                         }
                     } else if (sxtype[i] == 2) {
-                        for (t2 = 0; t2 <= sd[i] / 3000; t2++) {
-                            drawimage(grap[5 + xx[29]][1], (sa[i] - fx) / 100 + fma + 29 * t3, (sb[i] - fy) / 100 + fmb + 29 * t2);
+                        for (int k = 0; k <= sd[i] / 3000; k++) {
+                            drawImage(grap[5 + xx[29]][1], screenX / 100 + fmaZ + 29 * j,
+                                      screenY / 100 + fmb + 29 * k);
                         }
                     }
 
@@ -167,27 +172,27 @@ void paintSceneInGame() {
             if (trap == 1) {  // ステージトラップ
                 if (stype[i] >= 100 && stype[i] <= 299) {
                     if (stagecolor == 1 || stagecolor == 3 || stagecolor == 5)
-                        setc0();
+                        setColorToBlack();
                     if (stagecolor == 2 || stagecolor == 4)
-                        setc1();
-                    drawrect((sa[i] - fx) / 100 + fma, (sb[i] - fy) / 100 + fmb, sc[i] / 100, sd[i] / 100);
+                        setColorToWhite();
+                    drawRect(screenX / 100 + fmaZ, screenY / 100 + fmb, sc[i] / 100, sd[i] / 100);
                 }
             }
 
             if (stype[i] == 300) {  // ゴール
-                setc1();
-                fillrect((sa[i] - fx) / 100 + 10, (sb[i] - fy) / 100, 10, sd[i] / 100 - 8);
-                setc0();
-                drawrect((sa[i] - fx) / 100 + 10, (sb[i] - fy) / 100, 10, sd[i] / 100 - 8);
-                setcolor(250, 250, 0);
-                fillarc((sa[i] - fx) / 100 + 15 - 1, (sb[i] - fy) / 100, 10, 10);
-                setc0();
-                drawarc((sa[i] - fx) / 100 + 15 - 1, (sb[i] - fy) / 100, 10, 10);
+                setColorToWhite();
+                fillRect(screenX / 100 + 10, screenY / 100, 10, sd[i] / 100 - 8);
+                setColorToBlack();
+                drawRect(screenX / 100 + 10, screenY / 100, 10, sd[i] / 100 - 8);
+                setColor(250, 250, 0);
+                fillEllipse(screenX / 100 + 15 - 1, screenY / 100, 10, 10);
+                setColorToBlack();
+                drawEllipse(screenX / 100 + 15 - 1, screenY / 100, 10, 10);
             } else if (stype[i] == 500) {  // 中間
-                drawimage(grap[20][4], (sa[i] - fx) / 100, (sb[i] - fy) / 100);
+                drawImage(grap[20][4], screenX / 100, screenY / 100);
             }
         }
-    }            //t
+    }
 
     //描画上書き(土管)
     for (int i = 0; i < smax; i++) {  // TODO merge smax loop
@@ -195,92 +200,79 @@ void paintSceneInGame() {
 
 //入る土管(右)
             if (stype[i] == 40) {
-                setcolor(0, 230, 0);
-                fillrect((sa[i] - fx) / 100 + fma,
+                setColor(0, 230, 0);
+                fillRect((sa[i] - fx) / 100 + fmaZ,
                          (sb[i] - fy) / 100 + fmb + 1,
                          sc[i] / 100, sd[i] / 100);
-                setc0();
-                drawrect((sa[i] - fx) / 100 + fma,
+                setColorToBlack();
+                drawRect((sa[i] - fx) / 100 + fmaZ,
                          (sb[i] - fy) / 100 + fmb + 1,
                          sc[i] / 100, sd[i] / 100);
             }
 //とぶ土管
             if (stype[i] == 50) {
-                setcolor(0, 230, 0);
-                fillrect((sa[i] - fx) / 100 + fma + 5,
+                setColor(0, 230, 0);
+                fillRect((sa[i] - fx) / 100 + fmaZ + 5,
                          (sb[i] - fy) / 100 + fmb + 30,
                          50, sd[i] / 100 - 30);
-                setc0();
-                drawline((sa[i] - fx) / 100 + 5 + fma,
+                setColorToBlack();
+                drawLine((sa[i] - fx) / 100 + 5 + fmaZ,
                          (sb[i] - fy) / 100 + fmb + 30,
-                         (sa[i] - fx) / 100 + fma + 5,
+                         (sa[i] - fx) / 100 + fmaZ + 5,
                          (sb[i] - fy) / 100 + fmb + sd[i] / 100);
-                drawline((sa[i] - fx) / 100 + 5 + fma +
-                         50,
+                drawLine((sa[i] - fx) / 100 + 5 + fmaZ + 50,
                          (sb[i] - fy) / 100 + fmb + 30,
-                         (sa[i] - fx) / 100 + fma + 50 +
-                         5, (sb[i] - fy) / 100 + fmb + sd[i] / 100);
+                         (sa[i] - fx) / 100 + fmaZ + 50 + 5,
+                         (sb[i] - fy) / 100 + fmb + sd[i] / 100);
 
-                setcolor(0, 230, 0);
-                fillrect((sa[i] - fx) / 100 + fma,
+                setColor(0, 230, 0);
+                fillRect((sa[i] - fx) / 100 + fmaZ,
                          (sb[i] - fy) / 100 + fmb + 1, 60, 30);
-                setc0();
-                drawrect((sa[i] - fx) / 100 + fma,
+                setColorToBlack();
+                drawRect((sa[i] - fx) / 100 + fmaZ,
                          (sb[i] - fy) / 100 + fmb + 1, 60, 30);
             }
 //地面(ブロック)
             if (stype[i] == 200) {
                 for (t3 = 0; t3 <= sc[i] / 3000; t3++) {
                     for (t2 = 0; t2 <= sd[i] / 3000; t2++) {
-                        drawimage(grap[65][1],
-                                  (sa[i] -
-                                   fx) / 100 +
-                                  fma + 29 * t3,
+                        drawImage(grap[65][1],
+                                  (sa[i] - fx) / 100 + fmaZ + 29 * t3,
                                   (sb[i] - fy) / 100 + 29 * t2 + fmb);
                     }
                 }
             }
 
         }
-    }            //t
+    }
 
-        // ファイアバー  Fireball
-    for (t = 0; t < amax; t++) {
+    // ファイアバー  Fireball
+    for (int i = 0; i < ENEMY_MAX; i++) {
+        int screenX = aa[i] - fx;
+        int screenY = ab[i] - fy;
+        const int xx2 = 32;
+        const int xx14 = 12000;
 
-        xx[0] = aa[t] - fx;
-        xx[1] = ab[t] - fy;
-        xx[14] = 12000;
-        xx[16] = 0;
-        if (atype[t] == 87 || atype[t] == 88) {
-            if (xx[0] + xx[2] * 100 >= -10 - xx[14]
-                && xx[1] <= fxmax + xx[14]
-                && xx[1] + xx[3] * 100 >= -10 && xx[3] <= fymax) {
+        if (atype[i] == 87 || atype[i] == 88) {
+            if (screenX + xx2 * 100 >= -10 - xx14
+                    && screenY <= fxmax + xx14
+                    && screenY + xx[3] * 100 >= -10 && xx[3] <= fymax) {
+                for (int j = 0; j <= axtype[i] % 100; j++) {
+                    xx[24] = (int) (j * 18 * cos(atm[i] * pai / 180 / 2));
+                    xx[25] = (int) (j * 18 * sin(atm[i] * pai / 180 / 2));
+                    printf("i = %d\tj = %d\txx[24] = %d\txx[25] = %d\n", i, j, xx[24], xx[25]);
 
-                for (tt = 0; tt <= axtype[t] % 100; tt++) {
-                    xx[26] = 18;
-                    xd[4] = tt * xx[26] * cos(atm[t] * pai / 180 / 2);
-                    xd[5] = tt * xx[26] * sin(atm[t] * pai / 180 / 2);
-                    xx[24] = (int) xd[4];
-                    xx[25] = (int) xd[5];
-                    setcolor(230, 120, 0);
-                    xx[23] = 8;
-                    if (atype[t] == 87) {
-                        fillarc(xx[0] / 100 + xx[24], xx[1] / 100 + xx[25], xx[23], xx[23]);
-                        setcolor(0, 0, 0);
-                        drawarc(xx[0] / 100 + xx[24], xx[1] / 100 + xx[25], xx[23], xx[23]);
-                    } else {
-                        fillarc(xx[0] / 100 - xx[24], xx[1] / 100 + xx[25], xx[23], xx[23]);
-                        setcolor(0, 0, 0);
-                        drawarc(xx[0] / 100 - xx[24], xx[1] / 100 + xx[25], xx[23], xx[23]);
-                    }
+                    setColor(230, 120, 0);
+                    fillEllipse(screenX / 100 + xx[24], screenY / 100 + xx[25], 8, 8);
+                    setColor(0, 0, 0);
+                    drawEllipse(screenX / 100 + xx[24], screenY / 100 + xx[25], 8, 8);
                 }
-
             }
         }
     }
 
     //プレイヤーのメッセージ
-    setc0();
+    setColorToBlack();
     if (mmsgtm >= 1) {
         mmsgtm--;
         xs[0] = "";
@@ -308,17 +300,17 @@ void paintSceneInGame() {
         if (mmsgtype == 55)
             xs[0] = "溶岩と合体したい……";
 
-        setc0();
+        setColorToBlack();
         str(xs[0], (marioX + marioWidth + 300) / 100 - 1, marioY / 100 - 1);
         str(xs[0], (marioX + marioWidth + 300) / 100 + 1, marioY / 100 + 1);
-        setc1();
+        setColorToWhite();
         str(xs[0], (marioX + marioWidth + 300) / 100, marioY / 100);
 
     }            //mmsgtm
 
     //敵キャラのメッセージ
-    setc0();
-    for (int i = 0; i < amax; i++) {
+    setColorToBlack();
+    for (int i = 0; i < ENEMY_MAX; i++) {
         if (amsgtm[i] >= 1) {
             amsgtm[i]--;    //end();
 
@@ -432,12 +424,12 @@ void paintSceneInGame() {
             }
 
             ChangeFontType(DX_FONTTYPE_EDGE);
-            setc1();
+            setColorToWhite();
             str(xs[0], xx[5], xx[6]);
             ChangeFontType(DX_FONTTYPE_NORMAL);
 
         }            //amsgtm
-    }            //amax
+    }            //ENEMY_MAX
 
     //メッセージブロック
     if (tmsgtm > 0) {
@@ -471,20 +463,20 @@ void paintSceneInGame() {
     }            //tmsgtm
 
     //メッセージ
-    if (mainmsgtype >= 1) {
+    if (owataZone >= 1) {
         setFont(20, 4);
-        if (mainmsgtype == 1) {
+        if (owataZone == 1) {
             DrawFormatString(126, 100, GetColor(255, 255, 255), "WELCOME TO OWATA ZONE");
             for (int i = 0; i <= 2; i++)
                 DrawFormatString(88 + i * 143, 210, GetColor(255, 255, 255), "1");
         }
         setFont(20, 5);
-    }            //mainmsgtype>=1
+    }            //owataZone>=1
 
     //画面黒
     if (blacktm > 0) {
         blacktm--;
-        fillrect(0, 0, fxmax, fymax);
+        fillRect(0, 0, fxmax, fymax);
         if (blacktm == 0) {
             if (blackx == 1) {
                 initialized = false;
@@ -504,20 +496,20 @@ void paintSceneInGameBgItem(int index) {
     if (screenX + width >= -10 && screenX <= fxmax && screenY + height >= -10 && height <= fymax) {
         if (ntype[index] != 3) {
             if ((ntype[index] == 1 || ntype[index] == 2) && stagecolor == 5) {
-                drawimage(grap[ntype[index] + 30][4], screenX / 100, screenY / 100);
+                drawImage(grap[ntype[index] + 30][4], screenX / 100, screenY / 100);
             } else {
-                drawimage(grap[ntype[index]][4], screenX / 100, screenY / 100);
+                drawImage(grap[ntype[index]][4], screenX / 100, screenY / 100);
             }
         } else if (ntype[index] == 3) {
-            drawimage(grap[ntype[index]][4], screenX / 100 - 5, screenY / 100);
+            drawImage(grap[ntype[index]][4], screenX / 100 - 5, screenY / 100);
         } else if (ntype[index] == 100) {  // 51
-            DrawFormatString(screenX / 100 + fma, screenY / 100 + fmb,
+            DrawFormatString(screenX / 100 + fmaZ, screenY / 100 + fmb,
                              GetColor(255, 255, 255), "51");
         } else if (ntype[index] == 101) {
-            DrawFormatString(screenX / 100 + fma, screenY / 100 + fmb,
+            DrawFormatString(screenX / 100 + fmaZ, screenY / 100 + fmb,
                              GetColor(255, 255, 255), "ゲームクリアー");
         } else if (ntype[index] == 102) {
-            DrawFormatString(screenX / 100 + fma, screenY / 100 + fmb,
+            DrawFormatString(screenX / 100 + fmaZ, screenY / 100 + fmb,
                              GetColor(255, 255, 255), "プレイしてくれてありがとー");
         }
     }
@@ -532,32 +524,32 @@ void paintSceneInGameEffectItem(int index) {
 
     if (screenX + width * 100 >= -10 && screenY <= fxmax && screenY + height * 100 >= -10 - 8000 && height <= fymax) {
         if (egtype[index] == 0) {  // コイン
-            drawimage(grap[0][2], screenX / 100, screenY / 100);
+            drawImage(grap[0][2], screenX / 100, screenY / 100);
         } else if (egtype[index] == 1) {  // ブロックの破片
             if (stagecolor == 1 || stagecolor == 3 || stagecolor == 5) {
-                setcolor(9 * 16, 6 * 16, 3 * 16);
+                setColor(9 * 16, 6 * 16, 3 * 16);
             } else if (stagecolor == 2) {
-                setcolor(0, 120, 160);
+                setColor(0, 120, 160);
             } else if (stagecolor == 4) {
-                setcolor(192, 192, 192);
+                setColor(192, 192, 192);
             }
-            fillarc(screenX / 100, screenY / 100, 7, 7);
-            setcolor(0, 0, 0);
-            drawarc(screenX / 100, screenY / 100, 7, 7);
+            fillEllipse(screenX / 100, screenY / 100, 7, 7);
+            setColor(0, 0, 0);
+            drawEllipse(screenX / 100, screenY / 100, 7, 7);
         } else if (egtype[index] == 2 || egtype[index] == 3) {  // リフトの破片
             if (egtype[index] == 3)
-                mirror = 1;
-            drawimage(grap[0][5], screenX / 100, screenY / 100);
-            mirror = 0;
+                mirror = true;
+            drawImage(grap[0][5], screenX / 100, screenY / 100);
+            mirror = false;
         } else if (egtype[index] == 4) {  // ポール
-            setc1();
-            fillrect((screenX) / 100 + 10, (screenY) / 100, 10, height);
-            setc0();
-            drawrect((screenX) / 100 + 10, (screenY) / 100, 10, height);
-            setcolor(250, 250, 0);
-            fillarc((screenX) / 100 + 15 - 1, (screenY) / 100, 10, 10);
-            setc0();
-            drawarc((screenX) / 100 + 15 - 1, (screenY) / 100, 10, 10);
+            setColorToWhite();
+            fillRect((screenX) / 100 + 10, (screenY) / 100, 10, height);
+            setColorToBlack();
+            drawRect((screenX) / 100 + 10, (screenY) / 100, 10, height);
+            setColor(250, 250, 0);
+            fillEllipse((screenX) / 100 + 15 - 1, (screenY) / 100, 10, 10);
+            setColorToBlack();
+            drawEllipse((screenX) / 100 + 15 - 1, (screenY) / 100, 10, 10);
         }
     }
 }
@@ -575,38 +567,38 @@ void paintSceneInGameLift(int index) {
 
     if (srsp[index] <= 9 || srsp[index] >= 20) {
         if (srsp[index] == 2 || srsp[index] == 3) {
-            setcolor(0, 220, 0);
+            setColor(0, 220, 0);
         } else if (srsp[index] == 21) {
-            setcolor(180, 180, 180);
+            setColor(180, 180, 180);
         } else {
-            setcolor(220, 220, 0);
+            setColor(220, 220, 0);
         }
-        fillrect((sra[index] - fx) / 100, (srb[index] - fy) / 100, src[index] / 100, height);
+        fillRect((sra[index] - fx) / 100, (srb[index] - fy) / 100, src[index] / 100, height);
 
         if (srsp[index] == 2 || srsp[index] == 3) {
-            setcolor(0, 180, 0);
+            setColor(0, 180, 0);
         } else if (srsp[index] == 21) {
-            setcolor(150, 150, 150);
+            setColor(150, 150, 150);
         } else {
-            setcolor(180, 180, 0);
+            setColor(180, 180, 0);
         }
-        drawrect((sra[index] - fx) / 100, (srb[index] - fy) / 100, src[index] / 100, height);
+        drawRect((sra[index] - fx) / 100, (srb[index] - fy) / 100, src[index] / 100, height);
     } else if (srsp[index] <= 14) {
         if (src[index] >= 5000) {
-            setcolor(0, 200, 0);
-            fillrect((sra[index] - fx) / 100, (srb[index] - fy) / 100, src[index] / 100, 30);
-            setcolor(0, 160, 0);
-            drawrect((sra[index] - fx) / 100, (srb[index] - fy) / 100, src[index] / 100, 30);
+            setColor(0, 200, 0);
+            fillRect((sra[index] - fx) / 100, (srb[index] - fy) / 100, src[index] / 100, 30);
+            setColor(0, 160, 0);
+            drawRect((sra[index] - fx) / 100, (srb[index] - fy) / 100, src[index] / 100, 30);
 
-            setcolor(180, 120, 60);
-            fillrect((sra[index] - fx) / 100 + 20, (srb[index] - fy) / 100 + 30, src[index] / 100 - 40, 480);
-            setcolor(100, 80, 20);
-            drawrect((sra[index] - fx) / 100 + 20, (srb[index] - fy) / 100 + 30, src[index] / 100 - 40, 480);
+            setColor(180, 120, 60);
+            fillRect((sra[index] - fx) / 100 + 20, (srb[index] - fy) / 100 + 30, src[index] / 100 - 40, 480);
+            setColor(100, 80, 20);
+            drawRect((sra[index] - fx) / 100 + 20, (srb[index] - fy) / 100 + 30, src[index] / 100 - 40, 480);
         }
     } else if (srsp[index] == 15) {
         for (int i = 0; i <= 2; i++) {
             xx[6] = 1 + 0;
-            drawimage(grap[xx[6]][1], (sra[index] - fx) / 100 + i * 29, (srb[index] - fy) / 100);
+            drawImage(grap[xx[6]][1], (sra[index] - fx) / 100 + i * 29, (srb[index] - fy) / 100);
         }
     }
 }
@@ -625,7 +617,7 @@ void paintSceneInGameEnemy(int index) {
             && screenY + height * 100 >= -10 && height <= fymax) {
 
         if (amuki[index] == 1) {
-            mirror = atype[index] >= 100 ? 0 : 1;
+            mirror = atype[index] < 100;
         }
 
         if (atype[index] == 3 && axtype[index] == 1) {
@@ -640,32 +632,32 @@ void paintSceneInGameEnemy(int index) {
         if (atype[index] < 200 && xx[16] == 0 && atype[index] != 6 && atype[index] != 79 
                 && atype[index] != 86 && atype[index] != 30) {
             if (!((atype[index] == 80 || atype[index] == 81) && axtype[index] == 1)) {
-                drawimage(grap[atype[index]][3], screenX / 100, screenY / 100);
+                drawImage(grap[atype[index]][3], screenX / 100, screenY / 100);
             }
         }
         
         if (atype[index] == 6) {  // デフラグさん
             if ((atm[index] >= 10 && atm[index] <= 19) || (atm[index] >= 100 && atm[index] <= 119) || atm[index] >= 200) {
-                drawimage(grap[150][3], screenX / 100, screenY / 100);
+                drawImage(grap[150][3], screenX / 100, screenY / 100);
             } else {
-                drawimage(grap[6][3], screenX / 100, screenY / 100);
+                drawImage(grap[6][3], screenX / 100, screenY / 100);
             }
         }
 
         
         if (atype[index] == 30) {  // モララー
             if (axtype[index] == 0) {
-                drawimage(grap[30][3], screenX / 100, screenY / 100);
+                drawImage(grap[30][3], screenX / 100, screenY / 100);
             } else if (axtype[index] == 1) {
-                drawimage(grap[155][3], screenX / 100, screenY / 100);
+                drawImage(grap[155][3], screenX / 100, screenY / 100);
             }
         } else if ((atype[index] == 81) && axtype[index] == 1) {  // ステルス雲
-            drawimage(grap[130][3], screenX / 100, screenY / 100);
+            drawImage(grap[130][3], screenX / 100, screenY / 100);
         } else if (atype[index] == 79) {
-            setcolor(250, 250, 0);
-            fillrect(screenX / 100, screenY / 100, width, height);
-            setc0();
-            drawrect(screenX / 100, screenY / 100, width, height);
+            setColor(250, 250, 0);
+            fillRect(screenX / 100, screenY / 100, width, height);
+            setColorToBlack();
+            drawRect(screenX / 100, screenY / 100, width, height);
         } else if (atype[index] == 82) {
             if (axtype[index] == 0) {
                 xx[9] = 0;  // WTF?
@@ -677,7 +669,7 @@ void paintSceneInGameEnemy(int index) {
                     xx[9] = 90;
                 }
                 xx[6] = 5 + xx[9];
-                drawimage(grap[xx[6]][1], screenX / 100, screenY / 100);
+                drawImage(grap[xx[6]][1], screenX / 100, screenY / 100);
             } else if (axtype[index] == 1) {
                 xx[9] = 0;
                 if (stagecolor == 2) {
@@ -688,9 +680,9 @@ void paintSceneInGameEnemy(int index) {
                     xx[9] = 90;
                 }
                 xx[6] = 4 + xx[9];
-                drawimage(grap[xx[6]][1], screenX / 100, screenY / 100);
+                drawImage(grap[xx[6]][1], screenX / 100, screenY / 100);
             } else if (axtype[index] == 2) {
-                drawimage(grap[1][5], screenX / 100, screenY / 100);
+                drawImage(grap[1][5], screenX / 100, screenY / 100);
             }
         } else if (atype[index] == 83) {
             if (axtype[index] == 0) {
@@ -703,7 +695,7 @@ void paintSceneInGameEnemy(int index) {
                     xx[9] = 90;
                 }
                 xx[6] = 5 + xx[9];
-                drawimage(grap[xx[6]][1], screenX / 100 + 10, screenY / 100 + 9);
+                drawImage(grap[xx[6]][1], screenX / 100 + 10, screenY / 100 + 9);
             } else if (axtype[index] == 1) {
                 xx[9] = 0;
                 if (stagecolor == 2) {
@@ -714,29 +706,29 @@ void paintSceneInGameEnemy(int index) {
                     xx[9] = 90;
                 }
                 xx[6] = 4 + xx[9];
-                drawimage(grap[xx[6]][1], screenX / 100 + 10, screenY / 100 + 9);
+                drawImage(grap[xx[6]][1], screenX / 100 + 10, screenY / 100 + 9);
             }
         } else if (atype[index] == 85) {  // 偽ポール
-            setc1();
-            fillrect((screenX) / 100 + 10, (screenY) / 100, 10, height);
-            setc0();
-            drawrect((screenX) / 100 + 10, (screenY) / 100, 10, height);
-            setcolor(0, 250, 200);
-            fillarc((screenX) / 100 + 15 - 1, (screenY) / 100, 10, 10);
-            setc0();
-            drawarc((screenX) / 100 + 15 - 1, (screenY) / 100, 10, 10);
+            setColorToWhite();
+            fillRect((screenX) / 100 + 10, (screenY) / 100, 10, height);
+            setColorToBlack();
+            drawRect((screenX) / 100 + 10, (screenY) / 100, 10, height);
+            setColor(0, 250, 200);
+            fillEllipse((screenX) / 100 + 15 - 1, (screenY) / 100, 10, 10);
+            setColorToBlack();
+            drawEllipse((screenX) / 100 + 15 - 1, (screenY) / 100, 10, 10);
         } else if (atype[index] == 86) {  // ニャッスン
             if (marioX >= aa[index] - fx - marioWidth - 4000
                 && marioX <= aa[index] - fx + anobia[index] + 4000) {
-                drawimage(grap[152][3], screenX / 100, screenY / 100);
+                drawImage(grap[152][3], screenX / 100, screenY / 100);
             } else {
-                drawimage(grap[86][3], screenX / 100, screenY / 100);
+                drawImage(grap[86][3], screenX / 100, screenY / 100);
             }
         } else if (atype[index] == 200) {
-            drawimage(grap[0][3], screenX / 100, screenY / 100);
+            drawImage(grap[0][3], screenX / 100, screenY / 100);
         }
 
-        mirror = 0;
+        mirror = false;
     }
 }
 
@@ -750,7 +742,7 @@ void paintSceneInGameBlock(int index /*IBlock& block*/) {
     if (screenX + width * 100 >= -10 && screenY <= fxmax) {
 //        SDL_Surface* img = block.getImage();  // TODO
 //        if (img != nullptr) {
-//            drawimage(img, screenX, screenY);
+//            drawImage(img, screenX, screenY);
 //        }
 
         // xx6 is being used to select graph that fits the level color style
@@ -767,55 +759,55 @@ void paintSceneInGameBlock(int index /*IBlock& block*/) {
 
         if (blockType[index] < 100) {
             xx6 = blockType[index] + xx9;
-            drawimage(grap[xx6][1], screenX / 100, screenY / 100);
+            drawImage(grap[xx6][1], screenX / 100, screenY / 100);
         }
 
         if (blockXType[index] != 10) {
             if (blockType[index] == 100 || blockType[index] == 101 || blockType[index] == 102 || blockType[index] == 103
                 || (blockType[index] == 104 && blockXType[index] == 1) || (blockType[index] == 114 && blockXType[index] == 1) || blockType[index] == 116) {
                 xx6 = 2 + xx9;
-                drawimage(grap[xx6][1], screenX / 100, screenY / 100);
+                drawImage(grap[xx6][1], screenX / 100, screenY / 100);
             } else if (blockType[index] == 112 || (blockType[index] == 104 && blockXType[index] == 0) || (blockType[index] == 115 && blockXType[index] == 1)) {
                 xx6 = 1 + xx9;
-                drawimage(grap[xx6][1], screenX / 100, screenY / 100);
+                drawImage(grap[xx6][1], screenX / 100, screenY / 100);
             } else if (blockType[index] == 111 || blockType[index] == 113 || (blockType[index] == 115 && blockXType[index] == 0) || blockType[index] == 124) {
                 xx6 = 3 + xx9;
-                drawimage(grap[xx6][1], screenX / 100, screenY / 100);
+                drawImage(grap[xx6][1], screenX / 100, screenY / 100);
             }
         }
 
         if (blockType[index] == 115 && blockXType[index] == 3) {
             xx6 = 1 + xx9;
-            drawimage(grap[xx6][1], screenX / 100, screenY / 100);
+            drawImage(grap[xx6][1], screenX / 100, screenY / 100);
         } else if (blockType[index] == 117 && blockXType[index] == 1) {
-            drawimage(grap[4][5], screenX / 100, screenY / 100);
+            drawImage(grap[4][5], screenX / 100, screenY / 100);
         } else if (blockType[index] == 117 && blockXType[index] >= 3) {
-            drawimage(grap[3][5], screenX / 100, screenY / 100);
+            drawImage(grap[3][5], screenX / 100, screenY / 100);
         } else if (blockType[index] == 120 && blockXType[index] != 1) {  // ジャンプ台
-            drawimage(grap[16][1], screenX / 100 + 3, screenY / 100 + 2);
+            drawImage(grap[16][1], screenX / 100 + 3, screenY / 100 + 2);
         } else if (blockType[index] == 130) {  // ON-OFF: ON
-            drawimage(grap[10][5], screenX / 100, screenY / 100);
+            drawImage(grap[10][5], screenX / 100, screenY / 100);
         } else if (blockType[index] == 131) {  // ON-OFF: OFF
-            drawimage(grap[11][5], screenX / 100, screenY / 100);
+            drawImage(grap[11][5], screenX / 100, screenY / 100);
         } else if (blockType[index] == 140) {
-            drawimage(grap[12][5], screenX / 100, screenY / 100);
+            drawImage(grap[12][5], screenX / 100, screenY / 100);
         } else if (blockType[index] == 141) {
-            drawimage(grap[13][5], screenX / 100, screenY / 100);
+            drawImage(grap[13][5], screenX / 100, screenY / 100);
         } else if (blockType[index] == 142) {
-            drawimage(grap[14][5], screenX / 100, screenY / 100);
+            drawImage(grap[14][5], screenX / 100, screenY / 100);
         } else if (blockType[index] == 300 || blockType[index] == 301) {
-            drawimage(grap[1][5], screenX / 100, screenY / 100);
+            drawImage(grap[1][5], screenX / 100, screenY / 100);
         } else if (blockType[index] == 400) {  // Pスイッチ
-            drawimage(grap[2][5], screenX / 100, screenY / 100);
+            drawImage(grap[2][5], screenX / 100, screenY / 100);
         } else if (blockType[index] == 800) {  // コイン
-            drawimage(grap[0][2], screenX / 100 + 2, screenY / 100 + 1);
+            drawImage(grap[0][2], screenX / 100 + 2, screenY / 100 + 1);
         }
     }
 }
 
 void paintSceneAllStageClear() {
 
-    setcolor(255, 255, 255);
+    setColor(255, 255, 255);
     str("制作・プレイに関わった方々",
         240 - 13 * 20 / 2, xx[12] / 100);
     str("ステージ１　プレイ", 240 - 9 * 20 / 2, xx[13] / 100);
@@ -844,33 +836,33 @@ void paintSceneAllStageClear() {
 }
 
 void paintSceneLifeSplash() {
-    setc0();
-    FillScreen();
+    setColorToBlack();
+    fillScreen();
 
     SetFontSize(16);
     SetFontThickness(4);
 
-    drawimage(grap[0][0], 190, 190);
+    drawImage(grap[0][0], 190, 190);
     DrawFormatString(230, 200, GetColor(255, 255, 255), " × %d", marioLife);
 }
 
 void paintSceneTitle() {
-    setcolor(160, 180, 250);
-    fillrect(0, 0, fxmax, fymax);
+    setColor(160, 180, 250);
+    fillRect(0, 0, fxmax, fymax);
 
-    drawimage(mgrap[30], 240 - 380 / 2, 60);
+    drawImage(mgrap[30], 240 - 380 / 2, 60);
 
-    drawimage(grap[0][4], 12 * 30, 10 * 29 - 12);
-    drawimage(grap[1][4], 6 * 30, 12 * 29 - 12);
+    drawImage(grap[0][4], 12 * 30, 10 * 29 - 12);
+    drawImage(grap[1][4], 6 * 30, 12 * 29 - 12);
 
     //プレイヤー
-    drawimage(grap[0][0], 2 * 30, 12 * 29 - 12 - 6);
+    drawImage(grap[0][0], 2 * 30, 12 * 29 - 12 - 6);
     for (t = 0; t <= 16; t++) {
-        drawimage(grap[5][1], 29 * t, 13 * 29 - 12);
-        drawimage(grap[6][1], 29 * t, 14 * 29 - 12);
+        drawImage(grap[5][1], 29 * t, 13 * 29 - 12);
+        drawImage(grap[6][1], 29 * t, 14 * 29 - 12);
     }
 
-    setcolor(0, 0, 0);
+    setColor(0, 0, 0);
     str("Enterキーを押せ!!", 240 - 8 * 20 / 2, 250);
 }
 
@@ -911,7 +903,7 @@ void processSceneInGame() {
 
     if (!initialized) {
         initialized = true;
-        mainmsgtype = 0;
+        owataZone = 0;
 
         stagecolor = 1;
         marioX = 5600;
@@ -939,7 +931,7 @@ void processSceneInGame() {
 
         //ランダムにさせる
         if (zeroMode) {
-            for (int i = 0; i < T_MAX; i++) {
+            for (int i = 0; i < BLOCK_MAX; i++) {
 //            for (auto& ptrToBlock : blocks) {
                 if (rand(3) <= 1) {
 //                    ptrToBlock->setX((rand(500) - 1) * 29 * 100);
@@ -1062,7 +1054,7 @@ void processSceneInGame() {
     xx[13] = 2;
 
 //すべり補正
-    if (mrzimen == 1) {
+    if (level9ground == 1) {
         xx[0] = 20;
         xx[12] = 9;
         xx[13] = 10;
@@ -1079,7 +1071,7 @@ void processSceneInGame() {
             if (marioSpeedX < -xx[9] && atktm <= 0)
                 marioSpeedX -= xx[0] / 10;
         }
-        if (mrzimen != 1) {
+        if (level9ground != 1) {
             if (marioSpeedX > 100 && !marioOnGround) {
                 marioSpeedX -= xx[0] * 2 / 3;
             }
@@ -1105,7 +1097,7 @@ void processSceneInGame() {
             if (marioSpeedX > xx[9] && atktm <= 0)
                 marioSpeedX += xx[0] / 10;
         }
-        if (mrzimen != 1) {
+        if (level9ground != 1) {
             if (marioSpeedX < -100 && !marioOnGround) {
                 marioSpeedX += xx[0] * 2 / 3;
             }
@@ -1127,7 +1119,7 @@ void processSceneInGame() {
     }
 //すべり補正初期化
     if (!marioOnGround)
-        mrzimen = 0;
+        level9ground = 0;
 
 //ジャンプ
     if (mjumptm >= 0)
@@ -1395,26 +1387,26 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
                     nb[nco] = 4 * 29 * 100;
                     ntype[nco] = 101;
                     nco++;
-                    if (nco >= nmax)
+                    if (nco >= BG_MAX)
                         nco = 0;
                     na[nco] = 115 * 29 * 100 - 1100;
                     nb[nco] = 6 * 29 * 100;
                     ntype[nco] = 102;
                     nco++;
-                    if (nco >= nmax)
+                    if (nco >= BG_MAX)
                         nco = 0;
                 } else {
                     na[nco] = 157 * 29 * 100 - 1100;
                     nb[nco] = 4 * 29 * 100;
                     ntype[nco] = 101;
                     nco++;
-                    if (nco >= nmax)
+                    if (nco >= BG_MAX)
                         nco = 0;
                     na[nco] = 155 * 29 * 100 - 1100;
                     nb[nco] = 6 * 29 * 100;
                     ntype[nco] = 102;
                     nco++;
-                    if (nco >= nmax)
+                    if (nco >= BG_MAX)
                         nco = 0;
                 }
             }
@@ -1485,7 +1477,7 @@ if (mtm==250)end();
     if (marioOnGround && actaon[0] != 3) {
         if ((int(marioType) <= 9) || marioType == MarioType::_300 || marioType == MarioType::WIN_SWORD
             || marioType == MarioType::WIN_AUTO) {
-            if (mrzimen == 0) {
+            if (level9ground == 0) {
                 xx[2] = 30;
                 xx[1] = 60;
                 xx[3] = 30;
@@ -1499,7 +1491,7 @@ if (mtm==250)end();
                     marioSpeedX += xx[1];
                 }
             }
-            if (mrzimen == 1) {
+            if (level9ground == 1) {
                 xx[2] = 5;
                 xx[1] = 10;
                 xx[3] = 5;
@@ -1561,7 +1553,7 @@ if (mtm==250)end();
 //        }
 //    }
     xx[15] = 0;
-    for (int i = 0; i < T_MAX; i++) {
+    for (int i = 0; i < BLOCK_MAX; i++) {
         int xx0 = xx[0] = 200;
         int xx1 = xx[1] = 3000;
         int xx2 = xx[2] = 1000;
@@ -1599,7 +1591,7 @@ if (mtm==250)end();
                                     marioSpeedY = 0;
                                     blockX[i] = -8000000;
                                     ot(oto[13]);
-                                    for (tt = 0; tt < T_MAX; tt++) {
+                                    for (tt = 0; tt < BLOCK_MAX; tt++) {
                                         if (blockType[tt] != 7) {
                                             blockType[tt] = 800;
                                         }
@@ -1896,7 +1888,7 @@ if (mtm==250)end();
                                 ot(oto[13]);
                                 blockXType[i]
                                         = 2;
-                                for (i = 0; i < amax; i++) {
+                                for (i = 0; i < ENEMY_MAX; i++) {
                                     if (atype[i] == 87
                                         || atype[i] == 88) {
                                         if (axtype[i] == 105) {
@@ -1941,7 +1933,7 @@ if (mtm==250)end();
                 if (blockType[i] == 124) {
                     if (xx[17] == 1) {
                         ot(oto[13]);
-                        for (i = 0; i < amax; i++) {
+                        for (i = 0; i < ENEMY_MAX; i++) {
                             if (atype[i] == 87 || atype[i]
                                                   == 88) {
                                 if (axtype[i] == 101) {
@@ -1966,7 +1958,7 @@ if (mtm==250)end();
                         stageonoff = 1;
                         ot(oto[13]);
                         if (blockXType[i] == 1) {
-                            for (i = 0; i < amax; i++) {
+                            for (i = 0; i < ENEMY_MAX; i++) {
                                 if (atype[i] == 87 || atype[i] == 88) {
                                     if (axtype[i] == 105) {
                                         axtype[i]
@@ -2317,7 +2309,7 @@ if (mtm==250)end();
                             sxtype[t] = 5;
                             sxtype[t] = 0;
                         } else if (sxtype[t] == 7) {
-                            mainmsgtype = 1;
+                            owataZone = 1;
                         } else if (sxtype[t] == 8) {
                             ayobi(sa[t] - 5000 - 3000 * 1, 26000, 0, -1600, 0, 5, 0);
                             ot(oto[10]);
@@ -2426,7 +2418,7 @@ if (mtm==250)end();
     actaon[4] = 0;
 
 //リフト
-    for (t = 0; t < srmax; t++) {
+    for (t = 0; t < LIFT_MAX; t++) {
         xx[10] = sra[t];
         xx[11] = srb[t];
         xx[12] = src[t];
@@ -2527,7 +2519,7 @@ break;
                         marioSpeedY = 0;
                     } else {
 //すべり
-//marioSpeedY=0;mrzimen=1;marioOnGround=1;
+//marioSpeedY=0;level9ground=1;marioOnGround=1;
                         marioSpeedY = -800;
                     }
 
@@ -2670,7 +2662,7 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                     srb[t] += srsok[t];
             }
 //敵キャラ適用
-            for (tt = 0; tt < amax; tt++) {
+            for (tt = 0; tt < ENEMY_MAX; tt++) {
                 if (azimentype[tt] == 1) {
                     if (aa[tt] + anobia[tt] - fx > xx[8] + xx[0]
                         && aa[tt] - fx < xx[8] + xx[12] - xx[0]
@@ -2689,7 +2681,7 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
     }            //リフト
 
 //グラ
-    for (t = 0; t < emax; t++) {
+    for (t = 0; t < EFFECT_MAX; t++) {
         xx[0] = ea[t] - fx;
         xx[1] = eb[t] - fy;
         xx[2] = enobia[t] / 100;
@@ -2708,7 +2700,7 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
             ea[t] = -9000000;
         }
 
-    }            //emax
+    }            //EFFECT_MAX
 
 //敵キャラの配置
     for (t = 0; t < bmax; t++) {
@@ -2764,7 +2756,7 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
     }            //t
 
 //敵キャラ
-    for (t = 0; t < amax; t++) {
+    for (t = 0; t < ENEMY_MAX; t++) {
         xx[0] = aa[t] - fx;
         xx[1] = ab[t] - fy;
         xx[2] = anobia[t];
@@ -2799,7 +2791,7 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
 //if (axtype[t]==2)xx[10]=-xx[17];
 //他の敵を倒す
                     if (axtype[t] >= 1) {
-                        for (tt = 0; tt < amax; tt++) {
+                        for (tt = 0; tt < ENEMY_MAX; tt++) {
                             xx[0] = 250;
                             xx[5] = -800;
                             xx[12] = 0;
@@ -2962,7 +2954,7 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                         amuki[t] = 0;
                     }
 //他の敵を投げる
-                    for (tt = 0; tt < amax; tt++) {
+                    for (tt = 0; tt < ENEMY_MAX; tt++) {
                         xx[0] = 250;
                         xx[5] = -800;
                         xx[12] = 0;
@@ -3071,7 +3063,7 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                             ab[t] -= 1000;
                         }
 
-                        for (tt = 0; tt < amax; tt++) {
+                        for (tt = 0; tt < ENEMY_MAX; tt++) {
                             xx[0] = 250;
                             xx[5] = -800;
                             xx[12] = 0;
@@ -3272,7 +3264,7 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
 
 //ほかの敵を巨大化
                     if (axtype[t] == 2) {
-                        for (tt = 0; tt < amax; tt++) {
+                        for (tt = 0; tt < ENEMY_MAX; tt++) {
                             xx[0] = 250;
                             xx[5] = -800;
                             xx[12] = 0;
@@ -4126,7 +4118,7 @@ void tekizimen() {
     }
 
     //ブロック
-    for (int i = 0; i < T_MAX; i++) {
+    for (int i = 0; i < BLOCK_MAX; i++) {
         xx[0] = 200;
         xx[1] = 3000;
         xx[2] = 1000;
@@ -4171,7 +4163,7 @@ void tekizimen() {
                             ad[t] = 0;
                         }    //=-ad[t]*2/3;}
 //if (blockType[t]==7){
-//for (t2=0;t2<T_MAX;t2++){if (blockType[t2]==5){blockType[t2]=6;}else if (blockType[t2]==6){blockType[t2]=5;}}
+//for (t2=0;t2<BLOCK_MAX;t2++){if (blockType[t2]==5){blockType[t2]=6;}else if (blockType[t2]==6){blockType[t2]=5;}}
 //}
                     }
                 }
@@ -4276,8 +4268,8 @@ int rand(int Rand) {
 
 //終了
 void deinit() {
-    setc0();
-    FillScreen();
+    setColorToBlack();
+    fillScreen();
     DrawString(200, 200, "EXITING...", GetColor(255, 255, 255));
     SDL_Flip(screen);
 
@@ -4326,13 +4318,13 @@ void stagecls() {
         sxtype[t] = 0;
     }
     //for (t=0;t<spmax;t++){spa[t]=-9000000;szyunni[t]=t;spb[t]=1;spc[t]=1;spd[t]=1;sptype[t]=0;spgtype[t]=0;}
-    for (t = 0; t < T_MAX; t++) {
+    for (t = 0; t < BLOCK_MAX; t++) {
         blockX[t] = -9000000;
         blockY[t] = 1;
         titem[t] = 0;
         blockXType[t] = 0;
     }
-    for (t = 0; t < srmax; t++) {
+    for (t = 0; t < LIFT_MAX; t++) {
         sra[t] = -9000000;
         srb[t] = 1;
         src[t] = 1;
@@ -4350,7 +4342,7 @@ void stagecls() {
     //for (t=0;t<sqmax;t++){sqa[t]=-9000000;sqb[t]=1;sqc[t]=1;sqd[t]=1;sqgtype[t]=0;sqtype[t]=0;}
     //for (t=0;t<kmax;t++){ka[t]=-9000000;kmuki[t]=0;ksoka[t]=0;ksokb[t]=0;kxsoka[t]=0;kxsokb[t]=0;}
     //for (t=0;t<imax;t++){ia[t]=-9000000;ib[t]=1;ic[t]=1;id[t]=1;}
-    for (t = 0; t < amax; t++) {
+    for (t = 0; t < ENEMY_MAX; t++) {
         aa[t] = -9000000;
         ab[t] = 1;
         ac[t] = 0;
@@ -4372,14 +4364,14 @@ void stagecls() {
         btm[t] = 0;
         bxtype[t] = 0;
     }
-    for (t = 0; t < emax; t++) {
+    for (t = 0; t < EFFECT_MAX; t++) {
         ea[t] = -9000000;
         eb[t] = 1;
         ec[t] = 1;
         ed[t] = 1;
         egtype[t] = 0;
     }
-    for (t = 0; t < nmax; t++) {
+    for (t = 0; t < BG_MAX; t++) {
         na[t] = -9000000;
         nb[t] = 1;
         nc[t] = 1;
@@ -4439,7 +4431,7 @@ void stage() {
                 src[srco] = 3000;
                 srtype[srco] = 0;
                 srco++;
-                if (srco >= srmax)
+                if (srco >= LIFT_MAX)
                     srco = 0;
             } else if (value == 30) {
                 sa[sco] = xx[21] * 100;
@@ -4499,7 +4491,7 @@ void stage() {
                 nb[nco] = xx[22] * 100;
                 ntype[nco] = value - 80;
                 nco++;
-                if (nco >= nmax)
+                if (nco >= BG_MAX)
                     nco = 0;
             } else if (value == 9) {  // コイン Coin
                 tyobi(tt * 29, t * 29 - 12, 800);
@@ -5633,19 +5625,19 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         nb[nco] = 14 * 29 * 100 - 1200;
         ntype[nco] = 6;
         nco++;
-        if (nco >= nmax)
+        if (nco >= BG_MAX)
             nco = 0;
         na[nco] = 41 * 29 * 100 - 300;
         nb[nco] = 14 * 29 * 100 - 1200;
         ntype[nco] = 6;
         nco++;
-        if (nco >= nmax)
+        if (nco >= BG_MAX)
             nco = 0;
         na[nco] = 149 * 29 * 100 - 1100;
         nb[nco] = 10 * 29 * 100 - 600;
         ntype[nco] = 100;
         nco++;
-        if (nco >= nmax)
+        if (nco >= BG_MAX)
             nco = 0;
 
         blockCounter = 0;
@@ -6920,7 +6912,7 @@ void tyobi(int x, int y, int type) {
     blockType[blockCounter] = type;
 
     blockCounter++;
-    if (blockCounter >= T_MAX)
+    if (blockCounter >= BLOCK_MAX)
         blockCounter = 0;
 }                //tyobi
 
@@ -6943,24 +6935,24 @@ void ttmsg() {
     xx[1] = 6000 / 100;
     xx[2] = 4000 / 100;
     if (tmsgtype == 1 || tmsgtype == 2) {
-        setc0();
-        fillrect(xx[1], xx[2], 360, tmsgy / 100);
-        setc1();
-        drawrect(xx[1], xx[2], 360, tmsgy / 100);
+        setColorToBlack();
+        fillRect(xx[1], xx[2], 360, tmsgy / 100);
+        setColorToWhite();
+        drawRect(xx[1], xx[2], 360, tmsgy / 100);
     }
     if (tmsgtype == 2) {
 //フォント
         setFont(20, 5);
 
         if (tmsg == 0) {
-            setc1();
+            setColorToWhite();
 //フォント
             setFont(20, 5);
             txmsg("テスト　hoge", 0);
         }
 
         if (tmsg == 1) {
-            setc1();
+            setColorToWhite();
             txmsg("", 0);
             txmsg("ステージ 1 より", 0);
             txmsg("特殊的なものが増えたので", 1);
@@ -7037,10 +7029,10 @@ void ttmsg() {
     if (tmsgtype == 3) {
         xx[5] = (((15 - 1) * 1200 + 1500) / 100 - tmsgy / 100);
         if (xx[5] > 0) {
-            setc0();
-            fillrect(xx[1], xx[2] + tmsgy / 100, 360, xx[5]);
-            setc1();
-            drawrect(xx[1], xx[2] + tmsgy / 100, 360, xx[5]);
+            setColorToBlack();
+            fillRect(xx[1], xx[2] + tmsgy / 100, 360, xx[5]);
+            setColorToWhite();
+            drawRect(xx[1], xx[2] + tmsgy / 100, 360, xx[5]);
         }
     }
 
@@ -7071,7 +7063,7 @@ void eyobi(int x, int y, int xc, int xd, int xe, int xf, int width, int height, 
     enobib[eco] = height;
 
     eco++;
-    if (eco >= emax)
+    if (eco >= EFFECT_MAX)
         eco = 0;
 }                //eyobi
 
@@ -7084,7 +7076,7 @@ void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype) {
             t1 = 0;
         rz++;
 
-        if (rz <= amax) {
+        if (rz <= ENEMY_MAX) {
             t1 = 3;
 
             aa[aco] = x;
@@ -7155,7 +7147,7 @@ void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype) {
             }
 
             aco += 1;
-            if (aco >= amax - 1) {
+            if (aco >= ENEMY_MAX - 1) {
                 aco = 0;
             }
         }            //t1

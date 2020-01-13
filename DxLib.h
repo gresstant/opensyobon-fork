@@ -18,9 +18,7 @@
 
 #include "joyconfig.h"
 
-#define TRUE 1
-#define FALSE 0
-#define byte unsigned char
+typedef unsigned char byte;
 
 #define ScreenFlip() SDL_Flip(screen)
 #define GetNowCount() SDL_GetTicks()
@@ -88,14 +86,11 @@ byte WaitKey();
 
 //Uint32 GetColor(byte r, byte g, byte b);
 
-#define DrawGraph(a, b, mx, z) DrawGraphZ(a, b, mx)
-void DrawGraphZ(int a, int b, SDL_Surface * mx);
+void DrawGraphZ(int x, int y, SDL_Surface * src);
 
-#define DrawTurnGraph(a, b, mx, z) DrawTurnGraphZ(a, b, mx)
-void DrawTurnGraphZ(int a, int b, SDL_Surface * mx);
+void DrawTurnGraphZ(int x, int y, SDL_Surface * src);
 
-//#define DrawVertTurnGraph(x, y, e, a, mx, z) DrawRotaGraphZ(x, y, a, mx)
-void DrawVertTurnGraph(int a, int b, SDL_Surface * mx);
+void DrawVertTurnGraph(int x, int y, SDL_Surface * src);
 
 SDL_Surface *DerivationGraph(int srcx, int srcy, int width, int height,
 			     SDL_Surface * src);

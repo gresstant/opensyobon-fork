@@ -178,37 +178,37 @@ byte WaitKey() {
     return r << 8 * 3 | g << 8 * 2 | b << 8 | 0xFF;
 }*/
 
-void DrawGraphZ(int a, int b, SDL_Surface *mx) {
-    if (mx) {
+void DrawGraphZ(int x, int y, SDL_Surface *src) {
+    if (src) {
         SDL_Rect offset;
-        offset.x = a;
-        offset.y = b;
-        SDL_BlitSurface(mx, NULL, screen, &offset);
+        offset.x = x;
+        offset.y = y;
+        SDL_BlitSurface(src, nullptr, screen, &offset);
     }
 }
 
-void DrawTurnGraphZ(int a, int b, SDL_Surface *mx) {
-    if (mx) {
+void DrawTurnGraphZ(int x, int y, SDL_Surface *src) {
+    if (src) {
         SDL_Rect offset;
-        offset.x = a;
-        offset.y = b;
+        offset.x = x;
+        offset.y = y;
 
-        SDL_Surface *flipped = zoomSurface(mx, -1, 1, 0);
+        SDL_Surface *flipped = zoomSurface(src, -1, 1, 0);
         SDL_SetColorKey(flipped, SDL_SRCCOLORKEY, SDL_MapRGB(flipped->format, 9 * 16 + 9, 255, 255));
-        SDL_BlitSurface(flipped, NULL, screen, &offset);
+        SDL_BlitSurface(flipped, nullptr, screen, &offset);
         SDL_FreeSurface(flipped);
     }
 }
 
-void DrawVertTurnGraph(int a, int b, SDL_Surface *mx) {
-    if (mx) {
+void DrawVertTurnGraph(int x, int y, SDL_Surface *src) {
+    if (src) {
         SDL_Rect offset;
-        offset.x = a - mx->w / 2;
-        offset.y = b - mx->h / 2;
+        offset.x = x - src->w / 2;
+        offset.y = y - src->h / 2;
 
-        SDL_Surface *flipped = rotozoomSurface(mx, 180, 1, 0);
+        SDL_Surface *flipped = rotozoomSurface(src, 180, 1, 0);
         SDL_SetColorKey(flipped, SDL_SRCCOLORKEY, SDL_MapRGB(flipped->format, 9 * 16 + 9, 255, 255));
-        SDL_BlitSurface(flipped, NULL, screen, &offset);
+        SDL_BlitSurface(flipped, nullptr, screen, &offset);
         SDL_FreeSurface(flipped);
     }
 }
@@ -226,7 +226,7 @@ SDL_Surface *DerivationGraph(int srcx, int srcy, int width, int height,
     offset.w = width;
     offset.h = height;
 
-    SDL_BlitSurface(src, &offset, img, NULL);
+    SDL_BlitSurface(src, &offset, img, nullptr);
     SDL_SetColorKey(img, SDL_SRCCOLORKEY, SDL_MapRGB(img->format, 9 * 16 + 9, 255, 255));
     return img;
 }
@@ -245,20 +245,20 @@ void PlaySoundMem(Mix_Chunk *s, int l) {
 }
 
 Mix_Chunk *LoadSoundMem(const char *f) {
-    if (!sound) return NULL;
+    if (!sound) return nullptr;
 
     Mix_Chunk *s = Mix_LoadWAV(f);
     if (s) return s;
     fprintf(stderr, "Error: Unable to load sound %s: %s\n", f, Mix_GetError());
-    return NULL;
+    return nullptr;
 }
 
 Mix_Music *LoadMusicMem(const char *f) {
-    if (!sound) return NULL;
+    if (!sound) return nullptr;
 
     Mix_Music *m = Mix_LoadMUS(f);
     if (m) return m;
     fprintf(stderr, "Error: Unable to load music %s: %s\n", f, Mix_GetError());
-    return NULL;
+    return nullptr;
 }
 

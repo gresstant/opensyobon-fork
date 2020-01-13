@@ -130,7 +130,9 @@ int sgtype[smax];
 
 // region プレイヤー Player
 
-int mainmsgtype;
+// owataZone is only used in the "owata" zone in level 1-2.
+int owataZone;
+int level9ground;
 // other fields have been moved to mario.cpp / mario.h
 
 // endregion
@@ -151,12 +153,12 @@ using std::vector;
 using std::unique_ptr;
 void tyobi(int x, int y, int type);
 void brockbreak(int t);
-#define T_MAX 641
+#define BLOCK_MAX 641
 //vector<unique_ptr<IBlock>> blocks;
 // region TODO comment
 int blockCounter;
-int blockX[T_MAX], blockY[T_MAX], blockType[T_MAX], blockXType[T_MAX];
-int thp[T_MAX], titem[T_MAX];
+int blockX[BLOCK_MAX], blockY[BLOCK_MAX], blockType[BLOCK_MAX], blockXType[BLOCK_MAX];
+int thp[BLOCK_MAX], titem[BLOCK_MAX];
 // endregion
 
 //メッセージブロック
@@ -168,11 +170,11 @@ void setFont(int size, int thickness);
 //効果を持たないグラ
 void eyobi(int x, int y, int xc, int xd, int xe, int xf, int width,
            int height, int gtype, int tm);
-#define emax 201
+#define EFFECT_MAX 201
 int eco;
-int ea[emax], eb[emax], enobia[emax], enobib[emax], ec[emax], ed[emax];
-int ee[emax], ef[emax], etm[emax];
-int egtype[emax];
+int ea[EFFECT_MAX], eb[EFFECT_MAX], enobia[EFFECT_MAX], enobib[EFFECT_MAX], ec[EFFECT_MAX], ed[EFFECT_MAX];
+int ee[EFFECT_MAX], ef[EFFECT_MAX], etm[EFFECT_MAX];
+int egtype[EFFECT_MAX];
 
 
 
@@ -180,15 +182,15 @@ int egtype[emax];
 void ayobi(int x, int y, int c, int d, int xnotm, int type,
            int xtype);
 void tekizimen();
-#define amax 24
+#define ENEMY_MAX 24
 int aco;
-int aa[amax], ab[amax], anobia[amax], anobib[amax], ac[amax], ad[amax];
-int ae[amax], af[amax], abrocktm[amax];
-int aacta[amax], aactb[amax], azimentype[amax], axzimen[amax];
-int atype[amax], axtype[amax], amuki[amax], ahp[amax];
-int anotm[amax], anx[160], any[160];
-int atm[amax], a2tm[amax];
-int amsgtm[amax], amsgtype[amax];
+int aa[ENEMY_MAX], ab[ENEMY_MAX], anobia[ENEMY_MAX], anobib[ENEMY_MAX], ac[ENEMY_MAX], ad[ENEMY_MAX];
+int ae[ENEMY_MAX], af[ENEMY_MAX], abrocktm[ENEMY_MAX];
+int aacta[ENEMY_MAX], aactb[ENEMY_MAX], azimentype[ENEMY_MAX], axzimen[ENEMY_MAX];
+int atype[ENEMY_MAX], axtype[ENEMY_MAX], amuki[ENEMY_MAX], ahp[ENEMY_MAX];
+int anotm[ENEMY_MAX], anx[160], any[160];
+int atm[ENEMY_MAX], a2tm[ENEMY_MAX];
+int amsgtm[ENEMY_MAX], amsgtype[ENEMY_MAX];
 
 //敵出現
 #define bmax 81
@@ -198,19 +200,19 @@ int btype[bmax], bxtype[bmax], bz[bmax];
 
 
 //背景
-#define nmax 41
+#define BG_MAX 41
 int nxxmax, nco;
-int na[nmax], nb[nmax], nc[nmax], nd[nmax], ntype[nmax];
-int ne[nmax], nf[nmax], ng[nmax], nx[nmax];
+int na[BG_MAX], nb[BG_MAX], nc[BG_MAX], nd[BG_MAX], ntype[BG_MAX];
+int ne[BG_MAX], nf[BG_MAX], ng[BG_MAX], nx[BG_MAX];
 
 
 //リフト
-#define srmax 21
+#define LIFT_MAX 21
 int srco;
-int sra[srmax], srb[srmax], src[srmax], srd[srmax], sre[srmax], srf[srmax];
-int srtype[srmax], srgtype[srmax], sracttype[srmax], srsp[srmax];
-int srmuki[srmax], sron[srmax], sree[srmax];
-int srsok[srmax], srmovep[srmax], srmove[srmax];
+int sra[LIFT_MAX], srb[LIFT_MAX], src[LIFT_MAX], srd[LIFT_MAX], sre[LIFT_MAX], srf[LIFT_MAX];
+int srtype[LIFT_MAX], srgtype[LIFT_MAX], sracttype[LIFT_MAX], srsp[LIFT_MAX];
+int srmuki[LIFT_MAX], sron[LIFT_MAX], sree[LIFT_MAX];
+int srsok[LIFT_MAX], srmovep[LIFT_MAX], srmove[LIFT_MAX];
 
 
 
@@ -220,9 +222,7 @@ int srsok[srmax], srmovep[srmax], srmove[srmax];
 int fx = 0, fy = 0, fzx, fzy, scrollx, scrolly;
 //全体のポイント
 
-//: "fma" already exists, so call it something else and add a define
 int fmaZ = 0, fmb = 0;
-#define fma fmaZ
 
 //強制スクロール
 int kscroll = 0;
@@ -246,6 +246,6 @@ string xs[31];
 
 
 //タイマー測定
-//: Do with this what we did with fma
+//: Do with this what we did with fmaZ
 long stimeZ;
 #define stime stimeZ

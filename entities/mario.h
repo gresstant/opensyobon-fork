@@ -18,7 +18,7 @@ extern int marioSpeedX, marioSpeedY, atktm, marioLife, mactp, marioActImg;
 extern MarioType marioType;
 extern int marioXType, mtm, mzz;
 extern bool marioOnGround;
-extern int mrzimen, mkasok, mmuki, mjumptm, mkeytm;
+extern int mkasok, mmuki, mjumptm, mkeytm;
 extern int mmutekitm, mmutekion;
 extern int mztm, mztype;
 extern int actaon[7];

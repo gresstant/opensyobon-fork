@@ -11,14 +11,14 @@ int marioSpeedX, marioSpeedY, atktm, marioLife = 3, mactp, marioActImg;
 MarioType marioType;
 int marioXType, mtm, mzz;
 bool marioOnGround;
-int mrzimen, mkasok, mmuki, mjumptm, mkeytm;
+int mkasok, mmuki, mjumptm, mkeytm;
 int mmutekitm, mmutekion;
 int mztm, mztype;
 int actaon[7];
 
 // プレイヤー描画
 void paintSceneInGameMario() {
-    setcolor(0, 0, 255);
+    setColor(0, 0, 255);
 
     if (mactp >= 2000) {
         mactp -= 2000;
@@ -29,7 +29,7 @@ void paintSceneInGameMario() {
         }
     }
     if (mmuki == 0)
-        mirror = 1;
+        mirror = true;
 
 //    char buffer[50];
 //    sprintf_s(buffer, "atktm = %d, marioSpeedX = %d", atktm, marioSpeedX);
@@ -39,18 +39,18 @@ void paintSceneInGameMario() {
     if (marioType != MarioType::DYING && marioType != MarioType::HUGE) {
         if (marioOnGround) {
             if (marioActImg == 0) {  // 読みこんだグラフィックを拡大描画
-                drawimage(grap[0][0], marioX / 100, marioY / 100);
+                drawImage(grap[0][0], marioX / 100, marioY / 100);
             } else if (marioActImg == 1) {
-                drawimage(grap[1][0], marioX / 100, marioY / 100);
+                drawImage(grap[1][0], marioX / 100, marioY / 100);
             }
         } else {
-            drawimage(grap[2][0], marioX / 100, marioY / 100);
+            drawImage(grap[2][0], marioX / 100, marioY / 100);
         }
     } else if (marioType == MarioType::HUGE) {  // 巨大化
-        drawimage(grap[41][0], marioX / 100, marioY / 100);
+        drawImage(grap[41][0], marioX / 100, marioY / 100);
     } else if (marioType == MarioType::DYING) {  // dying
-        drawimage(grap[3][0], marioX / 100, marioY / 100);
+        drawImage(grap[3][0], marioX / 100, marioY / 100);
     }
 
-    mirror = 0;
+    mirror = false;
 }
