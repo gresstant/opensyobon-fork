@@ -260,7 +260,6 @@ void paintSceneInGame() {
                 for (int j = 0; j <= axtype[i] % 100; j++) {
                     xx[24] = (int) (j * 18 * cos(atm[i] * pai / 180 / 2));
                     xx[25] = (int) (j * 18 * sin(atm[i] * pai / 180 / 2));
-                    printf("i = %d\tj = %d\txx[24] = %d\txx[25] = %d\n", i, j, xx[24], xx[25]);
 
                     setColor(230, 120, 0);
                     fillEllipse(screenX / 100 + xx[24], screenY / 100 + xx[25], 8, 8);
@@ -301,10 +300,10 @@ void paintSceneInGame() {
             xs[0] = "溶岩と合体したい……";
 
         setColorToBlack();
-        str(xs[0], (marioX + marioWidth + 300) / 100 - 1, marioY / 100 - 1);
-        str(xs[0], (marioX + marioWidth + 300) / 100 + 1, marioY / 100 + 1);
+        drawString(xs[0], (marioX + marioWidth + 300) / 100 - 1, marioY / 100 - 1);
+        drawString(xs[0], (marioX + marioWidth + 300) / 100 + 1, marioY / 100 + 1);
         setColorToWhite();
-        str(xs[0], (marioX + marioWidth + 300) / 100, marioY / 100);
+        drawString(xs[0], (marioX + marioWidth + 300) / 100, marioY / 100);
 
     }            //mmsgtm
 
@@ -425,13 +424,13 @@ void paintSceneInGame() {
 
             ChangeFontType(DX_FONTTYPE_EDGE);
             setColorToWhite();
-            str(xs[0], xx[5], xx[6]);
+            drawString(xs[0], xx[5], xx[6]);
             ChangeFontType(DX_FONTTYPE_NORMAL);
 
         }            //amsgtm
     }            //ENEMY_MAX
 
-    //メッセージブロック
+    //メッセージブロック  TODO merge into ttmsg()
     if (tmsgtm > 0) {
         ttmsg();
         if (tmsgtype == 1) {
@@ -441,9 +440,7 @@ void paintSceneInGame() {
                 tmsgtm = 80000000;
                 tmsgtype = 2;
             }
-        }            //1
-
-        else if (tmsgtype == 2) {
+        } else if (tmsgtype == 2) {
             tmsgy = 0;
             tmsgtype = 3;
             tmsgtm = 15 + 1;
@@ -808,31 +805,31 @@ void paintSceneInGameBlock(int index /*IBlock& block*/) {
 void paintSceneAllStageClear() {
 
     setColor(255, 255, 255);
-    str("制作・プレイに関わった方々",
-        240 - 13 * 20 / 2, xx[12] / 100);
-    str("ステージ１　プレイ", 240 - 9 * 20 / 2, xx[13] / 100);
+    drawString("制作・プレイに関わった方々",
+               240 - 13 * 20 / 2, xx[12] / 100);
+    drawString("ステージ１　プレイ", 240 - 9 * 20 / 2, xx[13] / 100);
     //Theres an encoding error here, this is only temporary
-    //str("æy@]`y",240-6*20/2,xx[14]/100);
-    str("TODO: Fix this encoding error...", 240 - 6 * 20 / 2, xx[14] / 100);
-    str("ステージ２　プレイ", 240 - 9 * 20 / 2, xx[15] / 100);
-    str("友人　willowlet ", 240 - 8 * 20 / 2, xx[16] / 100);
-    str("ステージ３　プレイ", 240 - 9 * 20 / 2, xx[17] / 100);
-    str("友人　willowlet ", 240 - 8 * 20 / 2, xx[18] / 100);
-    str("ステージ４　プレイ", 240 - 9 * 20 / 2, xx[19] / 100);
-    str("友人２　ann ", 240 - 6 * 20 / 2, xx[20] / 100);
-    str("ご協力", 240 - 3 * 20 / 2, xx[21] / 100);
-    str("Ｔ先輩", 240 - 3 * 20 / 2, xx[22] / 100);
-    str("Ｓ先輩", 240 - 3 * 20 / 2, xx[23] / 100);
-    str("動画技術提供", 240 - 6 * 20 / 2, xx[24] / 100);
-    str("Ｋ先輩", 240 - 3 * 20 / 2, xx[25] / 100);
-    str("動画キャプチャ・編集・エンコード",
-        240 - 16 * 20 / 2, xx[26] / 100);
-    str("willowlet ", 240 - 5 * 20 / 2, xx[27] / 100);
-    str("プログラム・描画・ネタ・動画編集",
-        240 - 16 * 20 / 2, xx[28] / 100);
-    str("ちく", 240 - 2 * 20 / 2, xx[29] / 100);
+    //drawString("æy@]`y",240-6*20/2,xx[14]/100);
+    drawString("TODO: Fix this encoding error...", 240 - 6 * 20 / 2, xx[14] / 100);
+    drawString("ステージ２　プレイ", 240 - 9 * 20 / 2, xx[15] / 100);
+    drawString("友人　willowlet ", 240 - 8 * 20 / 2, xx[16] / 100);
+    drawString("ステージ３　プレイ", 240 - 9 * 20 / 2, xx[17] / 100);
+    drawString("友人　willowlet ", 240 - 8 * 20 / 2, xx[18] / 100);
+    drawString("ステージ４　プレイ", 240 - 9 * 20 / 2, xx[19] / 100);
+    drawString("友人２　ann ", 240 - 6 * 20 / 2, xx[20] / 100);
+    drawString("ご協力", 240 - 3 * 20 / 2, xx[21] / 100);
+    drawString("Ｔ先輩", 240 - 3 * 20 / 2, xx[22] / 100);
+    drawString("Ｓ先輩", 240 - 3 * 20 / 2, xx[23] / 100);
+    drawString("動画技術提供", 240 - 6 * 20 / 2, xx[24] / 100);
+    drawString("Ｋ先輩", 240 - 3 * 20 / 2, xx[25] / 100);
+    drawString("動画キャプチャ・編集・エンコード",
+               240 - 16 * 20 / 2, xx[26] / 100);
+    drawString("willowlet ", 240 - 5 * 20 / 2, xx[27] / 100);
+    drawString("プログラム・描画・ネタ・動画編集",
+               240 - 16 * 20 / 2, xx[28] / 100);
+    drawString("ちく", 240 - 2 * 20 / 2, xx[29] / 100);
 
-    str("プレイしていただき　ありがとうございました〜", 240 - 22 * 20 / 2, xx[30] / 100);
+    drawString("プレイしていただき　ありがとうございました〜", 240 - 22 * 20 / 2, xx[30] / 100);
 }
 
 void paintSceneLifeSplash() {
@@ -863,7 +860,7 @@ void paintSceneTitle() {
     }
 
     setColor(0, 0, 0);
-    str("Enterキーを押せ!!", 240 - 8 * 20 / 2, 250);
+    drawString("Enterキーを押せ!!", 240 - 8 * 20 / 2, 250);
 }
 
 //メインプログラム
@@ -3811,19 +3808,18 @@ void processSceneAllStageClear() {
         exit(0);
     }
     if (CheckHitKey(KEY_INPUT_SPACE) == 1) {
-        for (t = 0; t <= xx[7]; t += 1) {
-            xx[12 + t] -= 300;
+        for (int i = 0; i <= xx[7]; i++) {
+            xx[12 + i] -= 300;
         }
     }
 
-    if (gameSceneTimer <= 1) {
+    if (gameSceneTimer <= 1) {  // see paintSceneAllStageClear()
         gameSceneTimer = 2;
         bgmchange(otom[5]);
         xx[10] = 0;
-        for (t = 0; t <= xx[7]; t += 1) {
-            xx[12 + t] = 980000;
+        for (int i = 0; i <= xx[7]; i++) {
+            xx[12 + i] = 980000;
         }
-//for (t=0;t<=xx[7];t+=2){xx[12+t]=46000;}
         xx[12] = 460;
         xx[13] = 540;
         xx[14] = 590;
@@ -3847,15 +3843,15 @@ void processSceneAllStageClear() {
 
         xx[30] = 1800;
 
-        for (t = 0; t <= xx[7]; t += 1) {
-            xx[12 + t] *= 100;
+        for (int i = 0; i <= xx[7]; i++) {
+            xx[12 + i] *= 100;
         }
     }
 
     xx[10] += 1;
-    for (t = 0; t <= xx[7]; t += 1) {
-        xx[12 + t] -= 100;
-    }            //t
+    for (int i = 0; i <= xx[7]; i++) {
+        xx[12 + i] -= 100;
+    }
 
     if (xx[30] == -200) {
         bgmchange(otom[5]);
@@ -4046,11 +4042,10 @@ void tekizimen() {
                 }
 //下
                 if (blockType[i] != 117) {
-                    if (aa[t] + anobia[t] - fx > xx[8] + xx[0]
-                        && aa[t] - fx <
-                           xx[8] + xx[1] - xx[0] * 1
-                        && ab[t] - fy > xx[9] + xx[1] - xx[1]
-                        && ab[t] - fy < xx[9] + xx[1] + xx[0]) {
+                    if (aa[t] + anobia[t] - fx > xx[8] + xx[0] &&
+                            aa[t] - fx < xx[8] + xx[1] - xx[0] * 1 &&
+                            ab[t] - fy > xx[9] + xx[1] - xx[1] &&
+                            ab[t] - fy < xx[9] + xx[1] + xx[0]) {
                         ab[t] = xx[9] + xx[1] + xx[0] + fy;
                         if (ad[t] < 0) {
                             ad[t] = 0;
@@ -4063,35 +4058,30 @@ void tekizimen() {
 //左右
                 xx[27] = 0;
                 if ((atype[t] >= 100 || blockType[i] != 7 || (blockType[i] == 7 && atype[t] == 2)) && blockType[i] != 117) {
-                    if (aa[t] + anobia[t] - fx > xx[8]
-                        && aa[t] - fx < xx[8] + xx[2]
-                        && ab[t] + anobib[t] - fy >
-                           xx[9] + xx[1] / 2 - xx[0]
-                        && ab[t] - fy < xx[9] + xx[2]) {
+                    if (aa[t] + anobia[t] - fx > xx[8] &&
+                            aa[t] - fx < xx[8] + xx[2] &&
+                            ab[t] + anobib[t] - fy > xx[9] + xx[1] / 2 - xx[0] &&
+                            ab[t] - fy < xx[9] + xx[2]) {
                         aa[t] = xx[8] - anobia[t] + fx;
                         ac[t] = 0;
                         amuki[t] = 0;
                         xx[27] = 1;
                     }
-                    if (aa[t] + anobia[t] - fx >
-                        xx[8] + xx[1] - xx[0] * 2
-                        && aa[t] - fx < xx[8] + xx[1]
-                        && ab[t] + anobib[t] - fy >
-                           xx[9] + xx[1] / 2 - xx[0]
-                        && ab[t] - fy < xx[9] + xx[2]) {
+                    if (aa[t] + anobia[t] - fx > xx[8] + xx[1] - xx[0] * 2 &&
+                            aa[t] - fx < xx[8] + xx[1] &&
+                            ab[t] + anobib[t] - fy > xx[9] + xx[1] / 2 - xx[0] &&
+                            ab[t] - fy < xx[9] + xx[2]) {
                         aa[t] = xx[8] + xx[1] + fx;
                         ac[t] = 0;
                         amuki[t] = 1;
                         xx[27] = 1;
                     }
 //こうらブレイク
-                    if (xx[27] == 1 && (blockType[i] == 7 || blockType[i] == 1)
-                        && atype[t] == 2) {
+                    if (xx[27] == 1 && (blockType[i] == 7 || blockType[i] == 1) && atype[t] == 2) {
                         if (blockType[i] == 7) {
                             ot(oto[4]);
                             blockType[i] = 3;
-                            eyobi(blockX[i] + 10,
-                                  blockY[i], 0, -800,
+                            eyobi(blockX[i] + 10, blockY[i], 0, -800,
                                   0, 40, 3000, 3000, 0, 16);
                         } else if (blockType[i] == 1) {
                             ot(oto[3]);
@@ -4115,9 +4105,9 @@ void tekizimen() {
             }
             if (atype[t] == 86 || atype[t] == 90) {
                 if (aa[t] + anobia[t] - fx > xx[8]
-                    && aa[t] - fx < xx[8] + xx[1]
-                    && ab[t] + anobib[t] - fy > xx[9]
-                    && ab[t] - fy < xx[9] + xx[1]) {
+                        && aa[t] - fx < xx[8] + xx[1]
+                        && ab[t] + anobib[t] - fy > xx[9]
+                        && ab[t] - fy < xx[9] + xx[1]) {
                     ot(oto[3]);
                     eyobi(blockX[i] + 1200, blockY[i] + 1200, 300,
                           -1000, 0, 160, 1000, 1000, 1, 120);
@@ -4136,9 +4126,9 @@ void tekizimen() {
 //剣とってクリア
         if (blockType[i] == 140) {
             if (ab[t] - fy > xx[9] - xx[0] * 2 - 2000
-                && ab[t] - fy < xx[9] + xx[1] - xx[0] * 2 + 2000
-                && aa[t] + anobia[t] - fx > xx[8] - 400
-                && aa[t] - fx < xx[8] + xx[1]) {
+                    && ab[t] - fy < xx[9] + xx[1] - xx[0] * 2 + 2000
+                    && aa[t] + anobia[t] - fx > xx[8] - 400
+                    && aa[t] - fx < xx[8] + xx[1]) {
                 blockX[i] = -800000;    //ot(oto[4]);
                 sracttype[20] = 1;
                 sron[20] = 1;
@@ -6822,116 +6812,44 @@ void brockbreak(int t) {
 
 //メッセージ
 void ttmsg() {
-    xx[1] = 6000 / 100;
-    xx[2] = 4000 / 100;
+    int msgBoxX = 6000 / 100;  // that of ui window (0, 0)
+    int msgBoxY = 4000 / 100;
     if (tmsgtype == 1 || tmsgtype == 2) {
         setColorToBlack();
-        fillRect(xx[1], xx[2], 360, tmsgy / 100);
+        fillRect(msgBoxX, msgBoxY, 360, tmsgy / 100);
         setColorToWhite();
-        drawRect(xx[1], xx[2], 360, tmsgy / 100);
+        drawRect(msgBoxX, msgBoxY, 360, tmsgy / 100);
     }
     if (tmsgtype == 2) {
-//フォント
         setFont(20, 5);
 
-        if (tmsg == 0) {
-            setColorToWhite();
-//フォント
-            setFont(20, 5);
-            txmsg("テスト　hoge", 0);
-        }
-
-        if (tmsg == 1) {
-            setColorToWhite();
-            txmsg("", 0);
-            txmsg("ステージ 1 より", 0);
-            txmsg("特殊的なものが増えたので", 1);
-            txmsg("気をつけてくれよ〜", 2);
-            txmsg("後、アイテムの一部を利用するかも…", 4);
-            txmsg("                       ちく より", 6);
-        }
-
-        if (tmsg == 2) {
-            txmsg("            ？が必要です ", 3);
-            txmsg("                         m9(^Д^)", 6);
-        }
-
-        if (tmsg == 3) {
-            txmsg("   別にコインに意味ないけどね ", 3);
-            txmsg("                      (・ω・ )ﾉｼ", 6);
-        }
-
-        if (tmsg == 4) {
-            txmsg("この先に隠しブロックがあります ", 2);
-            txmsg("注意してください !!", 4);
-        }
-
-        if (tmsg == 5) {
-            txmsg("", 0);
-            txmsg(" 前回よりも難易度を下げましたので", 1);
-            txmsg(" 気楽にプレイしてください    ", 3);
-            txmsg("                       ちく より", 6);
-        }
-
-        if (tmsg == 6) {
-            txmsg("", 0);
-            txmsg(" そこにいる敵のそばによると、      ", 1);
-            txmsg(" 自分と一緒にジャンプしてくれます。", 2);
-            txmsg("   可愛いですね。                  ", 3);
-        }
-
-        if (tmsg == 7) {
-            txmsg("", 0);
-            txmsg(" あの敵は連れて来れましたか?、     ", 1);
-            txmsg(" 連れて来れなかった貴方は、        ", 2);
-            txmsg(" そこの落とし穴から Let's dive!    ", 3);
-        }
-
-        if (tmsg == 8) {
-            txmsg("そんな容易に", 1);
-            txmsg("ヒントに頼るもんじゃないぜ", 2);
-            txmsg("ほら、さっさと次行きな!!", 3);
-        }
-
-        if (tmsg == 9) {
-            txmsg(" 正真正銘のファイナルステージ。    ", 1);
-            txmsg(" クリアすれば遂にエンディング!!    ", 2);
-            txmsg(" その土管から戻ってもいいんだぜ?   ", 3);
-        }
-
-        if (tmsg == 10) {
-            txmsg(" 床が凍ってるから、すっごい滑るよ。", 1);
-            txmsg(" ", 2);
-            txmsg(" 　                      ", 3);
-        }
-
-        if (tmsg == 100) {
-            txmsg("え？私ですか？ ", 0);
-            txmsg("いやぁ、ただの通りすがりの", 2);
-            txmsg("ヒントブロックですよ〜", 3);
-            txmsg("決して怪しいブロックじゃないですよ", 5);
-            txmsg("                          (…チッ)", 6);
+        string str = getHintBlockText(tmsg);
+        string::size_type index = 0, next = 0;
+        for (int lineNo = 0; next != string::npos && lineNo < 7; lineNo++) {
+            next = str.find('\n', index);
+            auto line = str.substr(index, next - index);
+            txmsg(line.c_str(), lineNo);
+            index = next + 1;
         }
 
         setFont(16, 4);
-    }                //2
+    }
 
     if (tmsgtype == 3) {
         xx[5] = (((15 - 1) * 1200 + 1500) / 100 - tmsgy / 100);
         if (xx[5] > 0) {
             setColorToBlack();
-            fillRect(xx[1], xx[2] + tmsgy / 100, 360, xx[5]);
+            fillRect(msgBoxX, msgBoxY + tmsgy / 100, 360, xx[5]);
             setColorToWhite();
-            drawRect(xx[1], xx[2] + tmsgy / 100, 360, xx[5]);
+            drawRect(msgBoxX, msgBoxY + tmsgy / 100, 360, xx[5]);
         }
     }
+}
 
-}                //ttmsg
-
-void txmsg(string x, int a) {
-    int xx = 6;
-    str(x, 60 + xx, 40 + xx + a * 24);
-}                //txmsg
+void txmsg(const char *str, int lineNo) {
+    const int margin = 6;
+    drawString(str, 60 + margin, 40 + margin + lineNo * 24);
+}
 
 //フォント変更
 void setFont(int size, int thickness) {

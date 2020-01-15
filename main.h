@@ -1,5 +1,13 @@
 #include "draw.h"
+#include "resource.h"
 #include "entities/block.h"
+#include "entities/block.h"
+#include <vector>
+#include <memory>
+#include <cstring>
+
+using std::vector;
+using std::unique_ptr;
 
 using namespace std;
 
@@ -147,11 +155,6 @@ int mascrollmax = 21000;	//9000
 
 
 //ブロック
-#include "entities/block.h"
-#include <vector>
-#include <memory>
-using std::vector;
-using std::unique_ptr;
 void tyobi(int x, int y, int type);
 void brockbreak(int t);
 #define BLOCK_MAX 641
@@ -165,7 +168,7 @@ int thp[BLOCK_MAX], titem[BLOCK_MAX];
 //メッセージブロック
 int tmsgtm, tmsgtype, tmsgx, tmsgy, tmsgnobix, tmsgnobiy, tmsg;
 void ttmsg();
-void txmsg(string x, int a);
+void txmsg(const char *str, int lineNo);
 void setFont(int size, int thickness);
 
 //効果を持たないグラ

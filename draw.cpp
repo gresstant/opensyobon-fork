@@ -89,22 +89,13 @@ void drawImage(SDL_Surface *mx, int a, int b, int c, int d, int e, int f) {
     SDL_FreeSurface(m);
 }
 
-/*
 //文字
-void str(char d[],int a,int b){
-//char d[]=c;
-DrawString(a,b,d,color);
+void drawString(const std::string& str, int x, int y) {
+    drawString(str.c_str(), x, y);
 }
-*/
 
-//文字
-void str(std::string x, int a, int b) {
-//char d[]="あ";
-    DrawString(a, b, x.c_str(), color);
-//DrawString(10,10,xs[3].c_str(),color);
-
-//    xx[2] = 4;
-
+void drawString(const char* str, int x, int y) {
+    DrawString(x, y, str, color);
 }
 
 /*
@@ -132,7 +123,7 @@ g.drawString(c,a,b);
 char str[] = "12345";
 int num;
 
-num = atoi(str);
+num = atoi(drawString);
 */
 
 //文字ラベル変更

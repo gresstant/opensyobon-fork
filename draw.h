@@ -22,7 +22,8 @@ void drawImage(SDL_Surface * src, int x, int y);
 void drawImage(SDL_Surface * mx, int a, int b, int c, int d, int e, int f);
 
 //文字
-void str(std::string c, int a, int b);
+void drawString(const std::string& str, int x, int y);
+void drawString(const char* str, int x, int y);
 
 extern SDL_Surface* grap[161][8];
 extern SDL_Surface* mgrap[51];
