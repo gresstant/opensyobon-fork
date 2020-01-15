@@ -21,7 +21,6 @@ extern bool marioOnGround;
 extern int mkasok, mmuki, mjumptm, mkeytm;
 extern int mmutekitm, mmutekion;
 extern int mztm, mztype;
-extern int actaon[7];
 
 void paintSceneInGameMario();
 

@@ -889,11 +889,11 @@ void mainProgram() {
     paint();
 
     //30-fps
-    xx[0] = 30;
+    int fps = 30;
     if (CheckHitKey(KEY_INPUT_SPACE) == 1) {
-        xx[0] = 60;
+        fps = 60;
     }
-    wait2(stime, long(GetNowCount()), 1000 / xx[0]);
+    wait2(stime, long(GetNowCount()), 1000 / fps);
 
 //wait(20);
 
@@ -1010,7 +1010,7 @@ void processSceneInGame() {
 
     if (mkeytm <= 0) {
         if (CheckHitKey(KEY_INPUT_Z) == 1 || CheckHitKey(KEY_INPUT_UP) == 1
-            || SDL_JoystickGetButton(joystick, JOYSTICK_JUMP)) {
+                || SDL_JoystickGetButton(joystick, JOYSTICK_JUMP)) {
             if (actaon[1] == 10) {
                 actaon[1] = 1;
                 xx[0] = 1;
@@ -1351,7 +1351,7 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
                 stb++;
                 stc = 0;
                 initialized = false;
-                tyuukan = 0;
+                checkpoint = 0;
                 gameScene = GameScene::LIFE_SPLASH;
                 gameSceneTimer = 0;
             }
@@ -1420,7 +1420,7 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
                     stb = 1;
                     stc = 0;
                     initialized = false;
-                    tyuukan = 0;
+                    checkpoint = 0;
                     gameScene = GameScene::LIFE_SPLASH;
                     gameSceneTimer = 0;
                 }
@@ -2394,7 +2394,7 @@ if (mtm==250)end();
                     }
 //中間ゲート
                     if (stype[t] == 500 && marioType == MarioType::NORMAL && marioHP >= 1) {
-                        tyuukan += 1;
+                        checkpoint += 1;
                         sa[t] = -80000000;
                     }
 
@@ -2735,7 +2735,7 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                     && bb[t] - fy <= fymax + 4000 && btm[t] < 0) {
                     xx[0] = 1;
                     bz[t] = 0;
-                }        // && xza<=5000// && tyuukan!=1
+                }        // && xza<=5000// && checkpoint!=1
 //if (bz[t]==2){xx[0]=0;xx[1]=0;}
 //if (btype[t]>=100){bz[t]=2;}
 
@@ -2765,7 +2765,7 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
         if (anotm[t] >= 0)
             anotm[t]--;
         if (xx[0] + xx[2] >= -xx[14] && xx[0] <= fxmax + xx[14]
-            && xx[1] + xx[3] >= -10 - 9000 && xx[1] <= fymax + 20000) {
+                && xx[1] + xx[3] >= -10 - 9000 && xx[1] <= fymax + 20000) {
             aacta[t] = 0;
             aactb[t] = 0;
 
@@ -2799,22 +2799,10 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                             xx[8] = aa[tt] - fx;
                             xx[9] = ab[tt] - fy;
                             if (t != tt) {
-                                if (aa[t] +
-                                    anobia[t] -
-                                    fx >
-                                    xx[8] +
-                                    xx[0] * 2
-                                    && aa[t] -
-                                       fx <
-                                       xx[8] +
-                                       anobia[tt] -
-                                       xx[0] * 2
-                                    && ab[t] +
-                                       anobib[t] - fy > xx[9] + xx[5]
-                                    && ab[t] +
-                                       anobib[t] -
-                                       fy <
-                                       xx[9] + xx[1] * 3 + xx[12] + 1500) {
+                                if (aa[t] + anobia[t] - fx > xx[8] + xx[0] * 2
+                                        && aa[t] - fx < xx[8] + anobia[tt] - xx[0] * 2
+                                        && ab[t] + anobib[t] - fy > xx[9] + xx[5]
+                                        && ab[t] + anobib[t] - fy < xx[9] + xx[1] * 3 + xx[12] + 1500) {
                                     aa[tt] = -800000;
                                     ot(oto[6]);
                                 }
@@ -2844,14 +2832,10 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                     xx[9] = ab[t] - fy;
                     if (atm[t] >= 0)
                         atm[t]--;
-                    if (abs(marioX + marioWidth - xx[8] - xx[0] * 2)
-                        < 9000
-                        && abs(marioX <
-                               xx[8] - anobia[t] +
-                               xx[0] * 2) < 3000
-                        && marioSpeedY <= -600 && atm[t] <= 0) {
-                        if (axtype[t] == 1
-                            && !marioOnGround && axzimen[t] == 1) {
+                    if (abs(marioX + marioWidth - xx[8] - xx[0] * 2) < 9000
+                            && abs(marioX < xx[8] - anobia[t] + xx[0] * 2) < 3000  // WTF
+                            && marioSpeedY <= -600 && atm[t] <= 0) {
+                        if (axtype[t] == 1 && !marioOnGround && axzimen[t] == 1) {
                             ad[t] = -1600;
                             atm[t] = 40;
                             ab[t] -= 1000;
@@ -2890,8 +2874,7 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                                 amuki[t] = 1;
                                 if (axtype[t] == 1) {
                                     marioSpeedX = 840;
-                                    axtype[t]
-                                            = 0;
+                                    axtype[t] = 0;
                                 }
                             }
                             if (atm[t] == 40) {
@@ -2905,13 +2888,8 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                         for (tt = 0; tt < smax; tt++) {
                             if (stype[tt] == 300) {
 //sa[sco]=xx[21]*100;sb[sco]=xx[22]*100;sc[sco]=3000;sd[sco]=(12-t)*3000;stype[sco]=300;sco++;
-                                if (aa[t] -
-                                    fx >= -8000
-                                    && aa[t] >=
-                                       sa[tt] +
-                                       2000
-                                    && aa[t] <= sa[tt] + 3600 && axzimen[t]
-                                                                 == 1) {
+                                if (aa[t] - fx >= -8000 && aa[t] >= sa[tt] + 2000
+                                        && aa[t] <= sa[tt] + 3600 && axzimen[t] == 1) {
                                     sa[tt] = -800000;
                                     atm[t] = 100;
                                 }
@@ -2919,12 +2897,8 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                         }
 
                         if (atm[t] == 100) {
-                            eyobi(aa[t] + 1200 -
-                                  1200,
-                                  ab[t] + 3000 -
-                                  10 * 3000 - 1500,
-                                  0, 0, 0, 0, 1000,
-                                  10 * 3000 - 1200, 4, 20);
+                            eyobi(aa[t] + 1200 - 1200, ab[t] + 3000 - 10 * 3000 - 1500,
+                                  0, 0, 0, 0, 1000, 10 * 3000 - 1200, 4, 20);
                             if (marioType == MarioType::_300) {
                                 marioType = MarioType::NORMAL;StopSoundMem(oto[11]);
                                 bgmchange(otom[1]);
@@ -2935,12 +2909,8 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                             }
                         }
                         if (atm[t] == 120) {
-                            eyobi(aa[t] + 1200 -
-                                  1200,
-                                  ab[t] + 3000 -
-                                  10 * 3000 - 1500,
-                                  600, -1200, 0,
-                                  160, 1000, 10 * 3000 - 1200, 4, 240);
+                            eyobi(aa[t] + 1200 - 1200, ab[t] + 3000 - 10 * 3000 - 1500,
+                                  600, -1200, 0, 160, 1000, 10 * 3000 - 1200, 4, 240);
                             amuki[t] = 1;
                         }
 //marioSpeedX=700;mkeytm=24;marioSpeedY=-1200;marioY=xx[1]-1000-3000;amuki[t]=1;if (axtype[t]==1){marioSpeedX=840;axtype[t]=0;}}
@@ -2962,16 +2932,10 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                         xx[8] = aa[tt] - fx;
                         xx[9] = ab[tt] - fy;
                         if (t != tt && atype[tt] >= 100) {
-                            if (aa[t] + anobia[t] -
-                                fx >
-                                xx[8] + xx[0] * 2
-                                && aa[t] - fx <
-                                   xx[8] + anobia[tt] -
-                                   xx[0] * 2
-                                && ab[t] + anobib[t] - fy > xx[9] + xx[5]
-                                && ab[t] +
-                                   anobib[t] - fy <
-                                   xx[9] + xx[1] * 3 + xx[12] + 1500) {
+                            if (aa[t] + anobia[t] - fx > xx[8] + xx[0] * 2
+                                    && aa[t] - fx < xx[8] + anobia[tt] - xx[0] * 2
+                                    && ab[t] + anobib[t] - fy > xx[9] + xx[5]
+                                    && ab[t] + anobib[t] - fy < xx[9] + xx[1] * 3 + xx[12] + 1500) {
 //aa[tt]=-800000;
                                 amuki[tt] = 1;
                                 aa[tt] = aa[t] + 300;
@@ -3071,30 +3035,15 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                             xx[8] = aa[tt] - fx;
                             xx[9] = ab[tt] - fy;
                             if (t != tt && atype[tt] == 102) {
-                                if (aa[t] +
-                                    anobia[t] -
-                                    fx >
-                                    xx[8] +
-                                    xx[0] * 2
-                                    && aa[t] -
-                                       fx <
-                                       xx[8] +
-                                       anobia[tt] -
-                                       xx[0] * 2
-                                    && ab[t] +
-                                       anobib[t] - fy > xx[9] + xx[5]
-                                    && ab[t] +
-                                       anobib[t] -
-                                       fy <
-                                       xx[9] + xx[1] * 3 + xx[12] + 1500) {
+                                if (aa[t] + anobia[t] - fx > xx[8] + xx[0] * 2
+                                        && aa[t] - fx < xx[8] + anobia[tt] - xx[0] * 2
+                                        && ab[t] + anobib[t] - fy > xx[9] + xx[5]
+                                        && ab[t] + anobib[t] - fy < xx[9] + xx[1] * 3 + xx[12] + 1500) {
                                     aa[tt] = -800000;
-                                    axtype[t]
-                                            = 1;
+                                    axtype[t] = 1;
                                     ad[t] = -1600;
-                                    amsgtm[t]
-                                            = 30;
-                                    amsgtype[t]
-                                            = 25;
+                                    amsgtm[t] = 30;
+                                    amsgtype[t] = 25;
                                 }
                             }
                         }
@@ -3154,14 +3103,14 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                         amuki[t] = 1;
                     }
                     if (marioY >= 30000
-                        && marioX >= aa[t] - 3000 * 5 - fx
-                        && marioX <= aa[t] - fx && axtype[t] == 1) {
+                            && marioX >= aa[t] - 3000 * 5 - fx
+                            && marioX <= aa[t] - fx && axtype[t] == 1) {
                         axtype[t] = 5;
                         amuki[t] = 0;
                     }
                     if (marioY >= 24000
-                        && marioX <= aa[t] + 3000 * 8 - fx
-                        && marioX >= aa[t] - fx && axtype[t] == 1) {
+                            && marioX <= aa[t] + 3000 * 8 - fx
+                            && marioX >= aa[t] - fx && axtype[t] == 1) {
                         axtype[t] = 5;
                         amuki[t] = 1;
                     }
@@ -3173,7 +3122,7 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                     azimentype[t] = 4;
                     xx[23] = 1000;
                     if (marioX >= aa[t] - fx - marioWidth - xx[26]
-                        && marioX <= aa[t] - fx + anobia[t] + xx[26]) {
+                            && marioX <= aa[t] - fx + anobia[t] + xx[26]) {
                         atm[t] = 1;
                     }
                     if (atm[t] == 1) {
@@ -3184,9 +3133,9 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
 //ファイアバー
                 case 87:
                     azimentype[t] = 0;
-                    if (aa[t] % 10 != 1)
+                    if (aa[t] % 10 != 1) {
                         atm[t] += 6;
-                    else {
+                    } else {
                         atm[t] -= 6;
                     }
                     xx[25] = 2;
@@ -3206,9 +3155,9 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                         xx[9] = ab[t] - fy + int(xd[5]) * 100 - xx[4] / 2;
 
                         if (marioX + marioWidth > xx[8] + xx[5]
-                            && marioX < xx[8] + xx[4] - xx[5]
-                            && marioY + marioHeight > xx[9] + xx[5]
-                            && marioY < xx[9] + xx[4] - xx[5]) {
+                                && marioX < xx[8] + xx[4] - xx[5]
+                                && marioY + marioHeight > xx[9] + xx[5]
+                                && marioY < xx[9] + xx[4] - xx[5]) {
                             marioHP -= 1;
                             mmsgtype = 51;
                             mmsgtm = 30;
@@ -3219,9 +3168,9 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
 
                 case 88:
                     azimentype[t] = 0;
-                    if (aa[t] % 10 != 1)
+                    if (aa[t] % 10 != 1) {
                         atm[t] += 6;
-                    else {
+                    } else {
                         atm[t] -= 6;
                     }
                     xx[25] = 2;
@@ -3241,9 +3190,9 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                         xx[9] = ab[t] - fy + int(xd[5]) * 100 - xx[4] / 2;
 
                         if (marioX + marioWidth > xx[8] + xx[5]
-                            && marioX < xx[8] + xx[4] - xx[5]
-                            && marioY + marioHeight > xx[9] + xx[5]
-                            && marioY < xx[9] + xx[4] - xx[5]) {
+                                && marioX < xx[8] + xx[4] - xx[5]
+                                && marioY + marioHeight > xx[9] + xx[5]
+                                && marioY < xx[9] + xx[4] - xx[5]) {
                             marioHP -= 1;
                             mmsgtype = 51;
                             mmsgtm = 30;
@@ -3272,29 +3221,15 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                             xx[8] = aa[tt] - fx;
                             xx[9] = ab[tt] - fy;
                             if (t != tt) {
-                                if (aa[t] +
-                                    anobia[t] -
-                                    fx >
-                                    xx[8] +
-                                    xx[0] * 2
-                                    && aa[t] -
-                                       fx <
-                                       xx[8] +
-                                       anobia[tt] -
-                                       xx[0] * 2
-                                    && ab[t] +
-                                       anobib[t] - fy > xx[9] + xx[5]
-                                    && ab[t] +
-                                       anobib[t] -
-                                       fy < xx[9] + xx[1] * 3 + xx[12]) {
+                                if (aa[t] + anobia[t] - fx > xx[8] + xx[0] * 2
+                                    && aa[t] - fx < xx[8] + anobia[tt] - xx[0] * 2
+                                    && ab[t] + anobib[t] - fy > xx[9] + xx[5]
+                                    && ab[t] + anobib[t] - fy < xx[9] + xx[1] * 3 + xx[12]) {
                                     if (atype[tt] == 0 || atype[tt] == 4) {
                                         atype[tt] = 90;    //ot(oto[6]);
-                                        anobia[tt]
-                                                = 6400;
-                                        anobib[tt]
-                                                = 6300;
-                                        axtype[tt]
-                                                = 0;
+                                        anobia[tt] = 6400;
+                                        anobib[tt] = 6300;
+                                        axtype[tt] = 0;
                                         aa[tt] -= 1050;
                                         ab[tt] -= 1050;
                                         ot(oto[9]);
@@ -3534,11 +3469,11 @@ break;
             xx[25] = 0;
 
             if (marioX + marioWidth > xx[8] + xx[0] * 2
-                && marioX < xx[8] + anobia[t] - xx[0] * 2
-                && marioY + marioHeight > xx[9] - xx[5]
-                && marioY + marioHeight < xx[9] + xx[1] + xx[12]
-                && (mmutekitm <= 0 || marioSpeedY >= 100)
-                && abrocktm[t] <= 0) {
+                    && marioX < xx[8] + anobia[t] - xx[0] * 2
+                    && marioY + marioHeight > xx[9] - xx[5]
+                    && marioY + marioHeight < xx[9] + xx[1] + xx[12]
+                    && (mmutekitm <= 0 || marioSpeedY >= 100)
+                    && abrocktm[t] <= 0) {
                 if (atype[t] != 4 && atype[t] != 9 && atype[t] != 10 && (atype[t] <= 78 || atype[t] == 85) &&
                     !marioOnGround && marioType != MarioType::DYING) {    // && atype[t]!=4 && atype[t]!=7){
 
@@ -3659,89 +3594,59 @@ break;
 //せりふ
                         if (marioHP == 0) {
 
-                            if (atype[t] == 0 || atype[t]
-                                                 == 7) {
-                                amsgtm[t]
-                                        = 60;
-                                amsgtype[t]
-                                        = rand(7)
-                                          + 1 + 1000 + (stb - 1)
-                                                       * 10;
+                            if (atype[t] == 0 || atype[t] == 7) {
+                                amsgtm[t] = 60;
+                                amsgtype[t] = rand(7) + 1 + 1000 + (stb - 1) * 10;
                             }
 
                             if (atype[t] == 1) {
-                                amsgtm[t]
-                                        = 60;
-                                amsgtype[t]
-                                        = rand(2)
-                                          + 15;
+                                amsgtm[t] = 60;
+                                amsgtype[t] = rand(2) + 15;
                             }
 
-                            if (atype[t] == 2 && axtype[t]
-                                                 >= 1 && mmutekitm <= 0) {
-                                amsgtm[t]
-                                        = 60;
-                                amsgtype[t]
-                                        = 18;
+                            if (atype[t] == 2 && axtype[t] >= 1 && mmutekitm <= 0) {
+                                amsgtm[t] = 60;
+                                amsgtype[t] = 18;
                             }
 
                             if (atype[t] == 3) {
-                                amsgtm[t]
-                                        = 60;
-                                amsgtype[t]
-                                        = 20;
+                                amsgtm[t] = 60;
+                                amsgtype[t] = 20;
                             }
 
                             if (atype[t] == 4) {
-                                amsgtm[t]
-                                        = 60;
-                                amsgtype[t]
-                                        = rand(7)
-                                          + 1 + 1000 + (stb - 1)
-                                                       * 10;
+                                amsgtm[t] = 60;
+                                amsgtype[t] = rand(7) + 1 + 1000 + (stb - 1) * 10;
                             }
 
                             if (atype[t] == 5) {
-                                amsgtm[t]
-                                        = 60;
-                                amsgtype[t]
-                                        = 21;
+                                amsgtm[t] = 60;
+                                amsgtype[t] = 21;
                             }
 
-                            if (atype[t] == 9 || atype[t]
-                                                 == 10) {
+                            if (atype[t] == 9 || atype[t] == 10) {
                                 mmsgtm = 30;
                                 mmsgtype = 54;
                             }
 
                             if (atype[t] == 31) {
-                                amsgtm[t]
-                                        = 30;
-                                amsgtype[t]
-                                        = 24;
+                                amsgtm[t] = 30;
+                                amsgtype[t] = 24;
                             }
 
                             if (atype[t] == 80 || atype[t]
                                                   == 81) {
-                                amsgtm[t]
-                                        = 60;
-                                amsgtype[t]
-                                        = 30;
+                                amsgtm[t] = 60;
+                                amsgtype[t] = 30;
                             }
 
                             if (atype[t] == 82) {
-                                amsgtm[t]
-                                        = 20;
-                                amsgtype[t]
-                                        = rand(1)
-                                          + 31;
+                                amsgtm[t] = 20;
+                                amsgtype[t] = rand(1) + 31;
                                 xx[24] = 900;
-                                atype[t]
-                                        = 83;
-                                aa[t] -= xx[24]
-                                         + 100;
-                                ab[t] -= xx[24]
-                                         - 100 * 0;
+                                atype[t] = 83;
+                                aa[t] -= xx[24] + 100;
+                                ab[t] -= xx[24] - 100 * 0;
                             }    //82
 
                             if (atype[t] == 84) {
@@ -3750,11 +3655,8 @@ break;
                             }
 
                             if (atype[t] == 85) {
-                                amsgtm[t]
-                                        = 60;
-                                amsgtype[t]
-                                        = rand(1)
-                                          + 85;
+                                amsgtm[t] = 60;
+                                amsgtype[t] = rand(1) + 85;
                             }
 //雲
                             if (atype[t] == 80) {
@@ -3768,23 +3670,14 @@ break;
                         if (atype[t] == 2) {
 //if (axtype[t]==1 || axtype[t]==2){axtype[t]=0;}
                             if (axtype[t] == 0) {
-                                if (marioX + marioWidth > xx[8]
-                                                          + xx[0]
-                                                            * 2 && marioX < xx[8]
-                                                                            + anobia[t]
-                                                                              / 2 - xx[0]
-                                                                                    * 4) {
-                                    axtype[t]
-                                            = 1;
-                                    amuki[t]
-                                            = 1;
+                                if (marioX + marioWidth > xx[8] + xx[0] * 2 && marioX < xx[8] + anobia[t] / 2 - xx[0] * 4) {
+                                    axtype[t] = 1;
+                                    amuki[t] = 1;
                                     aa[t] = marioX + marioWidth + fx + marioSpeedX;
                                     mmutekitm = 5;
                                 } else {
-                                    axtype[t]
-                                            = 1;
-                                    amuki[t]
-                                            = 0;
+                                    axtype[t] = 1;
+                                    amuki[t] = 0;
                                     aa[t] = marioX - anobia[t] + fx - marioSpeedX;
                                     mmutekitm = 5;
                                 }
@@ -3905,7 +3798,7 @@ if (atype[t]==133){msoubi=4;}
 //if (kscroll!=5){//戻りなし
 //xx[1]=xx[2]-500;if (marioX<xx[1] && fzx>700){xx[5]=xx[1]-marioX;marioX=xx[1];fx-=xx[5];fzx-=xx[5];}
 //}
-//if (xx[3]==1){if (tyuukan==1)tyuukan=1;}
+//if (xx[3]==1){if (checkpoint==1)checkpoint=1;}
     }            //kscroll
 
 }
@@ -4064,7 +3957,7 @@ void processSceneTitle() {
 
         fast = 0;
         trap = 0;
-        tyuukan = 0;
+        checkpoint = 0;
     }
 }
 
@@ -4408,13 +4301,10 @@ void stage() {
     stagep();
 
     for (int i = 0; i <= 1000; i++) {
-        tt = i;
         for (int j = 0; j <= 16; j++) {
-            t = j;
-
             xx[10] = 0;  // TODO stop assigning xx[...] if they really have no special meaning.
-            if (stagedate[t][tt] >= 1 && stagedate[t][tt] <= 255)
-                xx[10] = (int) stagedate[t][tt];
+            if (stagedate[j][i] >= 1 && stagedate[j][i] <= 255)
+                xx[10] = (int) stagedate[j][i];
             xx[21] = i * 29;
             xx[22] = j * 29 - 12;
             xx[23] = xx[10];
@@ -4424,7 +4314,7 @@ void stage() {
             int y = xx[22];
 
             if (value >= 1 && value != 9 && value <= 19) {
-                tyobi(tt * 29, t * 29 - 12, value);
+                tyobi(i * 29, j * 29 - 12, value);
             } else if (value >= 20 && value <= 29) {
                 sra[srco] = xx[21] * 100;
                 srb[srco] = xx[22] * 100;
@@ -4494,12 +4384,12 @@ void stage() {
                 if (nco >= BG_MAX)
                     nco = 0;
             } else if (value == 9) {  // コイン Coin
-                tyobi(tt * 29, t * 29 - 12, 800);
+                tyobi(i * 29, j * 29 - 12, 800);
             } else if (value == 99) {
                 sa[sco] = xx[21] * 100;
                 sb[sco] = xx[22] * 100;
                 sc[sco] = 3000;
-                sd[sco] = (12 - t) * 3000;
+                sd[sco] = (12 - j) * 3000;
                 stype[sco] = 300;
                 sco++;
                 if (sco >= smax)
@@ -4508,21 +4398,21 @@ void stage() {
         }
     }
 
-    if (tyuukan >= 1) {
+    if (checkpoint >= 1) {
         xx[17] = 0;
         for (t = 0; t < smax; t++) {
-            if (stype[t] == 500 && tyuukan >= 1) {
+            if (stype[t] == 500 && checkpoint >= 1) {
                 fx = sa[t] - fxmax / 2;
                 fzx = fx;
                 marioX = sa[t] - fx;
                 marioY = sb[t] - fy;
-                tyuukan--;
+                checkpoint--;
                 xx[17]++;
 
                 sa[t] = -80000000;
             }
         }
-        tyuukan += xx[17];
+        checkpoint += xx[17];
     }
 //tyobi(1,2,3);
 
@@ -5315,7 +5205,7 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
             stagepoint = 0;
             marioX = 4500;
             marioY = -3000;
-            tyuukan = 0;
+            checkpoint = 0;
         }
 
         for (tt = 0; tt <= 1000; tt++) {

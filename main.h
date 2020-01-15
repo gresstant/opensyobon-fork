@@ -36,7 +36,7 @@ int fast = 1;
 int trap = 1;
 
 //中間ゲート
-int tyuukan = 0;
+int checkpoint = 0;
 
 
 //スタッフロール
@@ -133,6 +133,7 @@ int sgtype[smax];
 // owataZone is only used in the "owata" zone in level 1-2.
 int owataZone;
 int level9ground;
+int actaon[7];
 // other fields have been moved to mario.cpp / mario.h
 
 // endregion

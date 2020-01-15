@@ -14,7 +14,6 @@ bool marioOnGround;
 int mkasok, mmuki, mjumptm, mkeytm;
 int mmutekitm, mmutekion;
 int mztm, mztype;
-int actaon[7];
 
 // プレイヤー描画
 void paintSceneInGameMario() {
