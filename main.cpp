@@ -1870,34 +1870,28 @@ if (mtm==250)end();
                         }
                         if (blocks[i]->xtype == 2) {
                             ot(oto[4]);
-                            eyobi(blocks[i]->x +
-                                  10, blocks[i]->y,
+                            eyobi(blocks[i]->x + 10, blocks[i]->y,
                                   0, -800, 0, 40, 3000, 3000, 0, 16);
                             blocks[i]->type = 115;
                             blocks[i]->xtype = 0;
                         }
                         if (blocks[i]->xtype == 10) {
                             if (stageonoff == 1) {
-                                blocks[i]->type
-                                        = 130;
+                                blocks[i]->type = 130;
                                 stageonoff = 0;
                                 ot(oto[13]);
-                                blocks[i]->xtype
-                                        = 2;
-                                for (i = 0; i < ENEMY_MAX; i++) {
-                                    if (atype[i] == 87
-                                        || atype[i] == 88) {
-                                        if (axtype[i] == 105) {
-                                            axtype[i]
-                                                    = 110;
+                                blocks[i]->xtype = 2;
+                                for (int j = 0; j < ENEMY_MAX; j++) {
+                                    if (atype[j] == 87 || atype[j] == 88) {
+                                        if (axtype[j] == 105) {
+                                            axtype[j] = 110;
                                         }
                                     }
                                 }
                             } else {
                                 ot(oto[4]);
                                 eyobi(blocks[i]->x + 10, blocks[i]->y, 0, -800, 0, 40, 3000, 3000, 0, 16);
-                                blocks[i]->type
-                                        = 3;
+                                blocks[i]->type = 3;
                             }
                         }
 
@@ -1923,12 +1917,10 @@ if (mtm==250)end();
                 if (blocks[i]->type == 124) {
                     if (xx[17] == 1) {
                         ot(oto[13]);
-                        for (i = 0; i < ENEMY_MAX; i++) {
-                            if (atype[i] == 87 || atype[i]
-                                                  == 88) {
-                                if (axtype[i] == 101) {
-                                    axtype[i]
-                                            = 120;
+                        for (int j = 0; j < ENEMY_MAX; j++) {
+                            if (atype[j] == 87 || atype[j] == 88) {
+                                if (axtype[j] == 101) {
+                                    axtype[j] = 120;
                                 }
                             }
                         }
@@ -1948,11 +1940,10 @@ if (mtm==250)end();
                         stageonoff = 1;
                         ot(oto[13]);
                         if (blocks[i]->xtype == 1) {
-                            for (i = 0; i < ENEMY_MAX; i++) {
-                                if (atype[i] == 87 || atype[i] == 88) {
-                                    if (axtype[i] == 105) {
-                                        axtype[i]
-                                                = 110;
+                            for (int j = 0; j < ENEMY_MAX; j++) {
+                                if (atype[j] == 87 || atype[j] == 88) {
+                                    if (axtype[j] == 105) {
+                                        axtype[j] = 110;
                                     }
                                 }
                             }
