@@ -1,94 +1,31 @@
 #include "block.h"
-#include "../utilities/draw.h"
-#include "../main.h"
 
-namespace block {
-    class SimpleBlock : public IBlock {
-    public:
-        int x = 0, y = 0, width = 0, height = 0;
-        MapStyle style = MapStyle::GROUND;
-        SDL_Surface* image = nullptr;
-        SDL_Surface*(*imgFunc)(SimpleBlock* self) = nullptr;
-        bool(*onHitFunc)(IBlock* self, bool isMario, int x, int y, int speedX, int speedY) = nullptr;
-        bool(*onTickFunc)(IBlock* self, void(*recheckListeners)()) = nullptr;
-        bool(*onMarioMoveFunc)(IBlock* self, int x, int y, int speedX, int speedY) = nullptr;
+int blockCounter;
+int blockX[BLOCK_MAX], blockY[BLOCK_MAX], blockType[BLOCK_MAX], blockXType[BLOCK_MAX];
+int thp[BLOCK_MAX], titem[BLOCK_MAX];
 
-        int getX() override {
-            return x;
-        }
+//ブロック出現
 
-        void setX(int i) override {
-            x = i;
-        }
+void tyobi(int x, int y, int type) {
+    blockX[blockCounter] = x * 100;
+    blockY[blockCounter] = y * 100;
+    blockType[blockCounter] = type;
 
-        int getY() override {
-            return y;
-        }
+    blockCounter++;
+    if (blockCounter >= BLOCK_MAX)
+        blockCounter = 0;
+}                //tyobi
 
-        void setY(int i) override {
-            y = i;
-        }
-
-        int getWidth() override {
-            return width;
-        }
-
-        void setWidth(int i) override {
-            width = i;
-        }
-
-        int getHeight() override {
-            return height;
-        }
-
-        void setHeight(int i) override {
-            height = i;
-        }
-
-        MapStyle getStyle() override {
-            return style;
-        }
-
-        void setStyle(MapStyle s) override {
-            style = s;
-        }
-
-        SDL_Surface *getImage() override {
-            return imgFunc == nullptr ? image : imgFunc(this);
-        }
-
-        bool onHit(IBlock *self, bool isMario, int x, int y, int speedX, int speedY) override {
-            return onHitFunc == nullptr ? false : onHitFunc(self, isMario, x, y, speedX, speedY);
-        }
-
-        bool onTick(IBlock *self, void (*recheckListeners)()) override {
-            return onHitFunc == nullptr ? false : onTickFunc(self, recheckListeners);
-        }
-
-        bool onMarioMove(IBlock *self, int x, int y, int speedX, int speedY) override {
-            return onHitFunc == nullptr ? false : onMarioMoveFunc(self, x, y, speedX, speedY);
-        }
-    };
-
-//    SDL_Surface* _styledGrapHelper(MapStyle& style, ) {
-
-//    }
-
-    IBlock* create100() {
-        auto out = new SimpleBlock();
-        out->imgFunc = [](auto self) {
-            switch (self->getStyle()) {
-                case MapStyle::GROUND:
-                default:
-                    return grap[2][1];
-                case MapStyle::UNDERGROUND:
-                    return grap[32][1];
-                case MapStyle::CASTLE:
-                    return grap[62][1];
-                case MapStyle::SKIING:
-                    return grap[92][1];
-            }
-        };
-        return out;
+//ブロック破壊
+void brockbreak(int t) {
+    if (titem[t] == 1) {
+        //eyobi(blockX[t],blockY[t],0,-800,0,80,xx[1],xx[1],titem[t],8);
+        //hosico++;
     }
-}
+    if (titem[t] >= 2 && titem[t] <= 7) {
+        //ayobi(blockX[t],blockY[t],-800,10,100+(titem[t]-2),0);//end();
+    }
+
+    blockX[t] = -800000;
+//}//ty==1
+}                //brock

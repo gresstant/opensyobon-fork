@@ -1,7 +1,5 @@
 #include "utilities/draw.h"
 #include "resource.h"
-#include "entities/block.h"
-#include "entities/block.h"
 #include <vector>
 #include <memory>
 #include <cstring>
@@ -154,16 +152,6 @@ int mascrollmax = 21000;	//9000
 
 
 
-//ブロック
-void tyobi(int x, int y, int type);
-void brockbreak(int t);
-#define BLOCK_MAX 641
-//vector<unique_ptr<IBlock>> blocks;
-// region TODO comment
-int blockCounter;
-int blockX[BLOCK_MAX], blockY[BLOCK_MAX], blockType[BLOCK_MAX], blockXType[BLOCK_MAX];
-int thp[BLOCK_MAX], titem[BLOCK_MAX];
-// endregion
 
 //メッセージブロック
 int tmsgtm, tmsgtype, tmsgx, tmsgy, tmsgnobix, tmsgnobiy, tmsg;

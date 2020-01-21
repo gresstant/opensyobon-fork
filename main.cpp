@@ -1,6 +1,7 @@
 #include "main.h"
 #include "utilities/colors.h"
 #include "entities/mario.h"
+#include "entities/block.h"
 
 int main(int argc, char *argv[]) {
     parseArgs(argc, argv);
@@ -6784,32 +6785,6 @@ void bgmchange(Mix_Music *x) {
     if (x == otom[2]) Mix_VolumeMusic(MIX_MAX_VOLUME * 40 / 100);
     else Mix_VolumeMusic(MIX_MAX_VOLUME * 50 / 100);
 }                //bgmchange()
-
-//ブロック出現
-
-void tyobi(int x, int y, int type) {
-    blockX[blockCounter] = x * 100;
-    blockY[blockCounter] = y * 100;
-    blockType[blockCounter] = type;
-
-    blockCounter++;
-    if (blockCounter >= BLOCK_MAX)
-        blockCounter = 0;
-}                //tyobi
-
-//ブロック破壊
-void brockbreak(int t) {
-    if (titem[t] == 1) {
-        //eyobi(blockX[t],blockY[t],0,-800,0,80,xx[1],xx[1],titem[t],8);
-        //hosico++;
-    }
-    if (titem[t] >= 2 && titem[t] <= 7) {
-        //ayobi(blockX[t],blockY[t],-800,10,100+(titem[t]-2),0);//end();
-    }
-
-    blockX[t] = -800000;
-//}//ty==1
-}                //brock
 
 //メッセージ
 void ttmsg() {
