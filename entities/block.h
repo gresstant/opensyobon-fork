@@ -14,9 +14,10 @@ public:
     int item;
 };
 
-void tyobi(int x, int y, int type);
-void tyobi(int x, int y, int type, int xtype);
-void brockbreak(int t);
+void createBlock(int x, int y, int type);
+void createBlock(int x, int y, int type, int xtype);
+void blockBreak(LegacyBlock& block);
+void blockBreak(int index);
 
 // plan to use polymorphism in the future.
 // in order to minimize codes to change, i'm using unique_ptr instead of direct LegacyBlock.

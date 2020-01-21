@@ -1582,7 +1582,7 @@ if (mtm==250)end();
                                     eyobi(blocks[i]->x + 1200, blocks[i]->y + 1200, -300, -1000, 0, 160, 1000, 1000, 1, 120);
                                     eyobi(blocks[i]->x + 1200, blocks[i]->y + 1200, 240, -1400, 0, 160, 1000, 1000, 1, 120);
                                     eyobi(blocks[i]->x + 1200, blocks[i]->y + 1200, -240, -1400, 0, 160, 1000, 1000, 1, 120);
-                                    brockbreak(i);
+                                    blockBreak(i);
                                 } else if (blocks[i]->type == 400) {  // Pスイッチ
                                     marioSpeedY = 0;
                                     blocks[i]->x = -8000000;
@@ -1643,7 +1643,7 @@ if (mtm==250)end();
                                         eyobi(blocks[i]->x + 1200, blocks[i]->y + 1200, -300, -1000, 0, 160, 1000, 1000, 1, 120);
                                         eyobi(blocks[i]->x + 1200, blocks[i]->y + 1200, 240, -1400, 0, 160, 1000, 1000, 1, 120);
                                         eyobi(blocks[i]->x + 1200, blocks[i]->y + 1200, -240, -1400, 0, 160, 1000, 1000, 1, 120);
-                                        brockbreak(i);
+                                        blockBreak(i);
                                     }
 //コイン
                                     if (blocks[i]->type == 2 && !marioOnGround) {
@@ -1909,7 +1909,7 @@ if (mtm==250)end();
                         ot(oto[8]);
 //ot(oto[13]);
                         blocks[i]->type = 3;    //abrocktm[aco]=18;ayobi(blocks[i]->x,blocks[i]->y,0,0,0,104,1);
-                        tyobi(blocks[i]->x / 100, (blocks[i]->y / 100) - 29, 400);
+                        createBlock(blocks[i]->x / 100, (blocks[i]->y / 100) - 29, 400);
                     }
                 }        //116
 
@@ -1986,7 +1986,7 @@ if (mtm==250)end();
                         eyobi(blocks[i]->x + 1200,
                               blocks[i]->y + 1200,
                               -240, -1400, 0, 160, 1000, 1000, 1, 120);
-                        brockbreak(i);
+                        blockBreak(i);
                     }
                 }        //300
 
@@ -2009,7 +2009,7 @@ if (mtm==250)end();
                     eyobi(blocks[i]->x + 1200,
                           blocks[i]->y + 1200, -240, -1400,
                           0, 160, 1000, 1000, 1, 120);
-                    brockbreak(i);
+                    blockBreak(i);
 
                 }
             }
@@ -4081,7 +4081,7 @@ void tekizimen() {
                             eyobi(blocks[i]->x + 1200,
                                   blocks[i]->y + 1200,
                                   -240, -1400, 0, 160, 1000, 1000, 1, 120);
-                            brockbreak(i);
+                            blockBreak(i);
                         }
 
                     }
@@ -4101,7 +4101,7 @@ void tekizimen() {
                           -1400, 0, 160, 1000, 1000, 1, 120);
                     eyobi(blocks[i]->x + 1200, blocks[i]->y + 1200,
                           -240, -1400, 0, 160, 1000, 1000, 1, 120);
-                    brockbreak(i);
+                    blockBreak(i);
 
                 }
             }            //90
@@ -4289,7 +4289,7 @@ void stage() {
             int y = xx[22];
 
             if (value >= 1 && value != 9 && value <= 19) {
-                tyobi(i * 29, j * 29 - 12, value);
+                createBlock(i * 29, j * 29 - 12, value);
             } else if (value >= 20 && value <= 29) {
                 sra[srco] = xx[21] * 100;
                 srb[srco] = xx[22] * 100;
@@ -4359,7 +4359,7 @@ void stage() {
                 if (nco >= BG_MAX)
                     nco = 0;
             } else if (value == 9) {  // コイン Coin
-                tyobi(i * 29, j * 29 - 12, 800);
+                createBlock(i * 29, j * 29 - 12, 800);
             } else if (value == 99) {
                 sa[sco] = xx[21] * 100;
                 sb[sco] = xx[22] * 100;
@@ -4389,7 +4389,7 @@ void stage() {
         }
         checkpoint += xx[17];
     }
-//tyobi(1,2,3);
+//createBlock(1,2,3);
 
 }                //stage()
 
@@ -4431,13 +4431,13 @@ void stagep() {
         };
 
         //追加情報
-        tyobi(8 * 29, 9 * 29 - 12, 100);
-        tyobi(13 * 29, 9 * 29 - 12, 102, 2);
-        tyobi(14 * 29, 5 * 29 - 12, 101, 0);
-        tyobi(35 * 29, 8 * 29 - 12, 110);
-        tyobi(47 * 29, 9 * 29 - 12, 103);
-        tyobi(59 * 29, 9 * 29 - 12, 112);
-        tyobi(67 * 29, 9 * 29 - 12, 104);
+        createBlock(8 * 29, 9 * 29 - 12, 100);
+        createBlock(13 * 29, 9 * 29 - 12, 102, 2);
+        createBlock(14 * 29, 5 * 29 - 12, 101, 0);
+        createBlock(35 * 29, 8 * 29 - 12, 110);
+        createBlock(47 * 29, 9 * 29 - 12, 103);
+        createBlock(59 * 29, 9 * 29 - 12, 112);
+        createBlock(67 * 29, 9 * 29 - 12, 104);
 
         sco = 0;
         t = sco;
@@ -4555,11 +4555,11 @@ void stagep() {
 
         blocks.clear();
         //ヒント1
-        tyobi(4 * 29, 9 * 29 - 12, 300, 1);
-        //tyobi(7*29,9*29-12,300);
+        createBlock(4 * 29, 9 * 29 - 12, 300, 1);
+        //createBlock(7*29,9*29-12,300);
 
         //毒1
-        tyobi(13 * 29, 8 * 29 - 12, 114);
+        createBlock(13 * 29, 8 * 29 - 12, 114);
 
         //t=28;
         sco = 0;
@@ -4631,19 +4631,19 @@ void stagep() {
 	};
 
         blocks.clear();
-        tyobi(7 * 29, 9 * 29 - 12, 102, 2);
-        tyobi(10 * 29, 9 * 29 - 12, 101);
+        createBlock(7 * 29, 9 * 29 - 12, 102, 2);
+        createBlock(10 * 29, 9 * 29 - 12, 101);
 
-        tyobi(49 * 29, 9 * 29 - 12, 114, 2);
+        createBlock(49 * 29, 9 * 29 - 12, 114, 2);
 
         for (t = 0; t >= -7; t--) {
-            tyobi(53 * 29, t * 29 - 12, 1);
+            createBlock(53 * 29, t * 29 - 12, 1);
         }
 
-        tyobi(80 * 29, 5 * 29 - 12, 104, 1);
-        tyobi(78 * 29, 5 * 29 - 12, 102, 2);
+        createBlock(80 * 29, 5 * 29 - 12, 104, 1);
+        createBlock(78 * 29, 5 * 29 - 12, 102, 2);
 
-//blocks[blockCounter]->xtype=1;tyobi(11*29,9*29-12,114);//毒1
+//blocks[blockCounter]->xtype=1;createBlock(11*29,9*29-12,114);//毒1
 
         sco = 0;
         t = sco;
@@ -4848,11 +4848,11 @@ void stagep() {
         srco++;
 
 //ヒント1
-//tyobi(4*29,9*29-12,300);
-//tyobi(7*29,9*29-12,300);
+//createBlock(4*29,9*29-12,300);
+//createBlock(7*29,9*29-12,300);
 
 //毒1
-//tyobi(13*29,8*29-12,114);
+//createBlock(13*29,8*29-12,114);
 
 //t=28;
 //sco=0;
@@ -4902,7 +4902,7 @@ void stagep() {
 
 /*
 //毒1
-tyobi(13*29,8*29-12,114);
+createBlock(13*29,8*29-12,114);
 
 //t=28;
 sco=0;
@@ -4981,35 +4981,35 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
 	};
 
         blocks.clear();
-        tyobi(22 * 29, 3 * 29 - 12, 1);
+        createBlock(22 * 29, 3 * 29 - 12, 1);
 //毒1
-        tyobi(54 * 29, 9 * 29 - 12, 116);
+        createBlock(54 * 29, 9 * 29 - 12, 116);
 //音符+
-        tyobi(18 * 29, 14 * 29 - 12, 117);
-        tyobi(19 * 29, 14 * 29 - 12, 117);
-        tyobi(20 * 29, 14 * 29 - 12, 117);
-        tyobi(61 * 29, 9 * 29 - 12, 101, 1);    //5
-        tyobi(74 * 29, 9 * 29 - 12, 7);    //6
+        createBlock(18 * 29, 14 * 29 - 12, 117);
+        createBlock(19 * 29, 14 * 29 - 12, 117);
+        createBlock(20 * 29, 14 * 29 - 12, 117);
+        createBlock(61 * 29, 9 * 29 - 12, 101, 1);    //5
+        createBlock(74 * 29, 9 * 29 - 12, 7);    //6
 
 //ヒント2
-        tyobi(28 * 29, 9 * 29 - 12, 300, 2);    //7
+        createBlock(28 * 29, 9 * 29 - 12, 300, 2);    //7
 //ファイア
-        tyobi(7 * 29, 9 * 29 - 12, 101, 3);
+        createBlock(7 * 29, 9 * 29 - 12, 101, 3);
 //ヒント3
-        tyobi(70 * 29, 8 * 29 - 12, 300, 4);    //9
+        createBlock(70 * 29, 8 * 29 - 12, 300, 4);    //9
 
 //もろいぶろっく×３
-        tyobi(58 * 29, 13 * 29 - 12, 115, 1);
-        tyobi(59 * 29, 13 * 29 - 12, 115, 1);
-        tyobi(60 * 29, 13 * 29 - 12, 115, 1);
+        createBlock(58 * 29, 13 * 29 - 12, 115, 1);
+        createBlock(59 * 29, 13 * 29 - 12, 115, 1);
+        createBlock(60 * 29, 13 * 29 - 12, 115, 1);
 
 //ヒントブレイク
-        tyobi(111 * 29, 6 * 29 - 12, 301, 0);
+        createBlock(111 * 29, 6 * 29 - 12, 301, 0);
 //ジャンプ
-        tyobi(114 * 29, 9 * 29 - 12, 120, 0);
+        createBlock(114 * 29, 9 * 29 - 12, 120, 0);
 
 //ファイア
-//tyobi(7*29,9*29-12,101);
+//createBlock(7*29,9*29-12,101);
 
         bco = 0;
         t = bco;
@@ -5209,7 +5209,7 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
 	};
 
         blocks.clear();
-//tyobi(15*29,12*29-12,111);
+//createBlock(15*29,12*29-12,111);
 
         stc = 0;
 
@@ -5265,10 +5265,10 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
 //t=sco;sa[t]=12*29*100;sb[t]=(11*29-12)*100;sc[t]=3000;sd[t]=6000-200;stype[t]=40;sxtype[t]=0;sco++;
 //t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtype[t]=1;sco++;
 
-        tyobi(12 * 29, 4 * 29 - 12, 112, 0);
+        createBlock(12 * 29, 4 * 29 - 12, 112, 0);
 //ヒント3
-        tyobi(12 * 29, 8 * 29 - 12, 300, 3);
-//blocks[blockCounter]->xtype=0;tyobi(13*29,4*29-12,110);
+        createBlock(12 * 29, 8 * 29 - 12, 300, 3);
+//blocks[blockCounter]->xtype=0;createBlock(13*29,4*29-12,110);
 
 //stc=0;
 
@@ -5489,42 +5489,42 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
 
         blocks.clear();
 //ON-OFFブロック
-        tyobi(29 * 29, 3 * 29 - 12, 130, 1);
+        createBlock(29 * 29, 3 * 29 - 12, 130, 1);
 //1-2
-        tyobi(34 * 29, 9 * 29 - 12, 5);
-        tyobi(35 * 29, 9 * 29 - 12, 5);
+        createBlock(34 * 29, 9 * 29 - 12, 5);
+        createBlock(35 * 29, 9 * 29 - 12, 5);
 //隠し
-        tyobi(55 * 29 + 15, 6 * 29 - 12, 7);
-//tyobi(62*29,9*29-12,2);
+        createBlock(55 * 29 + 15, 6 * 29 - 12, 7);
+//createBlock(62*29,9*29-12,2);
 //隠しON-OFF
-        tyobi(50 * 29, 9 * 29 - 12, 114, 10);
+        createBlock(50 * 29, 9 * 29 - 12, 114, 10);
 //ヒント3
-        tyobi(1 * 29, 5 * 29 - 12, 300, 5);
+        createBlock(1 * 29, 5 * 29 - 12, 300, 5);
 //ファイア
-        tyobi(86 * 29, 9 * 29 - 12, 101, 3);
+        createBlock(86 * 29, 9 * 29 - 12, 101, 3);
 //キノコなし　普通
-//blocks[blockCounter]->xtype=2;tyobi(81*29,1*29-12,5);
+//blocks[blockCounter]->xtype=2;createBlock(81*29,1*29-12,5);
 //音符
-        tyobi(86 * 29, 6 * 29 - 12, 117, 2);
+        createBlock(86 * 29, 6 * 29 - 12, 117, 2);
 
 //もろいぶろっく×３
         for (t = 0; t <= 2; t++) {
-            tyobi((79 + t) * 29, 13 * 29 - 12, 115, 3);
+            createBlock((79 + t) * 29, 13 * 29 - 12, 115, 3);
         }
 
 //ジャンプ
-        tyobi(105 * 29, 11 * 29 - 12, 120, 3);
+        createBlock(105 * 29, 11 * 29 - 12, 120, 3);
 //毒1
-        tyobi(109 * 29, 7 * 29 - 12, 102, 3);
+        createBlock(109 * 29, 7 * 29 - 12, 102, 3);
 //デフラグ
-        tyobi(111 * 29, 7 * 29 - 12, 101, 4);
+        createBlock(111 * 29, 7 * 29 - 12, 101, 4);
 //剣
-        tyobi(132 * 29, 8 * 29 - 12 - 3, 140);
-        tyobi(131 * 29, 9 * 29 - 12, 141);
+        createBlock(132 * 29, 8 * 29 - 12 - 3, 140);
+        createBlock(131 * 29, 9 * 29 - 12, 141);
 //メロン
-        tyobi(161 * 29, 12 * 29 - 12, 142);
+        createBlock(161 * 29, 12 * 29 - 12, 142);
 //ファイアバー強化
-        tyobi(66 * 29, 4 * 29 - 12, 124);
+        createBlock(66 * 29, 4 * 29 - 12, 124);
 
 //リフト
         srco = 0;
@@ -5585,18 +5585,18 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         //追加情報
         blocks.clear();
         //
-        tyobi(1 * 29, 9 * 29 - 12, 300, 6);
+        createBlock(1 * 29, 9 * 29 - 12, 300, 6);
         //
-        tyobi(40 * 29, 9 * 29 - 12, 110, 0);
+        createBlock(40 * 29, 9 * 29 - 12, 110, 0);
         //
-        tyobi(79 * 29, 7 * 29 - 12, 300, 7);
+        createBlock(79 * 29, 7 * 29 - 12, 300, 7);
         //
-        tyobi(83 * 29, 7 * 29 - 12, 102, 2);
+        createBlock(83 * 29, 7 * 29 - 12, 102, 2);
         //
-        tyobi(83 * 29, 2 * 29 - 12, 114, 0);
+        createBlock(83 * 29, 2 * 29 - 12, 114, 0);
         //
         for (int i = -1; i > -7; i -= 1) {
-            tyobi(85 * 29, i * 29 - 12, 4);
+            createBlock(85 * 29, i * 29 - 12, 4);
         }
         //
         sco = 0;
@@ -5732,7 +5732,7 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         sxtype[sco] = 1;
         sco += 1;
         //
-        tyobi(6 * 29, 9 * 29 - 12, 110);
+        createBlock(6 * 29, 9 * 29 - 12, 110);
         //
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -5901,24 +5901,24 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         sco += 1;
         //
         blocks.clear();
-        tyobi(0 * 29, 0 * 29 - 12, 4, 0);
-        tyobi(2 * 29, 9 * 29 - 12, 4, 0);
-        tyobi(3 * 29, 9 * 29 - 12, 4, 0);
+        createBlock(0 * 29, 0 * 29 - 12, 4, 0);
+        createBlock(2 * 29, 9 * 29 - 12, 4, 0);
+        createBlock(3 * 29, 9 * 29 - 12, 4, 0);
         //
-        tyobi(5 * 29, 9 * 29 - 12, 115, 1);
-        tyobi(6 * 29, 9 * 29 - 12, 115, 1);
+        createBlock(5 * 29, 9 * 29 - 12, 115, 1);
+        createBlock(6 * 29, 9 * 29 - 12, 115, 1);
         //
-        tyobi(5 * 29, 10 * 29 - 12, 115, 1);
-        tyobi(6 * 29, 10 * 29 - 12, 115, 1);
+        createBlock(5 * 29, 10 * 29 - 12, 115, 1);
+        createBlock(6 * 29, 10 * 29 - 12, 115, 1);
         //
-        tyobi(5 * 29, 11 * 29 - 12, 115, 1);
-        tyobi(6 * 29, 11 * 29 - 12, 115, 1);
+        createBlock(5 * 29, 11 * 29 - 12, 115, 1);
+        createBlock(6 * 29, 11 * 29 - 12, 115, 1);
         //
-        tyobi(5 * 29, 12 * 29 - 12, 115, 1);
-        tyobi(6 * 29, 12 * 29 - 12, 115, 1);
+        createBlock(5 * 29, 12 * 29 - 12, 115, 1);
+        createBlock(6 * 29, 12 * 29 - 12, 115, 1);
         //
-        tyobi(70 * 29, 7 * 29 - 12, 115, 1);
-        tyobi(71 * 29, 7 * 29 - 12, 115, 1);
+        createBlock(70 * 29, 7 * 29 - 12, 115, 1);
+        createBlock(71 * 29, 7 * 29 - 12, 115, 1);
         //
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -6065,18 +6065,18 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         blocks.clear();
 //        blocks[blockCounter]->xtype = 0;  // default value of xtype is 0, so i assume this line is ensuring xtype being 0.
         for (int i = -1; i > -7; i -= 1) {
-            tyobi(55 * 29, i * 29 - 12, 4, 0);
+            createBlock(55 * 29, i * 29 - 12, 4, 0);
         }
         //
-        tyobi(64 * 29, 12 * 29 - 12, 120, 0);
+        createBlock(64 * 29, 12 * 29 - 12, 120, 0);
         //
-        tyobi(66 * 29, 3 * 29 - 12, 115, 1);
+        createBlock(66 * 29, 3 * 29 - 12, 115, 1);
         //
-        tyobi(67 * 29, 3 * 29 - 12, 115, 1);
+        createBlock(67 * 29, 3 * 29 - 12, 115, 1);
         //
-        tyobi(68 * 29, 3 * 29 - 12, 115, 1);
+        createBlock(68 * 29, 3 * 29 - 12, 115, 1);
         //
-        tyobi(60 * 29, 6 * 29 - 12, 300, 8);
+        createBlock(60 * 29, 6 * 29 - 12, 300, 8);
 	/*
 	   bco = 1;
 	   ba[bco]=(54*29-12)*100;
@@ -6179,15 +6179,15 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
 	};
         //
         blocks.clear();
-        tyobi(0 * 29, -1 * 29 - 12, 5, 0);
+        createBlock(0 * 29, -1 * 29 - 12, 5, 0);
         //
-        tyobi(4 * 29, -1 * 29 - 12, 5, 0);
+        createBlock(4 * 29, -1 * 29 - 12, 5, 0);
         //
-        tyobi(1 * 29, 14 * 29 - 12, 5, 0);
+        createBlock(1 * 29, 14 * 29 - 12, 5, 0);
         //
-        tyobi(6 * 29, 14 * 29 - 12, 5, 0);
+        createBlock(6 * 29, 14 * 29 - 12, 5, 0);
         //
-        tyobi(7 * 29, 14 * 29 - 12, 5, 0);
+        createBlock(7 * 29, 14 * 29 - 12, 5, 0);
         //
         bco = 0;
         ba[bco] = 2 * 29 * 100 - 1400;
@@ -6262,11 +6262,11 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         };
         //
         blocks.clear();
-        tyobi(12 * 29, 13 * 29 - 12, 115, 1);
+        createBlock(12 * 29, 13 * 29 - 12, 115, 1);
         //
-        tyobi(13 * 29, 13 * 29 - 12, 115, 1);
+        createBlock(13 * 29, 13 * 29 - 12, 115, 1);
         //
-        tyobi(14 * 29, 13 * 29 - 12, 115, 1);
+        createBlock(14 * 29, 13 * 29 - 12, 115, 1);
         //
         sco = 0;
         sa[sco] = 6 * 29 * 100;
@@ -6336,21 +6336,21 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
 	};
         //
         blocks.clear();
-        tyobi(1 * 29, 14 * 29 - 12, 5, 0);
+        createBlock(1 * 29, 14 * 29 - 12, 5, 0);
         //
-        tyobi(2 * 29, 14 * 29 - 12, 5, 0);
+        createBlock(2 * 29, 14 * 29 - 12, 5, 0);
         //
-        tyobi(3 * 29, 4 * 29 - 12, 300, 9);
+        createBlock(3 * 29, 4 * 29 - 12, 300, 9);
         //
-        tyobi(32 * 29, 9 * 29 - 12, 115, 1);
+        createBlock(32 * 29, 9 * 29 - 12, 115, 1);
         //
-        tyobi(76 * 29, 14 * 29 - 12, 5, 0);
+        createBlock(76 * 29, 14 * 29 - 12, 5, 0);
         //
-        tyobi(108 * 29, 11 * 29 - 12, 141, 0);
+        createBlock(108 * 29, 11 * 29 - 12, 141, 0);
         //
-        tyobi(109 * 29, 10 * 29 - 12 - 3, 140, 0);
+        createBlock(109 * 29, 10 * 29 - 12 - 3, 140, 0);
         //
-        tyobi(121 * 29, 10 * 29 - 12, 142, 0);
+        createBlock(121 * 29, 10 * 29 - 12, 142, 0);
         //
         bco = 0;
         ba[bco] = 0 * 29 * 100 + 1500;
@@ -6566,11 +6566,11 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         //追加情報
         blocks.clear();
         //
-        tyobi(2 * 29, 9 * 29 - 12, 300, 10);
+        createBlock(2 * 29, 9 * 29 - 12, 300, 10);
         //
-        tyobi(63 * 29, 13 * 29 - 12, 115, 1);
+        createBlock(63 * 29, 13 * 29 - 12, 115, 1);
         //
-        tyobi(64 * 29, 13 * 29 - 12, 115, 1);
+        createBlock(64 * 29, 13 * 29 - 12, 115, 1);
         //
         sco = 0;
         sa[sco] = 13 * 29 * 100;
