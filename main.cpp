@@ -6827,8 +6827,7 @@ void ttmsg() {
         string::size_type index = 0, next = 0;
         for (int lineNo = 0; next != string::npos && lineNo < 7; lineNo++) {
             next = str.find('\n', index);
-            auto line = str.substr(index, next - index);
-            txmsg(line.c_str(), lineNo);
+            txmsg(str.substr(index, next - index).c_str(), lineNo);
             index = next + 1;
         }
 
