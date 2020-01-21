@@ -18,6 +18,8 @@ void createBlock(int x, int y, int type);
 void createBlock(int x, int y, int type, int xtype);
 void blockBreak(LegacyBlock& block);
 void blockBreak(int index);
+void paintSceneInGameBlock(const LegacyBlock& block);
+void paintSceneInGameBlock(int index);
 
 // plan to use polymorphism in the future.
 // in order to minimize codes to change, i'm using unique_ptr instead of direct LegacyBlock.
