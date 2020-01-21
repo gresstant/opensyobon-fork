@@ -1,9 +1,5 @@
-//
-// Created by Gresstant on 2020/1/10.
-//
-
 #include "mario.h"
-#include "../draw.h"
+#include "../utilities/draw.h"
 
 int marioX, marioY, marioWidth, marioHeight, marioHP;
 int marioSpeedX, marioSpeedY, atktm, marioLife = 3, mactp, marioActImg;

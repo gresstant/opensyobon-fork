@@ -1,4 +1,4 @@
-#include "DxLib.h"
+#include "utilities/DxLib.h"
 
 #ifdef WIN32
 #define strcasecmp _stricmp

@@ -1,4 +1,5 @@
 #include "main.h"
+#include "utilities/colors.h"
 #include "entities/mario.h"
 
 int main(int argc, char *argv[]) {
@@ -93,12 +94,12 @@ void paintSceneInGame() {
                 fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb, sc[i] / 100, sd[i] / 100);
                 drawRect(screenX / 100 + fmaZ, screenY / 100 + fmb, sc[i] / 100, sd[i] / 100);
             } else if (stype[i] == 1) {  // 土管  Tube
-                setColor(0, 230, 0);
+                setColor(colors::TUBE_GREEN);
                 fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb, sc[i] / 100, sd[i] / 100);
                 setColorToBlack();
                 drawRect(screenX / 100 + fmaZ, screenY / 100 + fmb, sc[i] / 100, sd[i] / 100);
             } else if (stype[i] == 2) {  // 土管(下)  Tube (Downwards)
-                setColor(0, 230, 0);
+                setColor(colors::TUBE_GREEN);
                 fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb + 1, sc[i] / 100, sd[i] / 100);
                 setColorToBlack();
                 drawLine(screenX / 100 + fmaZ, screenY / 100 + fmb, screenX / 100 + fmaZ,
@@ -106,7 +107,7 @@ void paintSceneInGame() {
                 drawLine(screenX / 100 + fmaZ + sc[i] / 100, screenY / 100 + fmb,
                          screenX / 100 + fmaZ + sc[i] / 100, screenY / 100 + fmb + sd[i] / 100);
             } else if (stype[i] == 5) {  // 土管(横)  Tube (Horizontal)
-                setColor(0, 230, 0);
+                setColor(colors::TUBE_GREEN);
                 fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb + 1, sc[i] / 100, sd[i] / 100);
                 setColorToBlack();
                 drawLine(screenX / 100 + fmaZ, screenY / 100 + fmb, screenX / 100 + fmaZ + sc[i] / 100,
@@ -200,7 +201,7 @@ void paintSceneInGame() {
 
 //入る土管(右)
             if (stype[i] == 40) {
-                setColor(0, 230, 0);
+                setColor(colors::TUBE_GREEN);
                 fillRect((sa[i] - fx) / 100 + fmaZ,
                          (sb[i] - fy) / 100 + fmb + 1,
                          sc[i] / 100, sd[i] / 100);
@@ -211,7 +212,7 @@ void paintSceneInGame() {
             }
 //とぶ土管
             if (stype[i] == 50) {
-                setColor(0, 230, 0);
+                setColor(colors::TUBE_GREEN);
                 fillRect((sa[i] - fx) / 100 + fmaZ + 5,
                          (sb[i] - fy) / 100 + fmb + 30,
                          50, sd[i] / 100 - 30);
@@ -225,7 +226,7 @@ void paintSceneInGame() {
                          (sa[i] - fx) / 100 + fmaZ + 50 + 5,
                          (sb[i] - fy) / 100 + fmb + sd[i] / 100);
 
-                setColor(0, 230, 0);
+                setColor(colors::TUBE_GREEN);
                 fillRect((sa[i] - fx) / 100 + fmaZ,
                          (sb[i] - fy) / 100 + fmb + 1, 60, 30);
                 setColorToBlack();

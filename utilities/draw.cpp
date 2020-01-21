@@ -10,78 +10,13 @@ SDL_Surface* mgrap[51];
 
 bool mirror;
 
-// region impl of class Color
-
-Color::Color() = default;
-
-Color::Color(const Color& c) = default;
-
-Color::Color(int red, int green, int blue) : red(red), green(green), blue(blue) {}
-
-Color::Color(unsigned char red, unsigned char green, unsigned char blue) : red(red), green(green), blue(blue) {}
-
-unsigned char Color::getRed() const {
-    return red;
-}
-
-unsigned char Color::getGreen() const {
-    return green;
-}
-
-unsigned char Color::getBlue() const {
-    return blue;
-}
-
-unsigned long Color::getGFXColor() const {
-    return (unsigned long)(red) << 8u * 3u |
-            (unsigned long)(green) << 8u * 2u |
-            (unsigned long)(blue) << 8u | 0xFFu;
-}
-
-unsigned long Color::getSDLColor() const {
-    return SDL_MapRGB(screen->format, red, green, blue);
-}
-
-void Color::setRed(unsigned char red) {
-    this->red = red;
-}
-
-void Color::setRed(int red) {
-    this->red = red;
-}
-
-void Color::setGreen(unsigned char green) {
-    this->green = green;
-}
-
-void Color::setGreen(int green) {
-    this->green = green;
-}
-
-void Color::setBlue(unsigned char blue) {
-    this->blue = blue;
-}
-
-void Color::setBlue(int blue) {
-    this->blue = blue;
-}
-
-void Color::set(unsigned char red, unsigned char green, unsigned char blue) {
-    setRed(red);
-    setGreen(green);
-    setBlue(blue);
-}
-
-void Color::set(int red, int green, int blue) {
-    setRed(red);
-    setGreen(green);
-    setBlue(blue);
-}
-
-// endregion
-
 //画像関係
 //{
+
+void setColor(const Color& color) {
+    stateColor = color;
+}
+
 //色かえ(指定)
 void setColor(int red, int green, int blue) {
     stateColor.set(red, green, blue);
@@ -146,6 +81,14 @@ void fillRect(const Color& color, int x, int y, int width, int height) {
     boxColor(screen, x, y, x + width - 1, y + height - 1, color.getGFXColor());
 }
 
+void drawCircle(const Color& color, int x, int y, int radius) {
+    ellipseColor(screen, x, y, radius, radius, color.getGFXColor());
+}
+
+void fillCircle(const Color& color, int x, int y, int radius) {
+    filledEllipseColor(screen, x, y, radius, radius, color.getGFXColor());
+}
+
 void drawEllipse(const Color& color, int x, int y, int rx, int ry) {
     ellipseColor(screen, x, y, rx, ry, color.getGFXColor());
 }
@@ -155,7 +98,7 @@ void fillEllipse(const Color& color, int x, int y, int rx, int ry) {
 }
 
 void fillScreen(const Color& color) {
-    SDL_FillRect(screen, nullptr, color.getSDLColor());
+    SDL_FillRect(screen, nullptr, color.getSDLColor(screen->format));
 }
 
 //画像の読み込み
@@ -194,5 +137,5 @@ void drawString(const std::string& str, int x, int y) {
 }
 
 void drawString(const char* str, int x, int y) {
-    DrawString(x, y, str, stateColor.getSDLColor());
+    DrawString(x, y, str, stateColor.getSDLColor(screen->format));
 }

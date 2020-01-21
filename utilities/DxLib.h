@@ -16,7 +16,7 @@
 #include <math.h>
 #include <string>
 
-#include "joyconfig.h"
+#include "../joyconfig.h"
 
 typedef unsigned char byte;
 

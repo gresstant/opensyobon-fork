@@ -1,7 +1,3 @@
-//
-// Created by Gresstant on 2020/1/10.
-//
-
 #ifndef OSAFORK_MARIO_H
 #define OSAFORK_MARIO_H
 
