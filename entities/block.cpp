@@ -115,9 +115,3 @@ void paintSceneInGameBlock(const LegacyBlock& block) {
         }
     }
 }
-
-void paintSceneInGameBlock(int index) {
-    if (index < blocks.size()) {
-        blockBreak(*blocks[index]);
-    }
-}

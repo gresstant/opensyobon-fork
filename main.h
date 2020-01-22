@@ -123,12 +123,11 @@ int key, keytm;
 double pai = 3.1415926535;
 
 
-//地面
-#define smax 31
-int sx, sco;
-int sa[smax], sb[smax], sc[smax], sd[smax], stype[smax], sxtype[smax],
-    sr[smax];
-int sgtype[smax];
+//地面  Ground (including tubes ...)
+#define GROUND_MAX 31
+int groundCounter;
+int groundX[GROUND_MAX], groundY[GROUND_MAX], groundWidth[GROUND_MAX], groundHeight[GROUND_MAX];
+int groundType[GROUND_MAX], groundXType[GROUND_MAX], sr[GROUND_MAX], groundGType[GROUND_MAX];
 
 
 
@@ -151,13 +150,13 @@ int mascrollmax = 21000;	//9000
 
 
 
-//メッセージブロック
+//メッセージブロック  Message Block
 int tmsgtm, tmsgtype, tmsgx, tmsgy, tmsgnobix, tmsgnobiy, tmsg;
 void ttmsg();
 void txmsg(const char *str, int lineNo);
 void setFont(int size, int thickness);
 
-//効果を持たないグラ
+//効果を持たないグラ  Effect-less Graphic Items
 void eyobi(int x, int y, int xc, int xd, int xe, int xf, int width,
            int height, int gtype, int tm);
 #define EFFECT_MAX 201
@@ -168,7 +167,7 @@ int egtype[EFFECT_MAX];
 
 
 
-//敵キャラ
+//敵キャラ  Enemy Instances
 void ayobi(int x, int y, int c, int d, int xnotm, int type,
            int xtype);
 void tekizimen();
@@ -182,33 +181,32 @@ int anotm[ENEMY_MAX], anx[160], any[160];
 int atm[ENEMY_MAX], a2tm[ENEMY_MAX];
 int amsgtm[ENEMY_MAX], amsgtype[ENEMY_MAX];
 
-//敵出現
-#define bmax 81
-int bco;
-int ba[bmax], bb[bmax], btm[bmax];
-int btype[bmax], bxtype[bmax], bz[bmax];
+//敵出現  Enemy Templates
+#define ET_MAX 81
+int etCounter;
+int etX[ET_MAX], etY[ET_MAX], btm[ET_MAX];
+int etType[ET_MAX], etXType[ET_MAX], bz[ET_MAX];
 
 
-//背景
+//背景  Background Items
 #define BG_MAX 41
-int nxxmax, nco;
-int na[BG_MAX], nb[BG_MAX], nc[BG_MAX], nd[BG_MAX], ntype[BG_MAX];
-int ne[BG_MAX], nf[BG_MAX], ng[BG_MAX], nx[BG_MAX];
+int bgCounter;
+int bgX[BG_MAX], bgY[BG_MAX], bgType[BG_MAX];
 
 
-//リフト
+//リフト  Lift (Elevator)
 #define LIFT_MAX 21
-int srco;
-int sra[LIFT_MAX], srb[LIFT_MAX], src[LIFT_MAX], srd[LIFT_MAX], sre[LIFT_MAX], srf[LIFT_MAX];
-int srtype[LIFT_MAX], srgtype[LIFT_MAX], sracttype[LIFT_MAX], srsp[LIFT_MAX];
-int srmuki[LIFT_MAX], sron[LIFT_MAX], sree[LIFT_MAX];
-int srsok[LIFT_MAX], srmovep[LIFT_MAX], srmove[LIFT_MAX];
+int liftCounter;
+int liftX[LIFT_MAX], liftY[LIFT_MAX], liftWidth[LIFT_MAX], sre[LIFT_MAX], srf[LIFT_MAX];
+int liftType[LIFT_MAX], liftActType[LIFT_MAX], srsp[LIFT_MAX];
+int srmuki[LIFT_MAX], sron[LIFT_MAX];
+int srsok[LIFT_MAX], srmove[LIFT_MAX];
 
 
 
 
 
-//スクロール範囲
+//スクロール範囲  Scroll Range
 int fx = 0, fy = 0, fzx, fzy, scrollx, scrolly;
 //全体のポイント
 
@@ -232,7 +230,6 @@ int blacktm = 1, blackx = 0;
 //自由な値
 int xx[91];
 double xd[11];
-string xs[31];
 
 
 //タイマー測定

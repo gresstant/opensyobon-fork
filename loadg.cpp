@@ -12,7 +12,6 @@ extern Mix_Music *otom[6];
 extern Mix_Chunk *oto[19];
 
 extern int anx[160], any[160];
-extern int ne[40], nf[40];
 
 void loadg(void) {
     for (t = 0; t < 51; t++) {
@@ -187,19 +186,6 @@ void loadg(void) {
     anx[85] = 25 * 100;
     any[85] = 30 * 10 * 100;
 
-    //背景サイズ収得
-    x1 = 4;
-    for (t = 0; t < 40; t++) {
-        if (grap[t][x1]) {
-            ne[t] = grap[t][x1]->w;
-            nf[t] = grap[t][x1]->h;
-            //GetGraphSize(grap[t][x1] ,&ne[t] ,&nf[t]);
-            //ne[t]*=100;nf[t]*=100;
-        } else {
-            ne[t] = 0;
-            nf[t] = 0;
-        }
-    }
 
     /*
     anx[0]=30;any[0]=30;

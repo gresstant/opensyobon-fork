@@ -81,59 +81,59 @@ void paintSceneInGame() {
     }
 
     //地面(壁)//土管も
-    for (int i = 0; i < smax; i++) {
-        int screenX = sa[i] - fx;
-        int screenY = sb[i] - fy;
+    for (int i = 0; i < GROUND_MAX; i++) {
+        int screenX = groundX[i] - fx;
+        int screenY = groundY[i] - fy;
         
-        if (screenX + sc[i] >= -10 && screenX <= fxmax + 1100) {
+        if (screenX + groundWidth[i] >= -10 && screenX <= fxmax + 1100) {
 
-            if (stype[i] == 0) {
+            if (groundType[i] == 0) {
                 setColor(40, 200, 40);
-                fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb, sc[i] / 100, sd[i] / 100);
-                drawRect(screenX / 100 + fmaZ, screenY / 100 + fmb, sc[i] / 100, sd[i] / 100);
-            } else if (stype[i] == 1) {  // 土管  Tube
+                fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb, groundWidth[i] / 100, groundHeight[i] / 100);
+                drawRect(screenX / 100 + fmaZ, screenY / 100 + fmb, groundWidth[i] / 100, groundHeight[i] / 100);
+            } else if (groundType[i] == 1) {  // 土管  Tube
                 setColor(colors::TUBE_GREEN);
-                fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb, sc[i] / 100, sd[i] / 100);
+                fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb, groundWidth[i] / 100, groundHeight[i] / 100);
                 setColorToBlack();
-                drawRect(screenX / 100 + fmaZ, screenY / 100 + fmb, sc[i] / 100, sd[i] / 100);
-            } else if (stype[i] == 2) {  // 土管(下)  Tube (Downwards)
+                drawRect(screenX / 100 + fmaZ, screenY / 100 + fmb, groundWidth[i] / 100, groundHeight[i] / 100);
+            } else if (groundType[i] == 2) {  // 土管(下)  Tube (Downwards)
                 setColor(colors::TUBE_GREEN);
-                fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb + 1, sc[i] / 100, sd[i] / 100);
+                fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb + 1, groundWidth[i] / 100, groundHeight[i] / 100);
                 setColorToBlack();
                 drawLine(screenX / 100 + fmaZ, screenY / 100 + fmb, screenX / 100 + fmaZ,
-                         screenY / 100 + fmb + sd[i] / 100);
-                drawLine(screenX / 100 + fmaZ + sc[i] / 100, screenY / 100 + fmb,
-                         screenX / 100 + fmaZ + sc[i] / 100, screenY / 100 + fmb + sd[i] / 100);
-            } else if (stype[i] == 5) {  // 土管(横)  Tube (Horizontal)
+                         screenY / 100 + fmb + groundHeight[i] / 100);
+                drawLine(screenX / 100 + fmaZ + groundWidth[i] / 100, screenY / 100 + fmb,
+                         screenX / 100 + fmaZ + groundWidth[i] / 100, screenY / 100 + fmb + groundHeight[i] / 100);
+            } else if (groundType[i] == 5) {  // 土管(横)  Tube (Horizontal)
                 setColor(colors::TUBE_GREEN);
-                fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb + 1, sc[i] / 100, sd[i] / 100);
+                fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb + 1, groundWidth[i] / 100, groundHeight[i] / 100);
                 setColorToBlack();
-                drawLine(screenX / 100 + fmaZ, screenY / 100 + fmb, screenX / 100 + fmaZ + sc[i] / 100,
+                drawLine(screenX / 100 + fmaZ, screenY / 100 + fmb, screenX / 100 + fmaZ + groundWidth[i] / 100,
                          screenY / 100 + fmb);
-                drawLine(screenX / 100 + fmaZ, screenY / 100 + fmb + sd[i] / 100,
-                         screenX / 100 + fmaZ + sc[i] / 100, screenY / 100 + fmb + sd[i] / 100);
-            } else if (stype[i] == 51) {  // 落ちてくるブロック  Falling Block
-                if (sxtype[i] == 0) {
-                    for (t3 = 0; t3 <= sc[i] / 3000; t3++) {
+                drawLine(screenX / 100 + fmaZ, screenY / 100 + fmb + groundHeight[i] / 100,
+                         screenX / 100 + fmaZ + groundWidth[i] / 100, screenY / 100 + fmb + groundHeight[i] / 100);
+            } else if (groundType[i] == 51) {  // 落ちてくるブロック  Falling Block
+                if (groundXType[i] == 0) {
+                    for (t3 = 0; t3 <= groundWidth[i] / 3000; t3++) {
                         drawImage(grap[1][1], screenX / 100 + fmaZ + 29 * t3, screenY / 100 + fmb);
                     }
-                } else if (sxtype[i] == 1 || sxtype[i] == 2) {
-                    for (t3 = 0; t3 <= sc[i] / 3000; t3++) {
+                } else if (groundXType[i] == 1 || groundXType[i] == 2) {
+                    for (t3 = 0; t3 <= groundWidth[i] / 3000; t3++) {
                         drawImage(grap[31][1], screenX / 100 + fmaZ + 29 * t3, screenY / 100 + fmb);
                     }
-                } else if (sxtype[i] == 3 || sxtype[i] == 4) {
-                    for (t3 = 0; t3 <= sc[i] / 3000; t3++) {
-                        for (t2 = 0; t2 <= sd[i] / 3000; t2++) {
+                } else if (groundXType[i] == 3 || groundXType[i] == 4) {
+                    for (t3 = 0; t3 <= groundWidth[i] / 3000; t3++) {
+                        for (t2 = 0; t2 <= groundHeight[i] / 3000; t2++) {
                             drawImage(grap[65][1], screenX / 100 + fmaZ + 29 * t3,
                                       screenY / 100 + 29 * t2 + fmb);
                         }
                     }
-                } else if (sxtype[i] == 10) {
-                    for (t3 = 0; t3 <= sc[i] / 3000; t3++) {
+                } else if (groundXType[i] == 10) {
+                    for (t3 = 0; t3 <= groundWidth[i] / 3000; t3++) {
                         drawImage(grap[65][1], screenX / 100 + fmaZ + 29 * t3, screenY / 100 + fmb);
                     }
                 }
-            } else if (stype[i] == 52) {  // 落ちるやつ
+            } else if (groundType[i] == 52) {  // 落ちるやつ
                 xx[29] = 0;
                 if (stagecolor == 2) {
                     xx[29] = 30;
@@ -143,8 +143,8 @@ void paintSceneInGame() {
                     xx[29] = 90;
                 }
 
-                for (int j = 0; j <= sc[i] / 3000; j++) {
-                    if (sxtype[i] == 0) {
+                for (int j = 0; j <= groundWidth[i] / 3000; j++) {
+                    if (groundXType[i] == 0) {
                         drawImage(grap[5 + xx[29]][1], screenX / 100 + fmaZ + 29 * j, screenY / 100 + fmb);
                         if (stagecolor != 4) {
                             drawImage(grap[6 + xx[29]][1], screenX / 100 + fmaZ + 29 * j,
@@ -153,13 +153,13 @@ void paintSceneInGame() {
                             drawImage(grap[5 + xx[29]][1], screenX / 100 + fmaZ + 29 * j,
                                       screenY / 100 + fmb + 29);
                         }
-                    } else if (sxtype[i] == 1) {
-                        for (int k = 0; k <= sd[i] / 3000; k++) {
+                    } else if (groundXType[i] == 1) {
+                        for (int k = 0; k <= groundHeight[i] / 3000; k++) {
                             drawImage(grap[1 + xx[29]][1], screenX / 100 + fmaZ + 29 * j,
                                       screenY / 100 + fmb + 29 * k);
                         }
-                    } else if (sxtype[i] == 2) {
-                        for (int k = 0; k <= sd[i] / 3000; k++) {
+                    } else if (groundXType[i] == 2) {
+                        for (int k = 0; k <= groundHeight[i] / 3000; k++) {
                             drawImage(grap[5 + xx[29]][1], screenX / 100 + fmaZ + 29 * j,
                                       screenY / 100 + fmb + 29 * k);
                         }
@@ -169,75 +169,75 @@ void paintSceneInGame() {
             }
 
             if (trap == 1) {  // ステージトラップ
-                if (stype[i] >= 100 && stype[i] <= 299) {
+                if (groundType[i] >= 100 && groundType[i] <= 299) {
                     if (stagecolor == 1 || stagecolor == 3 || stagecolor == 5)
                         setColorToBlack();
                     if (stagecolor == 2 || stagecolor == 4)
                         setColorToWhite();
-                    drawRect(screenX / 100 + fmaZ, screenY / 100 + fmb, sc[i] / 100, sd[i] / 100);
+                    drawRect(screenX / 100 + fmaZ, screenY / 100 + fmb, groundWidth[i] / 100, groundHeight[i] / 100);
                 }
             }
 
-            if (stype[i] == 300) {  // ゴール
+            if (groundType[i] == 300) {  // ゴール
                 setColorToWhite();
-                fillRect(screenX / 100 + 10, screenY / 100, 10, sd[i] / 100 - 8);
+                fillRect(screenX / 100 + 10, screenY / 100, 10, groundHeight[i] / 100 - 8);
                 setColorToBlack();
-                drawRect(screenX / 100 + 10, screenY / 100, 10, sd[i] / 100 - 8);
+                drawRect(screenX / 100 + 10, screenY / 100, 10, groundHeight[i] / 100 - 8);
                 setColor(250, 250, 0);
                 fillEllipse(screenX / 100 + 15 - 1, screenY / 100, 10, 10);
                 setColorToBlack();
                 drawEllipse(screenX / 100 + 15 - 1, screenY / 100, 10, 10);
-            } else if (stype[i] == 500) {  // 中間
+            } else if (groundType[i] == 500) {  // 中間
                 drawImage(grap[20][4], screenX / 100, screenY / 100);
             }
         }
     }
 
     //描画上書き(土管)
-    for (int i = 0; i < smax; i++) {  // TODO merge smax loop
-        if (sa[i] - fx + sc[i] >= -10 && sa[i] - fx <= fxmax + 1100) {
+    for (int i = 0; i < GROUND_MAX; i++) {  // TODO merge GROUND_MAX loop
+        if (groundX[i] - fx + groundWidth[i] >= -10 && groundX[i] - fx <= fxmax + 1100) {
 
 //入る土管(右)
-            if (stype[i] == 40) {
+            if (groundType[i] == 40) {
                 setColor(colors::TUBE_GREEN);
-                fillRect((sa[i] - fx) / 100 + fmaZ,
-                         (sb[i] - fy) / 100 + fmb + 1,
-                         sc[i] / 100, sd[i] / 100);
+                fillRect((groundX[i] - fx) / 100 + fmaZ,
+                         (groundY[i] - fy) / 100 + fmb + 1,
+                         groundWidth[i] / 100, groundHeight[i] / 100);
                 setColorToBlack();
-                drawRect((sa[i] - fx) / 100 + fmaZ,
-                         (sb[i] - fy) / 100 + fmb + 1,
-                         sc[i] / 100, sd[i] / 100);
+                drawRect((groundX[i] - fx) / 100 + fmaZ,
+                         (groundY[i] - fy) / 100 + fmb + 1,
+                         groundWidth[i] / 100, groundHeight[i] / 100);
             }
 //とぶ土管
-            if (stype[i] == 50) {
+            if (groundType[i] == 50) {
                 setColor(colors::TUBE_GREEN);
-                fillRect((sa[i] - fx) / 100 + fmaZ + 5,
-                         (sb[i] - fy) / 100 + fmb + 30,
-                         50, sd[i] / 100 - 30);
+                fillRect((groundX[i] - fx) / 100 + fmaZ + 5,
+                         (groundY[i] - fy) / 100 + fmb + 30,
+                         50, groundHeight[i] / 100 - 30);
                 setColorToBlack();
-                drawLine((sa[i] - fx) / 100 + 5 + fmaZ,
-                         (sb[i] - fy) / 100 + fmb + 30,
-                         (sa[i] - fx) / 100 + fmaZ + 5,
-                         (sb[i] - fy) / 100 + fmb + sd[i] / 100);
-                drawLine((sa[i] - fx) / 100 + 5 + fmaZ + 50,
-                         (sb[i] - fy) / 100 + fmb + 30,
-                         (sa[i] - fx) / 100 + fmaZ + 50 + 5,
-                         (sb[i] - fy) / 100 + fmb + sd[i] / 100);
+                drawLine((groundX[i] - fx) / 100 + 5 + fmaZ,
+                         (groundY[i] - fy) / 100 + fmb + 30,
+                         (groundX[i] - fx) / 100 + fmaZ + 5,
+                         (groundY[i] - fy) / 100 + fmb + groundHeight[i] / 100);
+                drawLine((groundX[i] - fx) / 100 + 5 + fmaZ + 50,
+                         (groundY[i] - fy) / 100 + fmb + 30,
+                         (groundX[i] - fx) / 100 + fmaZ + 50 + 5,
+                         (groundY[i] - fy) / 100 + fmb + groundHeight[i] / 100);
 
                 setColor(colors::TUBE_GREEN);
-                fillRect((sa[i] - fx) / 100 + fmaZ,
-                         (sb[i] - fy) / 100 + fmb + 1, 60, 30);
+                fillRect((groundX[i] - fx) / 100 + fmaZ,
+                         (groundY[i] - fy) / 100 + fmb + 1, 60, 30);
                 setColorToBlack();
-                drawRect((sa[i] - fx) / 100 + fmaZ,
-                         (sb[i] - fy) / 100 + fmb + 1, 60, 30);
+                drawRect((groundX[i] - fx) / 100 + fmaZ,
+                         (groundY[i] - fy) / 100 + fmb + 1, 60, 30);
             }
 //地面(ブロック)
-            if (stype[i] == 200) {
-                for (t3 = 0; t3 <= sc[i] / 3000; t3++) {
-                    for (t2 = 0; t2 <= sd[i] / 3000; t2++) {
+            if (groundType[i] == 200) {
+                for (t3 = 0; t3 <= groundWidth[i] / 3000; t3++) {
+                    for (t2 = 0; t2 <= groundHeight[i] / 3000; t2++) {
                         drawImage(grap[65][1],
-                                  (sa[i] - fx) / 100 + fmaZ + 29 * t3,
-                                  (sb[i] - fy) / 100 + 29 * t2 + fmb);
+                                  (groundX[i] - fx) / 100 + fmaZ + 29 * t3,
+                                  (groundY[i] - fy) / 100 + 29 * t2 + fmb);
                     }
                 }
             }
@@ -273,36 +273,36 @@ void paintSceneInGame() {
     setColorToBlack();
     if (mmsgtm >= 1) {
         mmsgtm--;
-        xs[0] = "";
+        string str = "";
 
         if (mmsgtype == 1)
-            xs[0] = "お、おいしい!!";
+            str = "お、おいしい!!";
         if (mmsgtype == 2)
-            xs[0] = "毒は無いが……";
+            str = "毒は無いが……";
         if (mmsgtype == 3)
-            xs[0] = "刺さった!!";
+            str = "刺さった!!";
         if (mmsgtype == 10)
-            xs[0] = "食べるべきではなかった!!";
+            str = "食べるべきではなかった!!";
         if (mmsgtype == 11)
-            xs[0] = "俺は燃える男だ!!";
+            str = "俺は燃える男だ!!";
         if (mmsgtype == 50)
-            xs[0] = "体が……焼ける……";
+            str = "体が……焼ける……";
         if (mmsgtype == 51)
-            xs[0] = "たーまやー!!";
+            str = "たーまやー!!";
         if (mmsgtype == 52)
-            xs[0] = "見事にオワタ";
+            str = "見事にオワタ";
         if (mmsgtype == 53)
-            xs[0] = "足が、足がぁ!!";
+            str = "足が、足がぁ!!";
         if (mmsgtype == 54)
-            xs[0] = "流石は摂氏800度!!";
+            str = "流石は摂氏800度!!";
         if (mmsgtype == 55)
-            xs[0] = "溶岩と合体したい……";
+            str = "溶岩と合体したい……";
 
         setColorToBlack();
-        drawString(xs[0], (marioX + marioWidth + 300) / 100 - 1, marioY / 100 - 1);
-        drawString(xs[0], (marioX + marioWidth + 300) / 100 + 1, marioY / 100 + 1);
+        drawString(str, (marioX + marioWidth + 300) / 100 - 1, marioY / 100 - 1);
+        drawString(str, (marioX + marioWidth + 300) / 100 + 1, marioY / 100 + 1);
         setColorToWhite();
-        drawString(xs[0], (marioX + marioWidth + 300) / 100, marioY / 100);
+        drawString(str, (marioX + marioWidth + 300) / 100, marioY / 100);
 
     }            //mmsgtm
 
@@ -312,106 +312,106 @@ void paintSceneInGame() {
         if (amsgtm[i] >= 1) {
             amsgtm[i]--;    //end();
 
-            xs[0] = "";
+            string str = "";
 
             if (amsgtype[i] == 1001)
-                xs[0] = "ヤッフー!!";
+                str = "ヤッフー!!";
             if (amsgtype[i] == 1002)
-                xs[0] = "え?俺勝っちゃったの?";
+                str = "え?俺勝っちゃったの?";
             if (amsgtype[i] == 1003)
-                xs[0] = "貴様の死に場所はここだ!";
+                str = "貴様の死に場所はここだ!";
             if (amsgtype[i] == 1004)
-                xs[0] = "二度と会う事もないだろう";
+                str = "二度と会う事もないだろう";
             if (amsgtype[i] == 1005)
-                xs[0] = "俺、最強!!";
+                str = "俺、最強!!";
             if (amsgtype[i] == 1006)
-                xs[0] = "一昨日来やがれ!!";
+                str = "一昨日来やがれ!!";
             if (amsgtype[i] == 1007)
-                xs[0] = "漢に後退の二文字は無い!!";
+                str = "漢に後退の二文字は無い!!";
             if (amsgtype[i] == 1008)
-                xs[0] = "ハッハァ!!";
+                str = "ハッハァ!!";
 
             if (amsgtype[i] == 1011)
-                xs[0] = "ヤッフー!!";
+                str = "ヤッフー!!";
             if (amsgtype[i] == 1012)
-                xs[0] = "え?俺勝っちゃったの?";
+                str = "え?俺勝っちゃったの?";
             if (amsgtype[i] == 1013)
-                xs[0] = "貴様の死に場所はここだ!";
+                str = "貴様の死に場所はここだ!";
             if (amsgtype[i] == 1014)
-                xs[0] = "身の程知らずが……";
+                str = "身の程知らずが……";
             if (amsgtype[i] == 1015)
-                xs[0] = "油断が死を招く";
+                str = "油断が死を招く";
             if (amsgtype[i] == 1016)
-                xs[0] = "おめでたい奴だ";
+                str = "おめでたい奴だ";
             if (amsgtype[i] == 1017)
-                xs[0] = "屑が!!";
+                str = "屑が!!";
             if (amsgtype[i] == 1018)
-                xs[0] = "無謀な……";
+                str = "無謀な……";
 
             if (amsgtype[i] == 1021)
-                xs[0] = "ヤッフー!!";
+                str = "ヤッフー!!";
             if (amsgtype[i] == 1022)
-                xs[0] = "え?俺勝っちゃったの?";
+                str = "え?俺勝っちゃったの?";
             if (amsgtype[i] == 1023)
-                xs[0] = "二度と会う事もないだろう";
+                str = "二度と会う事もないだろう";
             if (amsgtype[i] == 1024)
-                xs[0] = "身の程知らずが……";
+                str = "身の程知らずが……";
             if (amsgtype[i] == 1025)
-                xs[0] = "僕は……負けない!!";
+                str = "僕は……負けない!!";
             if (amsgtype[i] == 1026)
-                xs[0] = "貴様に見切れる筋は無い";
+                str = "貴様に見切れる筋は無い";
             if (amsgtype[i] == 1027)
-                xs[0] =
+                str =
                         "今死ね、すぐ死ね、骨まで砕けろ!!";
             if (amsgtype[i] == 1028)
-                xs[0] = "任務完了!!";
+                str = "任務完了!!";
 
             if (amsgtype[i] == 1031)
-                xs[0] = "ヤッフー!!";
+                str = "ヤッフー!!";
             if (amsgtype[i] == 1032)
-                xs[0] = "え?俺勝っちゃったの?";
+                str = "え?俺勝っちゃったの?";
             if (amsgtype[i] == 1033)
-                xs[0] = "貴様の死に場所はここだ!";
+                str = "貴様の死に場所はここだ!";
             if (amsgtype[i] == 1034)
-                xs[0] = "身の程知らずが……";
+                str = "身の程知らずが……";
             if (amsgtype[i] == 1035)
-                xs[0] = "油断が死を招く";
+                str = "油断が死を招く";
             if (amsgtype[i] == 1036)
-                xs[0] = "おめでたい奴だ";
+                str = "おめでたい奴だ";
             if (amsgtype[i] == 1037)
-                xs[0] = "屑が!!";
+                str = "屑が!!";
             if (amsgtype[i] == 1038)
-                xs[0] = "無謀な……";
+                str = "無謀な……";
 
             if (amsgtype[i] == 15)
-                xs[0] = "鉄壁!!よって、無敵!!";
+                str = "鉄壁!!よって、無敵!!";
             if (amsgtype[i] == 16)
-                xs[0] = "丸腰で勝てるとでも?";
+                str = "丸腰で勝てるとでも?";
             if (amsgtype[i] == 17)
-                xs[0] = "パリイ!!";
+                str = "パリイ!!";
             if (amsgtype[i] == 18)
-                xs[0] = "自業自得だ";
+                str = "自業自得だ";
             if (amsgtype[i] == 20)
-                xs[0] = "Zzz";
+                str = "Zzz";
             if (amsgtype[i] == 21)
-                xs[0] = "ク、クマー";
+                str = "ク、クマー";
             if (amsgtype[i] == 24)
-                xs[0] = "?";
+                str = "?";
             if (amsgtype[i] == 25)
-                xs[0] = "食べるべきではなかった!!";
+                str = "食べるべきではなかった!!";
             if (amsgtype[i] == 30)
-                xs[0] = "うめぇ!!";
+                str = "うめぇ!!";
             if (amsgtype[i] == 31)
-                xs[0] = "ブロックを侮ったな?";
+                str = "ブロックを侮ったな?";
             if (amsgtype[i] == 32)
-                xs[0] = "シャキーン";
+                str = "シャキーン";
 
             if (amsgtype[i] == 50)
-                xs[0] = "波動砲!!";
+                str = "波動砲!!";
             if (amsgtype[i] == 85)
-                xs[0] = "裏切られたとでも思ったか?";
+                str = "裏切られたとでも思ったか?";
             if (amsgtype[i] == 86)
-                xs[0] = "ポールアターック!!";
+                str = "ポールアターック!!";
 
             if (amsgtype[i] != 31) {
                 xx[5] = (aa[i] + anobia[i] + 300 - fx) / 100;
@@ -423,7 +423,7 @@ void paintSceneInGame() {
 
             ChangeFontType(DX_FONTTYPE_EDGE);
             setColorToWhite();
-            drawString(xs[0], xx[5], xx[6]);
+            drawString(str, xx[5], xx[6]);
             ChangeFontType(DX_FONTTYPE_NORMAL);
 
         }            //amsgtm
@@ -484,27 +484,27 @@ void paintSceneInGame() {
 
 // 背景
 void paintSceneInGameBgItem(int index) {
-    int screenX = na[index] - fx;
-    int screenY = nb[index] - fy;
-    int width = 16000;  // = ne[ntype[index]] * 100;
-    int height = 16000;  // = nf[ntype[index]] * 100;
+    int screenX = bgX[index] - fx;
+    int screenY = bgY[index] - fy;
+    int width = 16000;
+    int height = 16000;
 
     if (screenX + width >= -10 && screenX <= fxmax && screenY + height >= -10 && height <= fymax) {
-        if (ntype[index] != 3) {
-            if ((ntype[index] == 1 || ntype[index] == 2) && stagecolor == 5) {
-                drawImage(grap[ntype[index] + 30][4], screenX / 100, screenY / 100);
+        if (bgType[index] != 3) {
+            if ((bgType[index] == 1 || bgType[index] == 2) && stagecolor == 5) {
+                drawImage(grap[bgType[index] + 30][4], screenX / 100, screenY / 100);
             } else {
-                drawImage(grap[ntype[index]][4], screenX / 100, screenY / 100);
+                drawImage(grap[bgType[index]][4], screenX / 100, screenY / 100);
             }
-        } else if (ntype[index] == 3) {
-            drawImage(grap[ntype[index]][4], screenX / 100 - 5, screenY / 100);
-        } else if (ntype[index] == 100) {  // 51
+        } else if (bgType[index] == 3) {
+            drawImage(grap[bgType[index]][4], screenX / 100 - 5, screenY / 100);
+        } else if (bgType[index] == 100) {  // 51
             DrawFormatString(screenX / 100 + fmaZ, screenY / 100 + fmb,
                              GetColor(255, 255, 255), "51");
-        } else if (ntype[index] == 101) {
+        } else if (bgType[index] == 101) {
             DrawFormatString(screenX / 100 + fmaZ, screenY / 100 + fmb,
                              GetColor(255, 255, 255), "ゲームクリアー");
-        } else if (ntype[index] == 102) {
+        } else if (bgType[index] == 102) {
             DrawFormatString(screenX / 100 + fmaZ, screenY / 100 + fmb,
                              GetColor(255, 255, 255), "プレイしてくれてありがとー");
         }
@@ -552,10 +552,10 @@ void paintSceneInGameEffectItem(int index) {
 
 // リフト
 void paintSceneInGameLift(int index) {
-    int screenX = sra[index] - fx;
-    int screenY = srb[index] - fy;
+    int screenX = liftX[index] - fx;
+    int screenY = liftY[index] - fy;
 
-    if (!(screenX + src[index] >= -10 && screenY <= fxmax + 12100 && src[index] / 100 >= 1)) {
+    if (!(screenX + liftWidth[index] >= -10 && screenY <= fxmax + 12100 && liftWidth[index] / 100 >= 1)) {
         return;
     }
 
@@ -569,7 +569,7 @@ void paintSceneInGameLift(int index) {
         } else {
             setColor(220, 220, 0);
         }
-        fillRect((sra[index] - fx) / 100, (srb[index] - fy) / 100, src[index] / 100, height);
+        fillRect((liftX[index] - fx) / 100, (liftY[index] - fy) / 100, liftWidth[index] / 100, height);
 
         if (srsp[index] == 2 || srsp[index] == 3) {
             setColor(0, 180, 0);
@@ -578,23 +578,23 @@ void paintSceneInGameLift(int index) {
         } else {
             setColor(180, 180, 0);
         }
-        drawRect((sra[index] - fx) / 100, (srb[index] - fy) / 100, src[index] / 100, height);
+        drawRect((liftX[index] - fx) / 100, (liftY[index] - fy) / 100, liftWidth[index] / 100, height);
     } else if (srsp[index] <= 14) {
-        if (src[index] >= 5000) {
+        if (liftWidth[index] >= 5000) {
             setColor(0, 200, 0);
-            fillRect((sra[index] - fx) / 100, (srb[index] - fy) / 100, src[index] / 100, 30);
+            fillRect((liftX[index] - fx) / 100, (liftY[index] - fy) / 100, liftWidth[index] / 100, 30);
             setColor(0, 160, 0);
-            drawRect((sra[index] - fx) / 100, (srb[index] - fy) / 100, src[index] / 100, 30);
+            drawRect((liftX[index] - fx) / 100, (liftY[index] - fy) / 100, liftWidth[index] / 100, 30);
 
             setColor(180, 120, 60);
-            fillRect((sra[index] - fx) / 100 + 20, (srb[index] - fy) / 100 + 30, src[index] / 100 - 40, 480);
+            fillRect((liftX[index] - fx) / 100 + 20, (liftY[index] - fy) / 100 + 30, liftWidth[index] / 100 - 40, 480);
             setColor(100, 80, 20);
-            drawRect((sra[index] - fx) / 100 + 20, (srb[index] - fy) / 100 + 30, src[index] / 100 - 40, 480);
+            drawRect((liftX[index] - fx) / 100 + 20, (liftY[index] - fy) / 100 + 30, liftWidth[index] / 100 - 40, 480);
         }
     } else if (srsp[index] == 15) {
         for (int i = 0; i <= 2; i++) {
             xx[6] = 1 + 0;
-            drawImage(grap[xx[6]][1], (sra[index] - fx) / 100 + i * 29, (srb[index] - fy) / 100);
+            drawImage(grap[xx[6]][1], (liftX[index] - fx) / 100 + i * 29, (liftY[index] - fy) / 100);
         }
     }
 }
@@ -854,42 +854,42 @@ void processSceneInGame() {
 
         //ランダムにさせる
         if (zeroMode) {
-            for (int i = 0; i < blocks.size(); i++) {
+            for (const auto& block : blocks) {
 //            for (auto& ptrToBlock : blocks) {
                 if (rand(3) <= 1) {
 //                    ptrToBlock->setX((rand(500) - 1) * 29 * 100);
 //                    ptrToBlock->setY(rand(14) * 100 * 29 - 1200);
-                    blocks[i]->x = (rand(500) - 1) * 29 * 100;
-                    blocks[i]->y = rand(14) * 100 * 29 - 1200;
+                    block->x = (rand(500) - 1) * 29 * 100;
+                    block->y = rand(14) * 100 * 29 - 1200;
 
                     // due to changes in the type detection, random type is becoming impossible:
-                    blocks[i]->type = rand(142);
-                    if (blocks[i]->type >= 9 && blocks[i]->type <= 99) {
-                        blocks[i]->type = rand(8);
+                    block->type = rand(142);
+                    if (block->type >= 9 && block->type <= 99) {
+                        block->type = rand(8);
                     }
-                    blocks[i]->xtype = rand(4);
+                    block->xtype = rand(4);
                 }
             }
-            for (int i = 0; i < bmax; i++) {
+            for (int i = 0; i < ET_MAX; i++) {
                 if (rand(2) <= 1) {
-                    ba[i] = (rand(500) - 1) * 29 * 100;
-                    bb[i] = rand(15) * 100 * 29 - 1200 - 3000;
+                    etX[i] = (rand(500) - 1) * 29 * 100;
+                    etY[i] = rand(15) * 100 * 29 - 1200 - 3000;
                     if (rand(6) == 0) {
-                        btype[i] = rand(9);
+                        etType[i] = rand(9);
                     }
                 }
             }
 
-            srco = 0;
-            t = srco;
-            sra[t] = marioX + fx;
-            srb[t] = (13 * 29 - 12) * 100;
-            src[t] = 30 * 100;
-            srtype[t] = 0;
-            sracttype[t] = 0;
+            liftCounter = 0;
+            t = liftCounter;
+            liftX[t] = marioX + fx;
+            liftY[t] = (13 * 29 - 12) * 100;
+            liftWidth[t] = 30 * 100;
+            liftType[t] = 0;
+            liftActType[t] = 0;
             sre[t] = 0;
             srsp[t] = 0;
-            srco++;
+            liftCounter++;
 
             if (rand(4) == 0)
                 stagecolor = rand(5);
@@ -1161,28 +1161,28 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
                     marioY = -80000000;
                 }
                 if (mtm == 23) {
-                    sa[t] -= 100;
+                    groundX[t] -= 100;
                 }
                 if (mtm >= 44 && mtm <= 60) {
                     if (mtm % 2 == 0)
-                        sa[t] += 200;
+                        groundX[t] += 200;
                     if (mtm % 2 == 1)
-                        sa[t] -= 200;
+                        groundX[t] -= 200;
                 }
                 if (mtm >= 61 && mtm <= 77) {
                     if (mtm % 2 == 0)
-                        sa[t] += 400;
+                        groundX[t] += 400;
                     if (mtm % 2 == 1)
-                        sa[t] -= 400;
+                        groundX[t] -= 400;
                 }
                 if (mtm >= 78 && mtm <= 78 + 16) {
                     if (mtm % 2 == 0)
-                        sa[t] += 600;
+                        groundX[t] += 600;
                     if (mtm % 2 == 1)
-                        sa[t] -= 600;
+                        groundX[t] -= 600;
                 }
                 if (mtm >= 110) {
-                    sb[t] -= mzz;
+                    groundY[t] -= mzz;
                     mzz += 80;
                     if (mzz > 1600)
                         mzz = 1600;
@@ -1306,31 +1306,31 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
             if (mtm == 200) {
                 ot(oto[17]);
                 if (marioType == MarioType::WIN_SWORD) {
-                    na[nco] = 117 * 29 * 100 - 1100;
-                    nb[nco] = 4 * 29 * 100;
-                    ntype[nco] = 101;
-                    nco++;
-                    if (nco >= BG_MAX)
-                        nco = 0;
-                    na[nco] = 115 * 29 * 100 - 1100;
-                    nb[nco] = 6 * 29 * 100;
-                    ntype[nco] = 102;
-                    nco++;
-                    if (nco >= BG_MAX)
-                        nco = 0;
+                    bgX[bgCounter] = 117 * 29 * 100 - 1100;
+                    bgY[bgCounter] = 4 * 29 * 100;
+                    bgType[bgCounter] = 101;
+                    bgCounter++;
+                    if (bgCounter >= BG_MAX)
+                        bgCounter = 0;
+                    bgX[bgCounter] = 115 * 29 * 100 - 1100;
+                    bgY[bgCounter] = 6 * 29 * 100;
+                    bgType[bgCounter] = 102;
+                    bgCounter++;
+                    if (bgCounter >= BG_MAX)
+                        bgCounter = 0;
                 } else {
-                    na[nco] = 157 * 29 * 100 - 1100;
-                    nb[nco] = 4 * 29 * 100;
-                    ntype[nco] = 101;
-                    nco++;
-                    if (nco >= BG_MAX)
-                        nco = 0;
-                    na[nco] = 155 * 29 * 100 - 1100;
-                    nb[nco] = 6 * 29 * 100;
-                    ntype[nco] = 102;
-                    nco++;
-                    if (nco >= BG_MAX)
-                        nco = 0;
+                    bgX[bgCounter] = 157 * 29 * 100 - 1100;
+                    bgY[bgCounter] = 4 * 29 * 100;
+                    bgType[bgCounter] = 101;
+                    bgCounter++;
+                    if (bgCounter >= BG_MAX)
+                        bgCounter = 0;
+                    bgX[bgCounter] = 155 * 29 * 100 - 1100;
+                    bgY[bgCounter] = 6 * 29 * 100;
+                    bgType[bgCounter] = 102;
+                    bgCounter++;
+                    if (bgCounter >= BG_MAX)
+                        bgCounter = 0;
                 }
             }
 //スタッフロールへ
@@ -1495,10 +1495,7 @@ if (mtm==250)end();
                         if (block->type != 7 && block->type != 110 && block->type != 114) {
                             if (marioX + marioWidth > screenX + xx0 * 2 + 100 && marioX < screenX + xx1 - xx0 * 2 - 100 &&
                                 marioY + marioHeight > screenY && marioY + marioHeight < screenY + xx1 && marioSpeedY >= -100) {
-                                if (block->type != 115 && block->type != 400
-                                    && block->type != 117
-                                    && block->type != 118
-                                    && block->type != 120) {
+                                if (block->type != 115 && block->type != 400 && block->type != 117 && block->type != 118 && block->type != 120) {
                                     marioY = screenY - marioHeight + 100;
                                     marioSpeedY = 0;
                                     marioOnGround = true;
@@ -1514,9 +1511,9 @@ if (mtm==250)end();
                                     marioSpeedY = 0;
                                     block->x = -8000000;
                                     ot(oto[13]);
-                                    for (tt = 0; tt < blocks.size(); tt++) {
-                                        if (blocks[tt]->type != 7) {
-                                            blocks[tt]->type = 800;
+                                    for (const auto& b : blocks) {
+                                        if (b->type != 7) {
+                                            b->type = 800;
                                         }
                                     }
                                     Mix_HaltMusic();
@@ -1551,10 +1548,10 @@ if (mtm==250)end();
                             xx[21] = 3;
                             xx[22] = 0;
                         }
-                        for (t3 = 0; t3 <= 1; t3++) {
+                        for (int i = 0; i <= 1; i++) {
 
                             //下
-                            if (t3 == xx[21] && marioType != MarioType::IN_PIPE && block->type != 117) {    // && xx[12]==0){
+                            if (i == xx[21] && marioType != MarioType::IN_PIPE && block->type != 117) {    // && xx[12]==0){
                                 if (marioX + marioWidth > screenX + xx0 * 2 + 800 && marioX < screenX + xx1 - xx0 * 2 - 800 &&
                                     marioY > screenY - xx0 * 2 && marioY < screenY + xx1 - xx0 * 2 && marioSpeedY <= 0) {
                                     xx[16] = 1;
@@ -1597,7 +1594,7 @@ if (mtm==250)end();
                                 }
                             }
 //左右
-                            if (t3 == xx[22] && xx[15] == 0) {
+                            if (i == xx[22] && xx[15] == 0) {
                                 if (block->type != 7 && block->type != 110 && block->type != 117) {
                                     if (block->type != 114) {    // && block->xtype==1)){
                                         if (block->x >= -20000) {
@@ -1657,7 +1654,7 @@ if (mtm==250)end();
                         && marioX + marioWidth > screenX - 400
                         && marioX < screenX + xx1) {
                         block->x = -800000;    //ot(oto[4]);
-                        sracttype[20] = 1;
+                        liftActType[20] = 1;
                         sron[20] = 1;
                         Mix_HaltMusic();
                         marioType = MarioType::WIN_SWORD;
@@ -1874,7 +1871,7 @@ if (mtm==250)end();
                                     }
                                 }
                             }
-                            bxtype[3] = 105;
+                            etXType[3] = 105;
                         }
                     }
                 }
@@ -1962,137 +1959,127 @@ if (mtm==250)end();
     }            //ブロック
 
 //壁
-    for (t = 0; t < smax; t++) {
-        if (sa[t] - fx + sc[t] >= -12000 && sa[t] - fx <= fxmax) {
+    for (t = 0; t < GROUND_MAX; t++) {
+        if (groundX[t] - fx + groundWidth[t] >= -12000 && groundX[t] - fx <= fxmax) {
             xx[0] = 200;
             xx[1] = 2400;
             xx[2] = 1000;
             xx[7] = 0;
 
-            xx[8] = sa[t] - fx;
-            xx[9] = sb[t] - fy;
-            if ((stype[t] <= 99 || stype[t] == 200)
+            int screenX = groundX[t] - fx;
+            int screenY = groundY[t] - fy;
+
+            if ((groundType[t] <= 99 || groundType[t] == 200)
                 && int(marioType) < 10) {
 
-//おちるブロック
-                if (stype[t] == 51) {
-                    if (marioX + marioWidth >
-                        xx[8] + xx[0] + 3000
-                        && marioX < xx[8] + sc[t] - xx[0]
-                        && marioY + marioHeight >
-                           xx[9] + 3000 && sgtype[t] == 0) {
-                        if (sxtype[t] == 0) {
-                            sgtype[t] = 1;
+//おちるブロック  Falling Blocks
+                if (groundType[t] == 51) {
+                    if (marioX + marioWidth > screenX + xx[0] + 3000
+                            && marioX < screenX + groundWidth[t] - xx[0]
+                            && marioY + marioHeight > screenY + 3000 && groundGType[t] == 0) {
+                        if (groundXType[t] == 0) {
+                            groundGType[t] = 1;
                             sr[t] = 0;
                         }
                     }
-                    if (marioX + marioWidth >
-                        xx[8] + xx[0] + 1000
-                        && marioX < xx[8] + sc[t] - xx[0]
-                        && marioY + marioHeight >
-                           xx[9] + 3000 && sgtype[t] == 0) {
-                        if ((sxtype[t] == 10)
-                            && sgtype[t] == 0) {
-                            sgtype[t] = 1;
+                    if (marioX + marioWidth > screenX + xx[0] + 1000
+                            && marioX < screenX + groundWidth[t] - xx[0]
+                            && marioY + marioHeight > screenY + 3000 && groundGType[t] == 0) {
+                        if ((groundXType[t] == 10)
+                            && groundGType[t] == 0) {
+                            groundGType[t] = 1;
                             sr[t] = 0;
                         }
                     }
 
-                    if ((sxtype[t] == 1)
-                        && sb[27] >= 25000
-                        && sa[27] > marioX + marioWidth
-                        && t != 27 && sgtype[t] == 0) {
-                        sgtype[t] = 1;
+                    if ((groundXType[t] == 1)
+                            && groundY[27] >= 25000
+                            && groundX[27] > marioX + marioWidth
+                            && t != 27 && groundGType[t] == 0) {
+                        groundGType[t] = 1;
                         sr[t] = 0;
                     }
-                    if (sxtype[t] == 2
-                        && sb[28] >= 48000
-                        && t != 28 && sgtype[t] == 0 && marioHP >= 1) {
-                        sgtype[t] = 1;
+                    if (groundXType[t] == 2
+                            && groundY[28] >= 48000
+                            && t != 28 && groundGType[t] == 0 && marioHP >= 1) {
+                        groundGType[t] = 1;
                         sr[t] = 0;
                     }
-                    if ((sxtype[t] == 3
-                         && marioY >= 30000
-                         || sxtype[t] == 4 && marioY >= 25000)
-                        && sgtype[t] == 0
-                        && marioHP >= 1
-                        && marioX + marioWidth >
-                           xx[8] + xx[0] + 3000 - 300
-                        && marioX < xx[8] + sc[t] - xx[0]) {
-                        sgtype[t] = 1;
+                    if ((groundXType[t] == 3 && marioY >= 30000
+                             || groundXType[t] == 4 && marioY >= 25000)
+                            && groundGType[t] == 0
+                            && marioHP >= 1
+                            && marioX + marioWidth >
+                               screenX + xx[0] + 3000 - 300
+                            && marioX < screenX + groundWidth[t] - xx[0]) {
+                        groundGType[t] = 1;
                         sr[t] = 0;
-                        if (sxtype[t] == 4)
+                        if (groundXType[t] == 4)
                             sr[t] = 100;
                     }
 
-                    if (sgtype[t] == 1 && sb[t] <= fymax + 18000) {
+                    if (groundGType[t] == 1 && groundY[t] <= fymax + 18000) {
                         sr[t] += 120;
                         if (sr[t] >= 1600) {
                             sr[t] = 1600;
                         }
-                        sb[t] += sr[t];
-                        if (marioX + marioWidth > xx[8] + xx[0]
-                            && marioX < xx[8] + sc[t] - xx[0]
-                            && marioY + marioHeight > xx[9]
-                            && marioY < xx[9] + sd[t] + xx[0]) {
+                        groundY[t] += sr[t];
+                        if (marioX + marioWidth > screenX + xx[0]
+                                && marioX < screenX + groundWidth[t] - xx[0]
+                                && marioY + marioHeight > screenY
+                                && marioY < screenY + groundHeight[t] + xx[0]) {
                             marioHP--;
                             xx[7] = 1;
                         }
                     }
                 }
 //おちるブロック2
-                if (stype[t] == 52) {
-                    if (sgtype[t] == 0
-                        && marioX + marioWidth >
-                           xx[8] + xx[0] + 2000
-                        && marioX <
-                           xx[8] + sc[t] - xx[0] - 2500
-                        && marioY + marioHeight > xx[9] - 3000) {
-                        sgtype[t] = 1;
+                if (groundType[t] == 52) {
+                    if (groundGType[t] == 0
+                            && marioX + marioWidth > screenX + xx[0] + 2000
+                            && marioX < screenX + groundWidth[t] - xx[0] - 2500
+                            && marioY + marioHeight > screenY - 3000) {
+                        groundGType[t] = 1;
                         sr[t] = 0;
                     }
-                    if (sgtype[t] == 1) {
+                    if (groundGType[t] == 1) {
                         sr[t] += 120;
                         if (sr[t] >= 1600) {
                             sr[t] = 1600;
                         }
-                        sb[t] += sr[t];
+                        groundY[t] += sr[t];
                     }
                 }
 //通常地面
                 if (xx[7] == 0) {
-                    if (marioX + marioWidth > xx[8] + xx[0]
-                        && marioX < xx[8] + sc[t] - xx[0]
-                        && marioY + marioHeight > xx[9]
-                        && marioY + marioHeight < xx[9] + xx[1]
-                        && marioSpeedY >= -100) {
-                        marioY = sb[t] - fy - marioHeight + 100;
+                    if (marioX + marioWidth > screenX + xx[0]
+                            && marioX < screenX + groundWidth[t] - xx[0]
+                            && marioY + marioHeight > screenY
+                            && marioY + marioHeight < screenY + xx[1]
+                            && marioSpeedY >= -100) {
+                        marioY = groundY[t] - fy - marioHeight + 100;
                         marioSpeedY = 0;
                         marioOnGround = true;
                     }
-                    if (marioX + marioWidth > xx[8] - xx[0]
-                        && marioX < xx[8] + xx[2]
-                        && marioY + marioHeight >
-                           xx[9] + xx[1] * 3 / 4
-                        && marioY < xx[9] + sd[t] - xx[2]) {
-                        marioX = xx[8] - xx[0] - marioWidth;
+                    if (marioX + marioWidth > screenX - xx[0]
+                            && marioX < screenX + xx[2]
+                            && marioY + marioHeight > screenY + xx[1] * 3 / 4
+                            && marioY < screenY + groundHeight[t] - xx[2]) {
+                        marioX = screenX - xx[0] - marioWidth;
                         marioSpeedX = 0;
                     }
-                    if (marioX + marioWidth > xx[8] + sc[t] - xx[0]
-                        && marioX < xx[8] + sc[t] + xx[0]
-                        && marioY + marioHeight >
-                           xx[9] + xx[1] * 3 / 4
-                        && marioY < xx[9] + sd[t] - xx[2]) {
-                        marioX = xx[8] + sc[t] + xx[0];
+                    if (marioX + marioWidth > screenX + groundWidth[t] - xx[0]
+                            && marioX < screenX + groundWidth[t] + xx[0]
+                            && marioY + marioHeight > screenY + xx[1] * 3 / 4
+                            && marioY < screenY + groundHeight[t] - xx[2]) {
+                        marioX = screenX + groundWidth[t] + xx[0];
                         marioSpeedX = 0;
                     }
-                    if (marioX + marioWidth >
-                        xx[8] + xx[0] * 2
-                        && marioX <
-                           xx[8] + sc[t] - xx[0] * 2
-                        && marioY > xx[9] + sd[t] - xx[1]
-                        && marioY < xx[9] + sd[t] + xx[0]) {
-                        marioY = xx[9] + sd[t] + xx[0];
+                    if (marioX + marioWidth > screenX + xx[0] * 2
+                            && marioX < screenX + groundWidth[t] - xx[0] * 2
+                            && marioY > screenY + groundHeight[t] - xx[1]
+                            && marioY < screenY + groundHeight[t] + xx[0]) {
+                        marioY = screenY + groundHeight[t] + xx[0];
                         if (marioSpeedY < 0) {
                             marioSpeedY = -marioSpeedY * 2 / 3;
                         }
@@ -2100,44 +2087,42 @@ if (mtm==250)end();
                 }        //xx[7]
 
 //入る土管
-                if (stype[t] == 50) {
-                    if (marioX + marioWidth > xx[8] + 2800
-                        && marioX < xx[8] + sc[t] - 3000
-                        && marioY + marioHeight >
-                           xx[9] - 1000
-                        && marioY + marioHeight <
-                           xx[9] + xx[1] + 3000
-                        && marioOnGround
-                        && actaon[3] == 1 && marioType == MarioType::NORMAL) {
+                if (groundType[t] == 50) {
+                    if (marioX + marioWidth > screenX + 2800
+                            && marioX < screenX + groundWidth[t] - 3000
+                            && marioY + marioHeight > screenY - 1000
+                            && marioY + marioHeight < screenY + xx[1] + 3000
+                            && marioOnGround
+                            && actaon[3] == 1 && marioType == MarioType::NORMAL) {
 //飛び出し
-                        if (sxtype[t] == 0) {
+                        if (groundXType[t] == 0) {
                             marioType = MarioType::IN_PIPE;
                             mtm = 0;
                             ot(oto[7]);
                             marioXType = 0;
                         }
 //普通
-                        if (sxtype[t] == 1) {
+                        if (groundXType[t] == 1) {
                             marioType = MarioType::IN_PIPE;
                             mtm = 0;
                             ot(oto[7]);
                             marioXType = 1;
                         }
 //普通
-                        if (sxtype[t] == 2) {
+                        if (groundXType[t] == 2) {
                             marioType = MarioType::IN_PIPE;
                             mtm = 0;
                             ot(oto[7]);
                             marioXType = 2;
                         }
-                        if (sxtype[t] == 5) {
+                        if (groundXType[t] == 5) {
                             marioType = MarioType::IN_PIPE;
                             mtm = 0;
                             ot(oto[7]);
                             marioXType = 5;
                         }
 // ループ
-                        if (sxtype[t] == 6) {
+                        if (groundXType[t] == 6) {
                             marioType = MarioType::IN_PIPE;
                             mtm = 0;
                             ot(oto[7]);
@@ -2147,12 +2132,12 @@ if (mtm==250)end();
                 }        //50
 
 //入る土管(左から)
-                if (stype[t] == 40) {
-                    if (marioX + marioWidth > xx[8] - 300 && marioX < xx[8] + sc[t] - 1000 && marioY > xx[9] + 1000 &&
-                        marioY + marioHeight < xx[9] + xx[1] + 4000 && marioOnGround && actaon[4] == 1 &&
-                        marioType == MarioType::NORMAL) {    //end();
+                if (groundType[t] == 40) {
+                    if (marioX + marioWidth > screenX - 300 && marioX < screenX + groundWidth[t] - 1000 && marioY > screenY + 1000 &&
+                            marioY + marioHeight < screenY + xx[1] + 4000 && marioOnGround && actaon[4] == 1 &&
+                            marioType == MarioType::NORMAL) {    //end();
 //飛び出し
-                        if (sxtype[t] == 0) {
+                        if (groundXType[t] == 0) {
                             marioType = MarioType::_500;
                             mtm = 0;
                             ot(oto[7]);    //marioXType=1;
@@ -2160,14 +2145,14 @@ if (mtm==250)end();
                             marioXType = 10;
                         }
 
-                        if (sxtype[t] == 2) {
+                        if (groundXType[t] == 2) {
                             marioXType = 3;
                             mtm = 0;
                             ot(oto[7]);    //marioXType=1;
                             marioType = MarioType::IN_PIPE;
                         }
 // ループ
-                        if (sxtype[t] == 6) {
+                        if (groundXType[t] == 6) {
                             marioType = MarioType::AFTER_SPRING;
                             mtm = 0;
                             ot(oto[7]);
@@ -2176,73 +2161,73 @@ if (mtm==250)end();
                     }
                 }        //40
 
-            }        //stype
+            }        //groundType
             else {
-                if (marioX + marioWidth > xx[8] + xx[0]
-                    && marioX < xx[8] + sc[t] - xx[0]
-                    && marioY + marioHeight > xx[9]
-                    && marioY < xx[9] + sd[t] + xx[0]) {
-                    if (stype[t] == 100) {
-                        if (sxtype[t] == 0
-                            || sxtype[t] == 1 && blocks[1]->type != 3) {
-                            ayobi(sa[t] + 1000, 32000, 0, 0, 0, 3, 0);
-                            sa[t] = -800000000;
+                if (marioX + marioWidth > screenX + xx[0]
+                        && marioX < screenX + groundWidth[t] - xx[0]
+                        && marioY + marioHeight > screenY
+                        && marioY < screenY + groundHeight[t] + xx[0]) {
+                    if (groundType[t] == 100) {
+                        if (groundXType[t] == 0
+                            || groundXType[t] == 1 && blocks[1]->type != 3) {
+                            ayobi(groundX[t] + 1000, 32000, 0, 0, 0, 3, 0);
+                            groundX[t] = -800000000;
                             ot(oto[10]);
                         }
                     }
-                    if (stype[t] == 101) {
-                        ayobi(sa[t] + 6000, -4000, 0, 0, 0, 3, 1);
-                        sa[t] = -800000000;
+                    if (groundType[t] == 101) {
+                        ayobi(groundX[t] + 6000, -4000, 0, 0, 0, 3, 1);
+                        groundX[t] = -800000000;
                         ot(oto[10]);
                     }
-                    if (stype[t] == 102) {
-                        if (sxtype[t] == 0) {
+                    if (groundType[t] == 102) {
+                        if (groundXType[t] == 0) {
                             for (t3 = 0; t3 <= 3; t3++) {
-                                ayobi(sa[t] + t3 * 3000, -3000, 0, 0, 0, 0, 0);
+                                ayobi(groundX[t] + t3 * 3000, -3000, 0, 0, 0, 0, 0);
                             }
                         }
-                        if (sxtype[t] == 1 && marioY >= 16000) {
-                            ayobi(sa[t] + 1500, 44000, 0, -2000, 0, 4, 0);
-                        } else if (sxtype[t] == 2) {
-                            ayobi(sa[t] + 4500, 30000, 0, -1600, 0, 5, 0);
+                        if (groundXType[t] == 1 && marioY >= 16000) {
+                            ayobi(groundX[t] + 1500, 44000, 0, -2000, 0, 4, 0);
+                        } else if (groundXType[t] == 2) {
+                            ayobi(groundX[t] + 4500, 30000, 0, -1600, 0, 5, 0);
                             ot(oto[10]);
-                            sxtype[t] = 3;
-                            sa[t] -= 12000;
-                        } else if (sxtype[t] == 3) {
-                            sa[t] += 12000;
-                            sxtype[t] = 4;
-                        } else if (sxtype[t] == 4) {
-                            ayobi(sa[t] + 4500, 30000, 0, -1600, 0, 5, 0);
+                            groundXType[t] = 3;
+                            groundX[t] -= 12000;
+                        } else if (groundXType[t] == 3) {
+                            groundX[t] += 12000;
+                            groundXType[t] = 4;
+                        } else if (groundXType[t] == 4) {
+                            ayobi(groundX[t] + 4500, 30000, 0, -1600, 0, 5, 0);
                             ot(oto[10]);
-                            sxtype[t] = 5;
-                            sxtype[t] = 0;
-                        } else if (sxtype[t] == 7) {
+                            groundXType[t] = 5;
+                            groundXType[t] = 0;
+                        } else if (groundXType[t] == 7) {
                             owataZone = 1;
-                        } else if (sxtype[t] == 8) {
-                            ayobi(sa[t] - 5000 - 3000 * 1, 26000, 0, -1600, 0, 5, 0);
+                        } else if (groundXType[t] == 8) {
+                            ayobi(groundX[t] - 5000 - 3000 * 1, 26000, 0, -1600, 0, 5, 0);
                             ot(oto[10]);
-                        } else if (sxtype[t] == 9) {
+                        } else if (groundXType[t] == 9) {
                             for (t3 = 0; t3 <= 2; t3++) {
-                                ayobi(sa[t] + t3 * 3000 + 3000, 48000, 0, -6000, 0, 3, 0);
+                                ayobi(groundX[t] + t3 * 3000 + 3000, 48000, 0, -6000, 0, 3, 0);
                             }
                         }
-                        if (sxtype[t] == 10) {
-                            sa[t] -= 5 * 30 * 100;
-                            stype[t] = 101;
+                        if (groundXType[t] == 10) {
+                            groundX[t] -= 5 * 30 * 100;
+                            groundType[t] = 101;
                         }
 
-                        if (sxtype[t] == 12) {
+                        if (groundXType[t] == 12) {
                             for (t3 = 1; t3 <= 3; t3++) {
-                                ayobi(sa[t] + t3 * 3000 - 1000, 40000, 0, -2600, 0, 9, 0);
+                                ayobi(groundX[t] + t3 * 3000 - 1000, 40000, 0, -2600, 0, 9, 0);
                             }
                         }
 //スクロール消し
-                        if (sxtype[t] == 20) {
+                        if (groundXType[t] == 20) {
                             scrollx = 0;
                         }
 //クリア
-                        if (sxtype[t] == 30) {
-                            sa[t] = -80000000;
+                        if (groundXType[t] == 30) {
+                            groundX[t] = -80000000;
                             marioSpeedY = 0;
                             Mix_HaltMusic();
                             marioType = MarioType::WIN_AUTO;
@@ -2250,69 +2235,69 @@ if (mtm==250)end();
                             ot(oto[16]);
                         }
 
-                        if (sxtype[t] != 3
-                            && sxtype[t] != 4 && sxtype[t] != 10) {
-                            sa[t] = -800000000;
+                        if (groundXType[t] != 3
+                            && groundXType[t] != 4 && groundXType[t] != 10) {
+                            groundX[t] = -800000000;
                         }
                     }
 
-                    if (stype[t] == 103) {
-                        if (sxtype[t] == 0) {
+                    if (groundType[t] == 103) {
+                        if (groundXType[t] == 0) {
                             amsgtm[aco] = 10;
                             amsgtype[aco] = 50;
-                            ayobi(sa[t] + 9000, sb[t] + 2000, 0, 0, 0, 79, 0);
-                            sa[t] = -800000000;
+                            ayobi(groundX[t] + 9000, groundY[t] + 2000, 0, 0, 0, 79, 0);
+                            groundX[t] = -800000000;
                         }
 
-                        if (sxtype[t] == 1 && blocks[6]->type <= 6) {
+                        if (groundXType[t] == 1 && blocks[6]->type <= 6) {
                             amsgtm[aco] = 10;
                             amsgtype[aco] = 50;
-                            ayobi(sa[t] - 12000, sb[t] + 2000, 0, 0, 0, 79, 0);
-                            sa[t] = -800000000;
+                            ayobi(groundX[t] - 12000, groundY[t] + 2000, 0, 0, 0, 79, 0);
+                            groundX[t] = -800000000;
                             blocks[9]->xtype = 500;    //blocks[9]->type=1;
                         }
                     }    //103
 
-                    if (stype[t] == 104) {
-                        if (sxtype[t] == 0) {
-                            ayobi(sa[t] + 12000, sb[t] + 2000 + 3000, 0, 0, 0, 79, 0);
-                            ayobi(sa[t] + 12000, sb[t] + 2000 + 3000, 0, 0, 0, 79, 1);
-                            ayobi(sa[t] + 12000, sb[t] + 2000 + 3000, 0, 0, 0, 79, 2);
-                            ayobi(sa[t] + 12000, sb[t] + 2000 + 3000, 0, 0, 0, 79, 3);
-                            ayobi(sa[t] + 12000, sb[t] + 2000 + 3000, 0, 0, 0, 79, 4);
-                            sa[t] = -800000000;
+                    if (groundType[t] == 104) {
+                        if (groundXType[t] == 0) {
+                            ayobi(groundX[t] + 12000, groundY[t] + 2000 + 3000, 0, 0, 0, 79, 0);
+                            ayobi(groundX[t] + 12000, groundY[t] + 2000 + 3000, 0, 0, 0, 79, 1);
+                            ayobi(groundX[t] + 12000, groundY[t] + 2000 + 3000, 0, 0, 0, 79, 2);
+                            ayobi(groundX[t] + 12000, groundY[t] + 2000 + 3000, 0, 0, 0, 79, 3);
+                            ayobi(groundX[t] + 12000, groundY[t] + 2000 + 3000, 0, 0, 0, 79, 4);
+                            groundX[t] = -800000000;
                         }
                     }
 
-                    if (stype[t] == 105 && !marioOnGround && marioSpeedY >= 0) {
+                    if (groundType[t] == 105 && !marioOnGround && marioSpeedY >= 0) {
                         blocks[1]->x -= 1000;
                         blocks[2]->x += 1000;
-                        sxtype[t]++;
-                        if (sxtype[t] >= 3)
-                            sa[t] = -8000000;
+                        groundXType[t]++;
+                        if (groundXType[t] >= 3)
+                            groundX[t] = -8000000;
                     }
 
-                    if (stype[t] == 300 && marioType == MarioType::NORMAL
-                        && marioY < xx[9] + sd[t] + xx[0] - 3000 && marioHP >= 1) {
+                    if (groundType[t] == 300 && marioType == MarioType::NORMAL
+                        && marioY < screenY + groundHeight[t] + xx[0] - 3000 && marioHP >= 1) {
                         Mix_HaltMusic();
                         marioType = MarioType::_300;
                         mtm = 0;
-                        marioX = sa[t] - fx - 2000;
+                        marioX = groundX[t] - fx - 2000;
                         ot(oto[11]);
                     }
 //中間ゲート
-                    if (stype[t] == 500 && marioType == MarioType::NORMAL && marioHP >= 1) {
+                    if (groundType[t] == 500 && marioType == MarioType::NORMAL && marioHP >= 1) {
                         checkpoint += 1;
-                        sa[t] = -80000000;
+                        groundX[t] = -80000000;
                     }
 
                 }
 
-                if (stype[t] == 180) {
+                if (groundType[t] == 180) {
                     sr[t]++;
-                    if (sr[t] >= sgtype[t]) {
+                    if (sr[t] >= groundGType[t]) {
                         sr[t] = 0;
-                        ayobi(sa[t], 30000, rand(600) - 300, -1600 - rand(900), 0, 84, 0);
+                        ayobi(groundX[t], 30000, rand(600) - 300, -1600 - rand(900), 0, 84, 0);
                     }
                 }
 
@@ -2326,11 +2311,10 @@ if (mtm==250)end();
     actaon[4] = 0;
 
 //リフト
-    for (t = 0; t < LIFT_MAX; t++) {
-        xx[10] = sra[t];
-        xx[11] = srb[t];
-        xx[12] = src[t];
-        xx[13] = srd[t];
+    for (int i = 0; i < LIFT_MAX; i++) {
+        xx[10] = liftX[i];
+        xx[11] = liftY[i];
+        xx[12] = liftWidth[i];
         xx[8] = xx[10] - fx;
         xx[9] = xx[11] - fy;
         if (xx[8] + xx[12] >= -10 - 12000 && xx[8] <= fxmax + 12100) {
@@ -2341,62 +2325,62 @@ if (mtm==250)end();
             if (marioSpeedY >= 100) {
                 xx[1] = 900 + marioSpeedY;
             }
-//if (srtype[t]==1){xx[0]=600;}
+//if (liftType[i]==1){xx[0]=600;}
             if (marioSpeedY > xx[1])
                 xx[1] = marioSpeedY + 100;
 //xx[18]=0;
 
-            srb[t] += sre[t];
-            sre[t] += srf[t];
-//if (srf[t]>=500)srf[t]=0;
+            liftY[i] += sre[i];
+            sre[i] += srf[i];
+//if (srf[i]>=500)srf[i]=0;
 
 //動き
-            switch (sracttype[t]) {
+            switch (liftActType[i]) {
 
                 case 1:
-                    if (sron[t] == 1)
-                        srf[t] = 60;
+                    if (sron[i] == 1)
+                        srf[i] = 60;
                     break;
 
                 case 2:
 /*
-if (sra[t]<=srmovep[t]-srmove[t])srmuki[t]=1;
-if (sra[t]>=srmovep[t]+srmove[t])srmuki[t]=0;
+if (liftX[i]<=srmovep[i]-srmove[i])srmuki[i]=1;
+if (liftX[i]>=srmovep[i]+srmove[i])srmuki[i]=0;
 */
                     break;
 
                 case 3:
 /*
-if (srb[t]<=srmovep[t]-srmove[t])srmuki[t]=1;
-if (srb[t]>=srmovep[t]+srmove[t])srmuki[t]=0;
+if (liftY[i]<=srmovep[i]-srmove[i])srmuki[i]=1;
+if (liftY[i]>=srmovep[i]+srmove[i])srmuki[i]=0;
 */
                     break;
 
 /*
 case 4:
-if (srmove[t]==0){srmuki[t]=0;}else{srmuki[t]=1;}
-if (sra[t]-fx<-1100-src[t]){sra[t]=fymax+fx+scrollx;}
-if (sra[t]-fx>24000+scrollx){sra[t]=-1100-src[t]+fx;}
+if (srmove[i]==0){srmuki[i]=0;}else{srmuki[i]=1;}
+if (liftX[i]-fx<-1100-liftWidth[i]){liftX[i]=fymax+fx+scrollx;}
+if (liftX[i]-fx>24000+scrollx){liftX[i]=-1100-liftWidth[i]+fx;}
 break;
 */
 
                 case 5:
-                    if (srmove[t] == 0) {
-                        srmuki[t] = 0;
+                    if (srmove[i] == 0) {
+                        srmuki[i] = 0;
                     } else {
-                        srmuki[t] = 1;
+                        srmuki[i] = 1;
                     }
-                    if (srb[t] - fy < -2100) {
-                        srb[t] = fymax + fy + scrolly + 2000;
+                    if (liftY[i] - fy < -2100) {
+                        liftY[i] = fymax + fy + scrolly + 2000;
                     }
-                    if (srb[t] - fy > fymax + scrolly + 2000) {
-                        srb[t] = -2100 + fy;
+                    if (liftY[i] - fy > fymax + scrolly + 2000) {
+                        liftY[i] = -2100 + fy;
                     }
                     break;
 
                 case 6:
-                    if (sron[t] == 1)
-                        srf[t] = 40;
+                    if (sron[i] == 1)
+                        srf[i] = 40;
                     break;
 
                 case 7:
@@ -2404,7 +2388,7 @@ break;
 
             }        //sw
 
-//if (srtype[t]==1){sre[10]=300;sre[11]=300;}
+//if (liftType[i]==1){sre[10]=300;sre[11]=300;}
 
 //乗ったとき
             if (!(mztm >= 1 && mztype == 1 && actaon[3] == 1)
@@ -2415,14 +2399,14 @@ break;
                     && marioY + marioHeight < xx[9] + xx[1]
                     && marioSpeedY >= -100) {
                     marioY = xx[9] - marioHeight + 100;
-//if (sracttype[t]!=7)marioOnGround=1;
+//if (liftActType[i]!=7)marioOnGround=1;
 
-                    if (srtype[t] == 1) {
+                    if (liftType[i] == 1) {
                         sre[10] = 900;
                         sre[11] = 900;
                     }
 
-                    if (srsp[t] != 12) {
+                    if (srsp[i] != 12) {
                         marioOnGround = true;
                         marioSpeedY = 0;
                     } else {
@@ -2433,31 +2417,31 @@ break;
 
 /*
 marioSpeedY=0;
-if ((sracttype[t]==1 || sracttype[t]==6) && sron[t]==1)marioY+=sre[t];
+if ((liftActType[i]==1 || liftActType[i]==6) && sron[i]==1)marioY+=sre[i];
 
-if (sracttype[t]==2 || sracttype[t]==4){
-if (srmuki[t]==0)marioX-=srsok[t];
-if (srmuki[t]==1)marioX+=srsok[t];
+if (liftActType[i]==2 || liftActType[i]==4){
+if (srmuki[i]==0)marioX-=srsok[i];
+if (srmuki[i]==1)marioX+=srsok[i];
 }
 */
 
 //落下
-                    if ((sracttype[t] == 1)
-                        && sron[t] == 0)
-                        sron[t] = 1;
+                    if ((liftActType[i] == 1)
+                        && sron[i] == 0)
+                        sron[i] = 1;
 
-                    if (sracttype[t] == 1
-                        && sron[t] == 1
-                        || sracttype[t] == 3 || sracttype[t] == 5) {
-                        marioY += sre[t];
-//if (srmuki[t]==0)
-//if (srf[t]<0)
-//if (srmuki[t]==1)
-//if (srf[t]>0)
-//marioY+=srsok[t];
+                    if (liftActType[i] == 1
+                        && sron[i] == 1
+                        || liftActType[i] == 3 || liftActType[i] == 5) {
+                        marioY += sre[i];
+//if (srmuki[i]==0)
+//if (srf[i]<0)
+//if (srmuki[i]==1)
+//if (srf[i]>0)
+//marioY+=srsok[i];
                     }
 
-                    if (sracttype[t] == 7) {
+                    if (liftActType[i] == 7) {
                         if (actaon[2] != 1) {
                             marioSpeedY = -600;
                             marioY -= 810;
@@ -2469,57 +2453,57 @@ if (srmuki[t]==1)marioX+=srsok[t];
                         }
                     }
 //特殊
-                    if (srsp[t] == 1) {
+                    if (srsp[i] == 1) {
                         ot(oto[3]);
-                        eyobi(sra[t] + 200,
-                              srb[t] - 1000,
+                        eyobi(liftX[i] + 200,
+                              liftY[i] - 1000,
                               -240, -1400, 0, 160, 4500, 4500, 2, 120);
-                        eyobi(sra[t] + 4500 -
+                        eyobi(liftX[i] + 4500 -
                               200,
-                              srb[t] - 1000,
+                              liftY[i] - 1000,
                               240, -1400, 0, 160, 4500, 4500, 3, 120);
-                        sra[t] = -70000000;
+                        liftX[i] = -70000000;
                     }
 
-                    if (srsp[t] == 2) {
+                    if (srsp[i] == 2) {
                         marioSpeedX = -2400;
-                        srmove[t] += 1;
-                        if (srmove[t] >= 100) {
+                        srmove[i] += 1;
+                        if (srmove[i] >= 100) {
                             marioHP = 0;
                             mmsgtype = 53;
                             mmsgtm = 30;
-                            srmove[t] = -5000;
+                            srmove[i] = -5000;
                         }
                     }
 
-                    if (srsp[t] == 3) {
+                    if (srsp[i] == 3) {
                         marioSpeedX = 2400;
-                        srmove[t] += 1;
-                        if (srmove[t] >= 100) {
+                        srmove[i] += 1;
+                        if (srmove[i] >= 100) {
                             marioHP = 0;
                             mmsgtype = 53;
                             mmsgtm = 30;
-                            srmove[t] = -5000;
+                            srmove[i] = -5000;
                         }
                     }
-//if (srtype[t]==1){marioSpeedY=-600;marioY-=610;marioHP-=1;if (mmutekion!=1)mmutekitm=40;}
+//if (liftType[i]==1){marioSpeedY=-600;marioY-=610;marioHP-=1;if (mmutekion!=1)mmutekitm=40;}
                 }        //判定内
 
 //疲れ初期化
-                if ((srsp[t] == 2 || srsp[t] == 3)
-                    && marioSpeedX != -2400 && srmove[t] > 0) {
-                    srmove[t]--;
+                if ((srsp[i] == 2 || srsp[i] == 3)
+                    && marioSpeedX != -2400 && srmove[i] > 0) {
+                    srmove[i]--;
                 }
 
-                if (srsp[t] == 11) {
+                if (srsp[i] == 11) {
                     if (marioX + marioWidth >
                         xx[8] + xx[0] - 2000
                         && marioX < xx[8] + xx[12] - xx[0]) {
-                        sron[t] = 1;
+                        sron[i] = 1;
                     }    // && marioY+marioHeight>xx[9]-1000 && marioY+marioHeight<xx[9]+xx[1]+2000)
-                    if (sron[t] == 1) {
-                        srf[t] = 60;
-                        srb[t] += sre[t];
+                    if (sron[i] == 1) {
+                        srf[i] = 60;
+                        liftY[i] += sre[i];
                     }
                 }
 //トゲ(下)
@@ -2527,7 +2511,7 @@ if (srmuki[t]==1)marioX+=srsok[t];
                     && marioX < xx[8] + xx[12] - xx[0]
                     && marioY > xx[9] - xx[1] / 2
                     && marioY < xx[9] + xx[1] / 2) {
-                    if (srtype[t] == 2) {
+                    if (liftType[i] == 2) {
                         if (marioSpeedY < 0) {
                             marioSpeedY = -marioSpeedY;
                         }
@@ -2539,10 +2523,10 @@ if (srmuki[t]==1)marioX+=srsok[t];
                     }
                 }
 //落下
-                if (sracttype[t] == 6) {
+                if (liftActType[i] == 6) {
                     if (marioX + marioWidth > xx[8] + xx[0]
                         && marioX < xx[8] + xx[12] - xx[0]) {
-                        sron[t] = 1;
+                        sron[i] = 1;
                     }
                 }
 
@@ -2550,24 +2534,24 @@ if (srmuki[t]==1)marioX+=srsok[t];
 
 /*
 //ジャンプ台
-if (sracttype[t]==7){
+if (liftActType[i]==7){
 if (marioX+marioWidth>xx[8]+xx[0] && marioX<xx[8]+xx[12]-xx[0] && marioY+marioHeight>xx[9]+xx[1]/2 && marioY+marioHeight<xx[9]+xx[1]*3/2 && marioSpeedY>=-100){
 if (actaon[2]!=1){marioSpeedY=-600;marioY-=810;}
 if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
 }}
 */
 
-            if (sracttype[t] == 2 || sracttype[t] == 4) {
-                if (srmuki[t] == 0)
-                    sra[t] -= srsok[t];
-                if (srmuki[t] == 1)
-                    sra[t] += srsok[t];
+            if (liftActType[i] == 2 || liftActType[i] == 4) {
+                if (srmuki[i] == 0)
+                    liftX[i] -= srsok[i];
+                if (srmuki[i] == 1)
+                    liftX[i] += srsok[i];
             }
-            if (sracttype[t] == 3 || sracttype[t] == 5) {
-                if (srmuki[t] == 0)
-                    srb[t] -= srsok[t];
-                if (srmuki[t] == 1)
-                    srb[t] += srsok[t];
+            if (liftActType[i] == 3 || liftActType[i] == 5) {
+                if (srmuki[i] == 0)
+                    liftY[i] -= srsok[i];
+                if (srmuki[i] == 1)
+                    liftY[i] += srsok[i];
             }
 //敵キャラ適用
             for (tt = 0; tt < ENEMY_MAX; tt++) {
@@ -2611,51 +2595,51 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
     }            //EFFECT_MAX
 
 //敵キャラの配置
-    for (t = 0; t < bmax; t++) {
-        if (ba[t] >= -80000) {
+    for (int i = 0; i < ET_MAX; i++) {
+        if (etX[i] >= -80000) {
 
-            if (btm[t] >= 0) {
-                btm[t] = btm[t] - 1;
+            if (btm[i] >= 0) {
+                btm[i] = btm[i] - 1;
             }
 
-            for (tt = 0; tt <= 1; tt++) {
+            for (int j = 0; j <= 1; j++) {
+                int screenX = etX[i] - fx;
+                int screenY = etY[i] - fy;
+
                 xx[0] = 0;
                 xx[1] = 0;
 
-                if (bz[t] == 0 && btm[t] < 0
-                    && ba[t] - fx >= fxmax + 2000
-                    && ba[t] - fx < fxmax + 2000 + marioSpeedX && tt == 0) {
+                if (bz[i] == 0 && btm[i] < 0
+                        && screenX >= fxmax + 2000
+                        && screenX < fxmax + 2000 + marioSpeedX && j == 0) {
                     xx[0] = 1;
                     amuki[aco] = 0;
                 }        // && mmuki==1
-                if (bz[t] == 0 && btm[t] < 0
-                    && ba[t] - fx >=
-                       -400 - anx[btype[t]] + marioSpeedX
-                    && ba[t] - fx < -400 - anx[btype[t]]
-                    && tt == 1) {
+                if (bz[i] == 0 && btm[i] < 0
+                        && screenX >= -400 - anx[etType[i]] + marioSpeedX
+                        && screenX < -400 - anx[etType[i]] && j == 1) {
                     xx[0] = 1;
                     xx[1] = 1;
                     amuki[aco] = 1;
                 }        // && mmuki==0
-                if (bz[t] == 1 && ba[t] - fx >= 0 - anx[btype[t]]
-                    && ba[t] - fx <= fxmax + 4000
-                    && bb[t] - fy >= -9000
-                    && bb[t] - fy <= fymax + 4000 && btm[t] < 0) {
+                if (bz[i] == 1 && screenX >= 0 - anx[etType[i]]
+                        && screenX <= fxmax + 4000
+                        && screenY >= -9000
+                        && screenY <= fymax + 4000 && btm[i] < 0) {
                     xx[0] = 1;
-                    bz[t] = 0;
+                    bz[i] = 0;
                 }        // && xza<=5000// && checkpoint!=1
-//if (bz[t]==2){xx[0]=0;xx[1]=0;}
-//if (btype[t]>=100){bz[t]=2;}
+//if (bz[i]==2){xx[0]=0;xx[1]=0;}
+//if (etType[i]>=100){bz[i]=2;}
 
                 if (xx[0] == 1) {    //400
-                    btm[t] = 401;
-                    xx[0] = 0;    //if (btype[t]>=20 && btype[t]<=23){btm[t]=90000;}
-                    if (btype[t] >= 10) {
-                        btm[t] = 9999999;
+                    btm[i] = 401;
+                    xx[0] = 0;    //if (etType[i]>=20 && etType[i]<=23){btm[i]=90000;}
+                    if (etType[i] >= 10) {
+                        btm[i] = 9999999;
                     }
 //10
-                    ayobi(ba[t], bb[t], 0, 0, 0, btype[t], bxtype[t]);
-
+                    ayobi(etX[i], etY[i], 0, 0, 0, etType[i], etXType[i]);
                 }
 
             }        //tt
@@ -2793,12 +2777,12 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                     }
 //ポール捨て
                     if (axtype[t] == 1) {
-                        for (tt = 0; tt < smax; tt++) {
-                            if (stype[tt] == 300) {
-//sa[sco]=xx[21]*100;sb[sco]=xx[22]*100;sc[sco]=3000;sd[sco]=(12-t)*3000;stype[sco]=300;sco++;
-                                if (aa[t] - fx >= -8000 && aa[t] >= sa[tt] + 2000
-                                        && aa[t] <= sa[tt] + 3600 && axzimen[t] == 1) {
-                                    sa[tt] = -800000;
+                        for (tt = 0; tt < GROUND_MAX; tt++) {
+                            if (groundType[tt] == 300) {
+//groundX[groundCounter]=xx[21]*100;groundY[groundCounter]=xx[22]*100;groundWidth[groundCounter]=3000;groundHeight[groundCounter]=(12-t)*3000;groundType[groundCounter]=300;groundCounter++;
+                                if (aa[t] - fx >= -8000 && aa[t] >= groundX[tt] + 2000
+                                    && aa[t] <= groundX[tt] + 3600 && axzimen[t] == 1) {
+                                    groundX[tt] = -800000;
                                     atm[t] = 100;
                                 }
                             }
@@ -2811,9 +2795,9 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                                 marioType = MarioType::NORMAL;StopSoundMem(oto[11]);
                                 bgmchange(otom[1]);
                             }
-                            for (t1 = 0; t1 < smax; t1++) {
-                                if (stype[t1] == 104)
-                                    sa[t1] = -80000000;
+                            for (t1 = 0; t1 < GROUND_MAX; t1++) {
+                                if (groundType[t1] == 104)
+                                    groundX[t1] = -80000000;
                             }
                         }
                         if (atm[t] == 120) {
@@ -3634,7 +3618,7 @@ break;
                     if (atype[t] == 105) {
                         if (axtype[t] == 0) {
                             ot(oto[4]);
-                            sgtype[26] = 6;
+                            groundGType[26] = 6;
                         }
                         if (axtype[t] == 1) {
                             blocks[7]->xtype = 80;
@@ -3870,45 +3854,45 @@ void processSceneTitle() {
 
 void tekizimen() {
     //壁
-    for (int i = 0; i < smax; i++) {
-        if (sa[i] - fx + sc[i] >= -12010 && sa[i] - fx <= fxmax + 12100 && stype[i] <= 99) {
+    for (int i = 0; i < GROUND_MAX; i++) {
+        if (groundX[i] - fx + groundWidth[i] >= -12010 && groundX[i] - fx <= fxmax + 12100 && groundType[i] <= 99) {
             xx[0] = 200;
             xx[2] = 1000;
             xx[1] = 2000;    //anobia[t]
 
-            xx[8] = sa[i] - fx;
-            xx[9] = sb[i] - fy;
+            xx[8] = groundX[i] - fx;
+            xx[9] = groundY[i] - fy;
             if (aa[t] + anobia[t] - fx > xx[8] - xx[0]
                     && aa[t] - fx < xx[8] + xx[2]
                     && ab[t] + anobib[t] - fy > xx[9] + xx[1] * 3 / 4
-                    && ab[t] - fy < xx[9] + sd[i] - xx[2]) {
+                    && ab[t] - fy < xx[9] + groundHeight[i] - xx[2]) {
                 aa[t] = xx[8] - xx[0] - anobia[t] + fx;
                 amuki[t] = 0;
             }
-            if (aa[t] + anobia[t] - fx > xx[8] + sc[i] - xx[0]
-                    && aa[t] - fx < xx[8] + sc[i] + xx[0]
+            if (aa[t] + anobia[t] - fx > xx[8] + groundWidth[i] - xx[0]
+                    && aa[t] - fx < xx[8] + groundWidth[i] + xx[0]
                     && ab[t] + anobib[t] - fy > xx[9] + xx[1] * 3 / 4
-                    && ab[t] - fy < xx[9] + sd[i] - xx[2]) {
-                aa[t] = xx[8] + sc[i] + xx[0] + fx;
+                    && ab[t] - fy < xx[9] + groundHeight[i] - xx[2]) {
+                aa[t] = xx[8] + groundWidth[i] + xx[0] + fx;
                 amuki[t] = 1;
             }
 
-//if (aa[t]+anobia[t]-fx>xx[8]+xx[0] && aa[t]-fx<xx[8]+sc[i]-xx[0] && ab[t]+anobib[t]-fy>xx[9] && ab[t]+anobib[t]-fy<xx[9]+xx[1] && ad[t]>=-100){ab[t]=sb[i]-fy-anobib[t]+100+fy;ad[t]=0;}//marioOnGround=1;}
+//if (aa[t]+anobia[t]-fx>xx[8]+xx[0] && aa[t]-fx<xx[8]+groundWidth[i]-xx[0] && ab[t]+anobib[t]-fy>xx[9] && ab[t]+anobib[t]-fy<xx[9]+xx[1] && ad[t]>=-100){ab[t]=groundY[i]-fy-anobib[t]+100+fy;ad[t]=0;}//marioOnGround=1;}
             if (aa[t] + anobia[t] - fx > xx[8] + xx[0]
-                    && aa[t] - fx < xx[8] + sc[i] - xx[0]
+                    && aa[t] - fx < xx[8] + groundWidth[i] - xx[0]
                     && ab[t] + anobib[t] - fy > xx[9]
-                    && ab[t] + anobib[t] - fy < xx[9] + sd[i] - xx[1]
+                    && ab[t] + anobib[t] - fy < xx[9] + groundHeight[i] - xx[1]
                     && ad[t] >= -100) {
-                ab[t] = sb[i] - fy - anobib[t] + 100 + fy;
+                ab[t] = groundY[i] - fy - anobib[t] + 100 + fy;
                 ad[t] = 0;
                 axzimen[t] = 1;
             }
 
             if (aa[t] + anobia[t] - fx > xx[8] + xx[0]
-                    && aa[t] - fx < xx[8] + sc[i] - xx[0]
-                    && ab[t] - fy > xx[9] + sd[i] - xx[1]
-                    && ab[t] - fy < xx[9] + sd[i] + xx[0]) {
-                ab[t] = xx[9] + sd[i] + xx[0] + fy;
+                    && aa[t] - fx < xx[8] + groundWidth[i] - xx[0]
+                    && ab[t] - fy > xx[9] + groundHeight[i] - xx[1]
+                    && ab[t] - fy < xx[9] + groundHeight[i] + xx[0]) {
+                ab[t] = xx[9] + groundHeight[i] + xx[0] + fy;
                 if (ad[t] < 0) {
                     ad[t] = -ad[t] * 2 / 3;
                 }        //axzimen[t]=1;
@@ -4041,7 +4025,7 @@ void tekizimen() {
                     && aa[t] + anobia[t] - fx > xx[8] - 400
                     && aa[t] - fx < xx[8] + xx[1]) {
                 blocks[i]->x = -800000;    //ot(oto[4]);
-                sracttype[20] = 1;
+                liftActType[20] = 1;
                 sron[20] = 1;
             }
         }
@@ -4102,14 +4086,14 @@ void ot(Mix_Chunk *x) {
 }
 
 void stagecls() {
-    for (t = 0; t < smax; t++) {
-        sa[t] = -9000000;
-        sb[t] = 1;
-        sc[t] = 1;
-        sd[t] = 1;
-        sgtype[t] = 0;
-        stype[t] = 0;
-        sxtype[t] = 0;
+    for (t = 0; t < GROUND_MAX; t++) {
+        groundX[t] = -9000000;
+        groundY[t] = 1;
+        groundWidth[t] = 1;
+        groundHeight[t] = 1;
+        groundGType[t] = 0;
+        groundType[t] = 0;
+        groundXType[t] = 0;
     }
     //for (t=0;t<spmax;t++){spa[t]=-9000000;szyunni[t]=t;spb[t]=1;spc[t]=1;spd[t]=1;sptype[t]=0;spgtype[t]=0;}
 //    for (t = 0; t < blocks.size(); t++) {  // just clear the vector blocks
@@ -4119,18 +4103,15 @@ void stagecls() {
 //        blocks[t]->xtype = 0;
 //    }
     for (t = 0; t < LIFT_MAX; t++) {
-        sra[t] = -9000000;
-        srb[t] = 1;
-        src[t] = 1;
-        srd[t] = 1;
+        liftX[t] = -9000000;
+        liftY[t] = 1;
+        liftWidth[t] = 1;
         sre[t] = 0;
         srf[t] = 0;
         srmuki[t] = 0;
         sron[t] = 0;
-        sree[t] = 0;
         srsok[t] = 0;
         srmove[t] = 0;
-        srmovep[t] = 0;
         srsp[t] = 0;
     }
     //for (t=0;t<sqmax;t++){sqa[t]=-9000000;sqb[t]=1;sqc[t]=1;sqd[t]=1;sqgtype[t]=0;sqtype[t]=0;}
@@ -4151,12 +4132,12 @@ void stagecls() {
         abrocktm[t] = 0;
         amsgtm[t] = 0;
     }
-    for (t = 0; t < bmax; t++) {
-        ba[t] = -9000000;
-        bb[t] = 1;
+    for (t = 0; t < ET_MAX; t++) {
+        etX[t] = -9000000;
+        etY[t] = 1;
         bz[t] = 1;
         btm[t] = 0;
-        bxtype[t] = 0;
+        etXType[t] = 0;
     }
     for (t = 0; t < EFFECT_MAX; t++) {
         ea[t] = -9000000;
@@ -4166,26 +4147,21 @@ void stagecls() {
         egtype[t] = 0;
     }
     for (t = 0; t < BG_MAX; t++) {
-        na[t] = -9000000;
-        nb[t] = 1;
-        nc[t] = 1;
-        nd[t] = 1;
-        ne[t] = 1;
-        nf[t] = 1;
-        ng[t] = 0;
-        ntype[t] = 0;
+        bgX[t] = -9000000;
+        bgY[t] = 1;
+        bgType[t] = 0;
     }
     //for (t=0;t<cmax;t++){ca[t]=-9000000;cb[t]=1;contm[t]=0;ctype[t]=0;ce[t]=0;cf[t]=0;}
     //for (t=0;t<vmax;t++){va[t]=-9000000;vtype[t]=0;vb[t]=0;vc[t]=1;vd[t]=1;}
     //for (t=0;t<gmax;t++){ga[t]=-9000000;gx[t]=0;gstring[t]="";}
 
-    sco = 0;
+    groundCounter = 0;
 //    blockCounter = 0;
     blocks.clear();
     aco = 0;
-    bco = 0;
+    etCounter = 0;
     eco = 0;
-    nco = 0;
+    bgCounter = 0;
     //haikeitouroku();
 }                //stagecls()
 
@@ -4218,100 +4194,100 @@ void stage() {
             if (value >= 1 && value != 9 && value <= 19) {
                 createBlock(i * 29, j * 29 - 12, value);
             } else if (value >= 20 && value <= 29) {
-                sra[srco] = xx[21] * 100;
-                srb[srco] = xx[22] * 100;
-                src[srco] = 3000;
-                srtype[srco] = 0;
-                srco++;
-                if (srco >= LIFT_MAX)
-                    srco = 0;
+                liftX[liftCounter] = xx[21] * 100;
+                liftY[liftCounter] = xx[22] * 100;
+                liftWidth[liftCounter] = 3000;
+                liftType[liftCounter] = 0;
+                liftCounter++;
+                if (liftCounter >= LIFT_MAX)
+                    liftCounter = 0;
             } else if (value == 30) {
-                sa[sco] = xx[21] * 100;
-                sb[sco] = xx[22] * 100;
-                sc[sco] = 3000;
-                sd[sco] = 6000;
-                stype[sco] = 500;
-                sco++;
-                if (sco >= smax)
-                    sco = 0;
+                groundX[groundCounter] = xx[21] * 100;
+                groundY[groundCounter] = xx[22] * 100;
+                groundWidth[groundCounter] = 3000;
+                groundHeight[groundCounter] = 6000;
+                groundType[groundCounter] = 500;
+                groundCounter++;
+                if (groundCounter >= GROUND_MAX)
+                    groundCounter = 0;
             } else if (value == 40) {
-                sa[sco] = xx[21] * 100;
-                sb[sco] = xx[22] * 100;
-                sc[sco] = 6000;
-                sd[sco] = 3000;
-                stype[sco] = 1;
-                sco++;
-                if (sco >= smax)
-                    sco = 0;
+                groundX[groundCounter] = xx[21] * 100;
+                groundY[groundCounter] = xx[22] * 100;
+                groundWidth[groundCounter] = 6000;
+                groundHeight[groundCounter] = 3000;
+                groundType[groundCounter] = 1;
+                groundCounter++;
+                if (groundCounter >= GROUND_MAX)
+                    groundCounter = 0;
             } else if (value == 41) {
-                sa[sco] = xx[21] * 100 + 500;
-                sb[sco] = xx[22] * 100;
-                sc[sco] = 5000;
-                sd[sco] = 3000;
-                stype[sco] = 2;
-                sco++;
-                if (sco >= smax)
-                    sco = 0;
+                groundX[groundCounter] = xx[21] * 100 + 500;
+                groundY[groundCounter] = xx[22] * 100;
+                groundWidth[groundCounter] = 5000;
+                groundHeight[groundCounter] = 3000;
+                groundType[groundCounter] = 2;
+                groundCounter++;
+                if (groundCounter >= GROUND_MAX)
+                    groundCounter = 0;
             } else if (value == 43) {
-                sa[sco] = xx[21] * 100;
-                sb[sco] = xx[22] * 100 + 500;
-                sc[sco] = 2900;
-                sd[sco] = 5300;
-                stype[sco] = 1;
-                sco++;
-                if (sco >= smax)
-                    sco = 0;
+                groundX[groundCounter] = xx[21] * 100;
+                groundY[groundCounter] = xx[22] * 100 + 500;
+                groundWidth[groundCounter] = 2900;
+                groundHeight[groundCounter] = 5300;
+                groundType[groundCounter] = 1;
+                groundCounter++;
+                if (groundCounter >= GROUND_MAX)
+                    groundCounter = 0;
             } else if (value == 44) {
-                sa[sco] = xx[21] * 100;
-                sb[sco] = xx[22] * 100 + 700;
-                sc[sco] = 3900;
-                sd[sco] = 5000;
-                stype[sco] = 5;
-                sco++;
-                if (sco >= smax)
-                    sco = 0;
+                groundX[groundCounter] = xx[21] * 100;
+                groundY[groundCounter] = xx[22] * 100 + 700;
+                groundWidth[groundCounter] = 3900;
+                groundHeight[groundCounter] = 5000;
+                groundType[groundCounter] = 5;
+                groundCounter++;
+                if (groundCounter >= GROUND_MAX)
+                    groundCounter = 0;
             } else if (value >= 50 && value <= 79) {  //これなぜかバグの原因ｗ
                 // the original author says there are some bugs ...
-                ba[bco] = xx[21] * 100;
-                bb[bco] = xx[22] * 100;
-                btype[bco] = value - 50;
-                bco++;
-                if (bco >= bmax)
-                    bco = 0;
+                etX[etCounter] = xx[21] * 100;
+                etY[etCounter] = xx[22] * 100;
+                etType[etCounter] = value - 50;
+                etCounter++;
+                if (etCounter >= ET_MAX)
+                    etCounter = 0;
             } else if (value >= 80 && value <= 89) {
-                na[nco] = xx[21] * 100;
-                nb[nco] = xx[22] * 100;
-                ntype[nco] = value - 80;
-                nco++;
-                if (nco >= BG_MAX)
-                    nco = 0;
+                bgX[bgCounter] = xx[21] * 100;
+                bgY[bgCounter] = xx[22] * 100;
+                bgType[bgCounter] = value - 80;
+                bgCounter++;
+                if (bgCounter >= BG_MAX)
+                    bgCounter = 0;
             } else if (value == 9) {  // コイン Coin
                 createBlock(i * 29, j * 29 - 12, 800);
             } else if (value == 99) {
-                sa[sco] = xx[21] * 100;
-                sb[sco] = xx[22] * 100;
-                sc[sco] = 3000;
-                sd[sco] = (12 - j) * 3000;
-                stype[sco] = 300;
-                sco++;
-                if (sco >= smax)
-                    sco = 0;
+                groundX[groundCounter] = xx[21] * 100;
+                groundY[groundCounter] = xx[22] * 100;
+                groundWidth[groundCounter] = 3000;
+                groundHeight[groundCounter] = (12 - j) * 3000;
+                groundType[groundCounter] = 300;
+                groundCounter++;
+                if (groundCounter >= GROUND_MAX)
+                    groundCounter = 0;
             }
         }
     }
 
     if (checkpoint >= 1) {
         xx[17] = 0;
-        for (t = 0; t < smax; t++) {
-            if (stype[t] == 500 && checkpoint >= 1) {
-                fx = sa[t] - fxmax / 2;
+        for (t = 0; t < GROUND_MAX; t++) {
+            if (groundType[t] == 500 && checkpoint >= 1) {
+                fx = groundX[t] - fxmax / 2;
                 fzx = fx;
-                marioX = sa[t] - fx;
-                marioY = sb[t] - fy;
+                marioX = groundX[t] - fx;
+                marioY = groundY[t] - fy;
                 checkpoint--;
                 xx[17]++;
 
-                sa[t] = -80000000;
+                groundX[t] = -80000000;
             }
         }
         checkpoint += xx[17];
@@ -4366,80 +4342,80 @@ void stagep() {
         createBlock(59 * 29, 9 * 29 - 12, 112);
         createBlock(67 * 29, 9 * 29 - 12, 104);
 
-        sco = 0;
-        t = sco;
-        sa[t] = 20 * 29 * 100 + 500;
-        sb[t] = -6000;
-        sc[t] = 5000;
-        sd[t] = 70000;
-        stype[t] = 100;
-        sco++;
-        t = sco;
-        sa[t] = 54 * 29 * 100 - 500;
-        sb[t] = -6000;
-        sc[t] = 7000;
-        sd[t] = 70000;
-        stype[t] = 101;
-        sco++;
-        t = sco;
-        sa[t] = 112 * 29 * 100 + 1000;
-        sb[t] = -6000;
-        sc[t] = 3000;
-        sd[t] = 70000;
-        stype[t] = 102;
-        sco++;
-        t = sco;
-        sa[t] = 117 * 29 * 100;
-        sb[t] = (2 * 29 - 12) * 100 - 1500;
-        sc[t] = 15000;
-        sd[t] = 3000;
-        stype[t] = 103;
-        sco++;
-        t = sco;
-        sa[t] = 125 * 29 * 100;
-        sb[t] = -6000;
-        sc[t] = 9000;
-        sd[t] = 70000;
-        stype[t] = 101;
-        sco++;
-        //t=sco;sa[t]=77*29*100;sb[t]=(6*29-12)*100-1500;sc[t]=12000;sd[t]=3000;stype[t]=103;sco++;
+        groundCounter = 0;
+        t = groundCounter;
+        groundX[t] = 20 * 29 * 100 + 500;
+        groundY[t] = -6000;
+        groundWidth[t] = 5000;
+        groundHeight[t] = 70000;
+        groundType[t] = 100;
+        groundCounter++;
+        t = groundCounter;
+        groundX[t] = 54 * 29 * 100 - 500;
+        groundY[t] = -6000;
+        groundWidth[t] = 7000;
+        groundHeight[t] = 70000;
+        groundType[t] = 101;
+        groundCounter++;
+        t = groundCounter;
+        groundX[t] = 112 * 29 * 100 + 1000;
+        groundY[t] = -6000;
+        groundWidth[t] = 3000;
+        groundHeight[t] = 70000;
+        groundType[t] = 102;
+        groundCounter++;
+        t = groundCounter;
+        groundX[t] = 117 * 29 * 100;
+        groundY[t] = (2 * 29 - 12) * 100 - 1500;
+        groundWidth[t] = 15000;
+        groundHeight[t] = 3000;
+        groundType[t] = 103;
+        groundCounter++;
+        t = groundCounter;
+        groundX[t] = 125 * 29 * 100;
+        groundY[t] = -6000;
+        groundWidth[t] = 9000;
+        groundHeight[t] = 70000;
+        groundType[t] = 101;
+        groundCounter++;
+        //t=groundCounter;groundX[t]=77*29*100;groundY[t]=(6*29-12)*100-1500;groundWidth[t]=12000;groundHeight[t]=3000;groundType[t]=103;groundCounter++;
         t = 28;
-        sa[t] = 29 * 29 * 100 + 500;
-        sb[t] = (9 * 29 - 12) * 100;
-        sc[t] = 6000;
-        sd[t] = 12000 - 200;
-        stype[t] = 50;
-        sco++;
-        t = sco;
-        sa[t] = 49 * 29 * 100;
-        sb[t] = (5 * 29 - 12) * 100;
-        sc[t] = 9000 - 1;
-        sd[t] = 3000;
-        stype[t] = 51;
-        sgtype[t] = 0;
-        sco++;
-        t = sco;
-        sa[t] = 72 * 29 * 100;
-        sb[t] = (13 * 29 - 12) * 100;
-        sc[t] = 3000 * 5 - 1;
-        sd[t] = 3000;
-        stype[t] = 52;
-        sco++;
+        groundX[t] = 29 * 29 * 100 + 500;
+        groundY[t] = (9 * 29 - 12) * 100;
+        groundWidth[t] = 6000;
+        groundHeight[t] = 12000 - 200;
+        groundType[t] = 50;
+        groundCounter++;
+        t = groundCounter;
+        groundX[t] = 49 * 29 * 100;
+        groundY[t] = (5 * 29 - 12) * 100;
+        groundWidth[t] = 9000 - 1;
+        groundHeight[t] = 3000;
+        groundType[t] = 51;
+        groundGType[t] = 0;
+        groundCounter++;
+        t = groundCounter;
+        groundX[t] = 72 * 29 * 100;
+        groundY[t] = (13 * 29 - 12) * 100;
+        groundWidth[t] = 3000 * 5 - 1;
+        groundHeight[t] = 3000;
+        groundType[t] = 52;
+        groundCounter++;
 
-        bco = 0;
-        t = bco;
-        ba[t] = 27 * 29 * 100;
-        bb[t] = (9 * 29 - 12) * 100;
-        btype[t] = 0;
-        bxtype[t] = 0;
-        bco++;
-        t = bco;
-        ba[t] = 103 * 29 * 100;
-        bb[t] = (5 * 29 - 12 + 10) * 100;
-        btype[t] = 80;
-        bxtype[t] = 0;
-        bco++;
-        //t=bco;ba[t]=13*29*100;bb[t]=(5*29-12)*100;btype[t]=81;bxtype[t]=0;bco++;
+        etCounter = 0;
+        t = etCounter;
+        etX[t] = 27 * 29 * 100;
+        etY[t] = (9 * 29 - 12) * 100;
+        etType[t] = 0;
+        etXType[t] = 0;
+        etCounter++;
+        t = etCounter;
+        etX[t] = 103 * 29 * 100;
+        etY[t] = (5 * 29 - 12 + 10) * 100;
+        etType[t] = 80;
+        etXType[t] = 0;
+        etCounter++;
+        //t=etCounter;etX[t]=13*29*100;etY[t]=(5*29-12)*100;etType[t]=81;etXType[t]=0;etCounter++;
 
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -4489,34 +4465,34 @@ void stagep() {
         createBlock(13 * 29, 8 * 29 - 12, 114);
 
         //t=28;
-        sco = 0;
-        t = sco;
-        sa[t] = 14 * 29 * 100 + 500;
-        sb[t] = (9 * 29 - 12) * 100;
-        sc[t] = 6000;
-        sd[t] = 12000 - 200;
-        stype[t] = 50;
-        sxtype[t] = 1;
-        sco++;
-        t = sco;
-        sa[t] = 12 * 29 * 100;
-        sb[t] = (11 * 29 - 12) * 100;
-        sc[t] = 3000;
-        sd[t] = 6000 - 200;
-        stype[t] = 40;
-        sxtype[t] = 0;
-        sco++;
-        t = sco;
-        sa[t] = 14 * 29 * 100 + 1000;
-        sb[t] = -6000;
-        sc[t] = 5000;
-        sd[t] = 70000;
-        stype[t] = 100;
-        sxtype[t] = 1;
-        sco++;
+        groundCounter = 0;
+        t = groundCounter;
+        groundX[t] = 14 * 29 * 100 + 500;
+        groundY[t] = (9 * 29 - 12) * 100;
+        groundWidth[t] = 6000;
+        groundHeight[t] = 12000 - 200;
+        groundType[t] = 50;
+        groundXType[t] = 1;
+        groundCounter++;
+        t = groundCounter;
+        groundX[t] = 12 * 29 * 100;
+        groundY[t] = (11 * 29 - 12) * 100;
+        groundWidth[t] = 3000;
+        groundHeight[t] = 6000 - 200;
+        groundType[t] = 40;
+        groundXType[t] = 0;
+        groundCounter++;
+        t = groundCounter;
+        groundX[t] = 14 * 29 * 100 + 1000;
+        groundY[t] = -6000;
+        groundWidth[t] = 5000;
+        groundHeight[t] = 70000;
+        groundType[t] = 100;
+        groundXType[t] = 1;
+        groundCounter++;
 
         //ブロックもどき
-        //t=bco;ba[t]=7*29*100;bb[t]=(9*29-12)*100;btype[t]=82;bxtype[t]=0;bco++;
+        //t=etCounter;etX[t]=7*29*100;etY[t]=(9*29-12)*100;etType[t]=82;etXType[t]=0;etCounter++;
 
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -4572,207 +4548,207 @@ void stagep() {
 
 //blocks[blockCounter]->xtype=1;createBlock(11*29,9*29-12,114);//毒1
 
-        sco = 0;
-        t = sco;
-        sa[t] = 2 * 29 * 100;
-        sb[t] = (13 * 29 - 12) * 100;
-        sc[t] = 3000 * 1 - 1;
-        sd[t] = 3000;
-        stype[t] = 52;
-        sco++;
-//t=sco;sa[t]=19*29*100;sb[t]=(13*29-12)*100;sc[t]=3000*1-1;sd[t]=3000;stype[t]=52;sco++;
-        t = sco;
-        sa[t] = 24 * 29 * 100;
-        sb[t] = (13 * 29 - 12) * 100;
-        sc[t] = 3000 * 1 - 1;
-        sd[t] = 3000;
-        stype[t] = 52;
-        sco++;
-        t = sco;
-        sa[t] = 43 * 29 * 100 + 500;
-        sb[t] = -6000;
-        sc[t] = 3000;
-        sd[t] = 70000;
-        stype[t] = 102;
-        sxtype[t] = 1;
-        sco++;
-        t = sco;
-        sa[t] = 53 * 29 * 100 + 500;
-        sb[t] = -6000;
-        sc[t] = 3000;
-        sd[t] = 70000;
-        stype[t] = 102;
-        sxtype[t] = 2;
-        sco++;
-        t = sco;
-        sa[t] = 129 * 29 * 100;
-        sb[t] = (7 * 29 - 12) * 100;
-        sc[t] = 3000;
-        sd[t] = 6000 - 200;
-        stype[t] = 40;
-        sxtype[t] = 2;
-        sco++;
-        t = sco;
-        sa[t] = 154 * 29 * 100;
-        sb[t] = 3000;
-        sc[t] = 9000;
-        sd[t] = 3000;
-        stype[t] = 102;
-        sxtype[t] = 7;
-        sco++;
+        groundCounter = 0;
+        t = groundCounter;
+        groundX[t] = 2 * 29 * 100;
+        groundY[t] = (13 * 29 - 12) * 100;
+        groundWidth[t] = 3000 * 1 - 1;
+        groundHeight[t] = 3000;
+        groundType[t] = 52;
+        groundCounter++;
+//t=groundCounter;groundX[t]=19*29*100;groundY[t]=(13*29-12)*100;groundWidth[t]=3000*1-1;groundHeight[t]=3000;groundType[t]=52;groundCounter++;
+        t = groundCounter;
+        groundX[t] = 24 * 29 * 100;
+        groundY[t] = (13 * 29 - 12) * 100;
+        groundWidth[t] = 3000 * 1 - 1;
+        groundHeight[t] = 3000;
+        groundType[t] = 52;
+        groundCounter++;
+        t = groundCounter;
+        groundX[t] = 43 * 29 * 100 + 500;
+        groundY[t] = -6000;
+        groundWidth[t] = 3000;
+        groundHeight[t] = 70000;
+        groundType[t] = 102;
+        groundXType[t] = 1;
+        groundCounter++;
+        t = groundCounter;
+        groundX[t] = 53 * 29 * 100 + 500;
+        groundY[t] = -6000;
+        groundWidth[t] = 3000;
+        groundHeight[t] = 70000;
+        groundType[t] = 102;
+        groundXType[t] = 2;
+        groundCounter++;
+        t = groundCounter;
+        groundX[t] = 129 * 29 * 100;
+        groundY[t] = (7 * 29 - 12) * 100;
+        groundWidth[t] = 3000;
+        groundHeight[t] = 6000 - 200;
+        groundType[t] = 40;
+        groundXType[t] = 2;
+        groundCounter++;
+        t = groundCounter;
+        groundX[t] = 154 * 29 * 100;
+        groundY[t] = 3000;
+        groundWidth[t] = 9000;
+        groundHeight[t] = 3000;
+        groundType[t] = 102;
+        groundXType[t] = 7;
+        groundCounter++;
 
 //ブロックもどき
 
         t = 27;
-        sa[t] = 69 * 29 * 100;
-        sb[t] = (1 * 29 - 12) * 100;
-        sc[t] = 9000 * 2 - 1;
-        sd[t] = 3000;
-        stype[t] = 51;
-        sxtype[t] = 0;
-        sgtype[t] = 0;
-        sco++;
+        groundX[t] = 69 * 29 * 100;
+        groundY[t] = (1 * 29 - 12) * 100;
+        groundWidth[t] = 9000 * 2 - 1;
+        groundHeight[t] = 3000;
+        groundType[t] = 51;
+        groundXType[t] = 0;
+        groundGType[t] = 0;
+        groundCounter++;
         t = 28;
-        sa[t] = 66 * 29 * 100;
-        sb[t] = (1 * 29 - 12) * 100;
-        sc[t] = 9000 - 1;
-        sd[t] = 3000;
-        stype[t] = 51;
-        sxtype[t] = 1;
-        sgtype[t] = 0;
-        sco++;
+        groundX[t] = 66 * 29 * 100;
+        groundY[t] = (1 * 29 - 12) * 100;
+        groundWidth[t] = 9000 - 1;
+        groundHeight[t] = 3000;
+        groundType[t] = 51;
+        groundXType[t] = 1;
+        groundGType[t] = 0;
+        groundCounter++;
         t = 29;
-        sa[t] = 66 * 29 * 100;
-        sb[t] = (-2 * 29 - 12) * 100;
-        sc[t] = 9000 * 3 - 1;
-        sd[t] = 3000;
-        stype[t] = 51;
-        sxtype[t] = 2;
-        sgtype[t] = 0;
-        sco++;
+        groundX[t] = 66 * 29 * 100;
+        groundY[t] = (-2 * 29 - 12) * 100;
+        groundWidth[t] = 9000 * 3 - 1;
+        groundHeight[t] = 3000;
+        groundType[t] = 51;
+        groundXType[t] = 2;
+        groundGType[t] = 0;
+        groundCounter++;
 
 //26 ファイアー土管
         t = 26;
-        sa[t] = 103 * 29 * 100 - 1500;
-        sb[t] = (9 * 29 - 12) * 100 - 2000;
-        sc[t] = 3000;
-        sd[t] = 3000;
-        stype[t] = 180;
-        sxtype[t] = 0;
+        groundX[t] = 103 * 29 * 100 - 1500;
+        groundY[t] = (9 * 29 - 12) * 100 - 2000;
+        groundWidth[t] = 3000;
+        groundHeight[t] = 3000;
+        groundType[t] = 180;
+        groundXType[t] = 0;
         sr[t] = 0;
-        sgtype[t] = 48;
-        sco++;
-        t = sco;
-        sa[t] = 102 * 29 * 100;
-        sb[t] = (9 * 29 - 12) * 100;
-        sc[t] = 6000;
-        sd[t] = 12000 - 200;
-        stype[t] = 50;
-        sxtype[t] = 2;
-        sco++;
-        t = sco;
-        sa[t] = 123 * 29 * 100;
-        sb[t] = (9 * 29 - 12) * 100;
-        sc[t] = 3000 * 5 - 1;
-        sd[t] = 3000 * 5;
-        stype[t] = 52;
-        sxtype[t] = 1;
-        sco++;
+        groundGType[t] = 48;
+        groundCounter++;
+        t = groundCounter;
+        groundX[t] = 102 * 29 * 100;
+        groundY[t] = (9 * 29 - 12) * 100;
+        groundWidth[t] = 6000;
+        groundHeight[t] = 12000 - 200;
+        groundType[t] = 50;
+        groundXType[t] = 2;
+        groundCounter++;
+        t = groundCounter;
+        groundX[t] = 123 * 29 * 100;
+        groundY[t] = (9 * 29 - 12) * 100;
+        groundWidth[t] = 3000 * 5 - 1;
+        groundHeight[t] = 3000 * 5;
+        groundType[t] = 52;
+        groundXType[t] = 1;
+        groundCounter++;
 
-        t = sco;
-        sa[t] = 131 * 29 * 100;
-        sb[t] = (1 * 29 - 12) * 100;
-        sc[t] = 4700;
-        sd[t] = 3000 * 8 - 700;
-        stype[t] = 1;
-        sxtype[t] = 0;
-        sco++;
+        t = groundCounter;
+        groundX[t] = 131 * 29 * 100;
+        groundY[t] = (1 * 29 - 12) * 100;
+        groundWidth[t] = 4700;
+        groundHeight[t] = 3000 * 8 - 700;
+        groundType[t] = 1;
+        groundXType[t] = 0;
+        groundCounter++;
 
-//t=sco;sa[t]=44*29*100;sb[t]=-6000;sc[t]=9000;sd[t]=70000;stype[t]=102;sco++;
+//t=groundCounter;groundX[t]=44*29*100;groundY[t]=-6000;groundWidth[t]=9000;groundHeight[t]=70000;groundType[t]=102;groundCounter++;
 
 //オワタゾーン
-        t = sco;
-        sa[t] = 143 * 29 * 100;
-        sb[t] = (9 * 29 - 12) * 100;
-        sc[t] = 6000;
-        sd[t] = 12000 - 200;
-        stype[t] = 50;
-        sxtype[t] = 5;
-        sco++;
-        t = sco;
-        sa[t] = 148 * 29 * 100;
-        sb[t] = (9 * 29 - 12) * 100;
-        sc[t] = 6000;
-        sd[t] = 12000 - 200;
-        stype[t] = 50;
-        sxtype[t] = 5;
-        sco++;
-        t = sco;
-        sa[t] = 153 * 29 * 100;
-        sb[t] = (9 * 29 - 12) * 100;
-        sc[t] = 6000;
-        sd[t] = 12000 - 200;
-        stype[t] = 50;
-        sxtype[t] = 5;
-        sco++;
+        t = groundCounter;
+        groundX[t] = 143 * 29 * 100;
+        groundY[t] = (9 * 29 - 12) * 100;
+        groundWidth[t] = 6000;
+        groundHeight[t] = 12000 - 200;
+        groundType[t] = 50;
+        groundXType[t] = 5;
+        groundCounter++;
+        t = groundCounter;
+        groundX[t] = 148 * 29 * 100;
+        groundY[t] = (9 * 29 - 12) * 100;
+        groundWidth[t] = 6000;
+        groundHeight[t] = 12000 - 200;
+        groundType[t] = 50;
+        groundXType[t] = 5;
+        groundCounter++;
+        t = groundCounter;
+        groundX[t] = 153 * 29 * 100;
+        groundY[t] = (9 * 29 - 12) * 100;
+        groundWidth[t] = 6000;
+        groundHeight[t] = 12000 - 200;
+        groundType[t] = 50;
+        groundXType[t] = 5;
+        groundCounter++;
 
-        bco = 0;
-        t = bco;
-        ba[t] = 18 * 29 * 100;
-        bb[t] = (10 * 29 - 12) * 100;
-        btype[t] = 82;
-        bxtype[t] = 1;
-        bco++;
-//t=bco;ba[t]=52*29*100;bb[t]=(2*29-12)*100;btype[t]=82;bxtype[t]=1;bco++;
-        t = bco;
-        ba[t] = 51 * 29 * 100 + 1000;
-        bb[t] = (2 * 29 - 12 + 10) * 100;
-        btype[t] = 80;
-        bxtype[t] = 1;
-        bco++;
+        etCounter = 0;
+        t = etCounter;
+        etX[t] = 18 * 29 * 100;
+        etY[t] = (10 * 29 - 12) * 100;
+        etType[t] = 82;
+        etXType[t] = 1;
+        etCounter++;
+//t=etCounter;etX[t]=52*29*100;etY[t]=(2*29-12)*100;etType[t]=82;etXType[t]=1;etCounter++;
+        t = etCounter;
+        etX[t] = 51 * 29 * 100 + 1000;
+        etY[t] = (2 * 29 - 12 + 10) * 100;
+        etType[t] = 80;
+        etXType[t] = 1;
+        etCounter++;
 
 //？ボール
-        t = bco;
-        ba[t] = 96 * 29 * 100 + 100;
-        bb[t] = (10 * 29 - 12) * 100;
-        btype[t] = 105;
-        bxtype[t] = 0;
-        bco++;
+        t = etCounter;
+        etX[t] = 96 * 29 * 100 + 100;
+        etY[t] = (10 * 29 - 12) * 100;
+        etType[t] = 105;
+        etXType[t] = 0;
+        etCounter++;
 
 //リフト
-        srco = 0;
-        t = srco;
-        sra[t] = 111 * 29 * 100;
-        srb[t] = (8 * 29 - 12) * 100;
-        src[t] = 90 * 100;
-        srtype[t] = 0;
-        sracttype[t] = 5;
+        liftCounter = 0;
+        t = liftCounter;
+        liftX[t] = 111 * 29 * 100;
+        liftY[t] = (8 * 29 - 12) * 100;
+        liftWidth[t] = 90 * 100;
+        liftType[t] = 0;
+        liftActType[t] = 5;
         sre[t] = -300;
-        srco++;
-        t = srco;
-        sra[t] = 111 * 29 * 100;
-        srb[t] = (0 * 29 - 12) * 100;
-        src[t] = 90 * 100;
-        srtype[t] = 0;
-        sracttype[t] = 5;
+        liftCounter++;
+        t = liftCounter;
+        liftX[t] = 111 * 29 * 100;
+        liftY[t] = (0 * 29 - 12) * 100;
+        liftWidth[t] = 90 * 100;
+        liftType[t] = 0;
+        liftActType[t] = 5;
         sre[t] = -300;
-        srco++;
+        liftCounter++;
         t = 10;
-        sra[t] = 116 * 29 * 100;
-        srb[t] = (4 * 29 - 12) * 100;
-        src[t] = 90 * 100;
-        srtype[t] = 1;
-        sracttype[t] = 5;
+        liftX[t] = 116 * 29 * 100;
+        liftY[t] = (4 * 29 - 12) * 100;
+        liftWidth[t] = 90 * 100;
+        liftType[t] = 1;
+        liftActType[t] = 5;
         sre[t] = 300;
-        srco++;
+        liftCounter++;
         t = 11;
-        sra[t] = 116 * 29 * 100;
-        srb[t] = (12 * 29 - 12) * 100;
-        src[t] = 90 * 100;
-        srtype[t] = 1;
-        sracttype[t] = 5;
+        liftX[t] = 116 * 29 * 100;
+        liftY[t] = (12 * 29 - 12) * 100;
+        liftWidth[t] = 90 * 100;
+        liftType[t] = 1;
+        liftActType[t] = 5;
         sre[t] = 300;
-        srco++;
+        liftCounter++;
 
 //ヒント1
 //createBlock(4*29,9*29-12,300);
@@ -4782,9 +4758,9 @@ void stagep() {
 //createBlock(13*29,8*29-12,114);
 
 //t=28;
-//sco=0;
-//t=sco;
-//sa[t]=14*29*100+500;sb[t]=(9*29-12)*100;sc[t]=6000;sd[t]=12000-200;stype[t]=50;sxtype[t]=1;sco++;
+//groundCounter=0;
+//t=groundCounter;
+//groundX[t]=14*29*100+500;groundY[t]=(9*29-12)*100;groundWidth[t]=6000;groundHeight[t]=12000-200;groundType[t]=50;groundXType[t]=1;groundCounter++;
 
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -4832,37 +4808,37 @@ void stagep() {
 createBlock(13*29,8*29-12,114);
 
 //t=28;
-sco=0;
-t=sco;sa[t]=14*29*100+500;sb[t]=(9*29-12)*100;sc[t]=6000;sd[t]=12000-200;stype[t]=50;sxtype[t]=1;sco++;
-t=sco;sa[t]=12*29*100;sb[t]=(11*29-12)*100;sc[t]=3000;sd[t]=6000-200;stype[t]=40;sxtype[t]=0;sco++;
-t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtype[t]=1;sco++;
+groundCounter=0;
+t=groundCounter;groundX[t]=14*29*100+500;groundY[t]=(9*29-12)*100;groundWidth[t]=6000;groundHeight[t]=12000-200;groundType[t]=50;groundXType[t]=1;groundCounter++;
+t=groundCounter;groundX[t]=12*29*100;groundY[t]=(11*29-12)*100;groundWidth[t]=3000;groundHeight[t]=6000-200;groundType[t]=40;groundXType[t]=0;groundCounter++;
+t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;groundHeight[t]=70000;groundType[t]=100;groundXType[t]=1;groundCounter++;
 */
 
-        t = sco;
-        sa[t] = 5 * 29 * 100 + 500;
-        sb[t] = -6000;
-        sc[t] = 3000;
-        sd[t] = 70000;
-        stype[t] = 102;
-        sxtype[t] = 8;
-        sco++;
+        t = groundCounter;
+        groundX[t] = 5 * 29 * 100 + 500;
+        groundY[t] = -6000;
+        groundWidth[t] = 3000;
+        groundHeight[t] = 70000;
+        groundType[t] = 102;
+        groundXType[t] = 8;
+        groundCounter++;
 //空飛ぶ土管
         t = 28;
-        sa[t] = 44 * 29 * 100 + 500;
-        sb[t] = (10 * 29 - 12) * 100;
-        sc[t] = 6000;
-        sd[t] = 9000 - 200;
-        stype[t] = 50;
-        sco++;
+        groundX[t] = 44 * 29 * 100 + 500;
+        groundY[t] = (10 * 29 - 12) * 100;
+        groundWidth[t] = 6000;
+        groundHeight[t] = 9000 - 200;
+        groundType[t] = 50;
+        groundCounter++;
 
 //ポールもどき
-        bco = 0;
-        t = bco;
-        ba[t] = 19 * 29 * 100;
-        bb[t] = (2 * 29 - 12) * 100;
-        btype[t] = 85;
-        bxtype[t] = 0;
-        bco++;
+        etCounter = 0;
+        t = etCounter;
+        etX[t] = 19 * 29 * 100;
+        etY[t] = (2 * 29 - 12) * 100;
+        etType[t] = 85;
+        etXType[t] = 0;
+        etCounter++;
 
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -4938,154 +4914,154 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
 //ファイア
 //createBlock(7*29,9*29-12,101);
 
-        bco = 0;
-        t = bco;
-        ba[t] = 101 * 29 * 100;
-        bb[t] = (5 * 29 - 12) * 100;
-        btype[t] = 4;
-        bxtype[t] = 1;
-        bco++;
-        t = bco;
-        ba[t] = 146 * 29 * 100;
-        bb[t] = (10 * 29 - 12) * 100;
-        btype[t] = 6;
-        bxtype[t] = 1;
-        bco++;
+        etCounter = 0;
+        t = etCounter;
+        etX[t] = 101 * 29 * 100;
+        etY[t] = (5 * 29 - 12) * 100;
+        etType[t] = 4;
+        etXType[t] = 1;
+        etCounter++;
+        t = etCounter;
+        etX[t] = 146 * 29 * 100;
+        etY[t] = (10 * 29 - 12) * 100;
+        etType[t] = 6;
+        etXType[t] = 1;
+        etCounter++;
 
-        t = sco;
-        sa[t] = 9 * 29 * 100;
-        sb[t] = (13 * 29 - 12) * 100;
-        sc[t] = 9000 - 1;
-        sd[t] = 3000;
-        stype[t] = 52;
-        sco++;
-//t=sco;sa[t]=58*29*100;sb[t]=(13*29-12)*100;sc[t]=9000-1;sd[t]=3000;stype[t]=52;sco++;
+        t = groundCounter;
+        groundX[t] = 9 * 29 * 100;
+        groundY[t] = (13 * 29 - 12) * 100;
+        groundWidth[t] = 9000 - 1;
+        groundHeight[t] = 3000;
+        groundType[t] = 52;
+        groundCounter++;
+//t=groundCounter;groundX[t]=58*29*100;groundY[t]=(13*29-12)*100;groundWidth[t]=9000-1;groundHeight[t]=3000;groundType[t]=52;groundCounter++;
 
 //土管
-        t = sco;
-        sa[t] = 65 * 29 * 100 + 500;
-        sb[t] = (10 * 29 - 12) * 100;
-        sc[t] = 6000;
-        sd[t] = 9000 - 200;
-        stype[t] = 50;
-        sxtype[t] = 1;
-        sco++;
-//t=28;sa[t]=65*29*100;sb[t]=(10*29-12)*100;sc[t]=6000;sd[t]=9000-200;stype[t]=50;sco++;
+        t = groundCounter;
+        groundX[t] = 65 * 29 * 100 + 500;
+        groundY[t] = (10 * 29 - 12) * 100;
+        groundWidth[t] = 6000;
+        groundHeight[t] = 9000 - 200;
+        groundType[t] = 50;
+        groundXType[t] = 1;
+        groundCounter++;
+//t=28;groundX[t]=65*29*100;groundY[t]=(10*29-12)*100;groundWidth[t]=6000;groundHeight[t]=9000-200;groundType[t]=50;groundCounter++;
 
 //トラップ
-        t = sco;
-        sa[t] = 74 * 29 * 100;
-        sb[t] = (8 * 29 - 12) * 100 - 1500;
-        sc[t] = 6000;
-        sd[t] = 3000;
-        stype[t] = 103;
-        sxtype[t] = 1;
-        sco++;
-        t = sco;
-        sa[t] = 96 * 29 * 100 - 3000;
-        sb[t] = -6000;
-        sc[t] = 9000;
-        sd[t] = 70000;
-        stype[t] = 102;
-        sxtype[t] = 10;
-        sco++;
+        t = groundCounter;
+        groundX[t] = 74 * 29 * 100;
+        groundY[t] = (8 * 29 - 12) * 100 - 1500;
+        groundWidth[t] = 6000;
+        groundHeight[t] = 3000;
+        groundType[t] = 103;
+        groundXType[t] = 1;
+        groundCounter++;
+        t = groundCounter;
+        groundX[t] = 96 * 29 * 100 - 3000;
+        groundY[t] = -6000;
+        groundWidth[t] = 9000;
+        groundHeight[t] = 70000;
+        groundType[t] = 102;
+        groundXType[t] = 10;
+        groundCounter++;
 //ポール砲
-        t = sco;
-        sa[t] = 131 * 29 * 100 - 1500;
-        sb[t] = (1 * 29 - 12) * 100 - 3000;
-        sc[t] = 15000;
-        sd[t] = 14000;
-        stype[t] = 104;
-        sco++;
+        t = groundCounter;
+        groundX[t] = 131 * 29 * 100 - 1500;
+        groundY[t] = (1 * 29 - 12) * 100 - 3000;
+        groundWidth[t] = 15000;
+        groundHeight[t] = 14000;
+        groundType[t] = 104;
+        groundCounter++;
 
 //？ボール
-        t = bco;
-        ba[t] = 10 * 29 * 100 + 100;
-        bb[t] = (11 * 29 - 12) * 100;
-        btype[t] = 105;
-        bxtype[t] = 1;
-        bco++;
+        t = etCounter;
+        etX[t] = 10 * 29 * 100 + 100;
+        etY[t] = (11 * 29 - 12) * 100;
+        etType[t] = 105;
+        etXType[t] = 1;
+        etCounter++;
 //ブロックもどき
-        t = bco;
-        ba[t] = 43 * 29 * 100;
-        bb[t] = (11 * 29 - 12) * 100;
-        btype[t] = 82;
-        bxtype[t] = 1;
-        bco++;
-//t=bco;ba[t]=146*29*100;bb[t]=(12*29-12)*100;btype[t]=82;bxtype[t]=1;bco++;
+        t = etCounter;
+        etX[t] = 43 * 29 * 100;
+        etY[t] = (11 * 29 - 12) * 100;
+        etType[t] = 82;
+        etXType[t] = 1;
+        etCounter++;
+//t=etCounter;etX[t]=146*29*100;etY[t]=(12*29-12)*100;etType[t]=82;etXType[t]=1;etCounter++;
 //うめぇ
-        t = bco;
-        ba[t] = 1 * 29 * 100;
-        bb[t] = (2 * 29 - 12 + 10) * 100 - 1000;
-        btype[t] = 80;
-        bxtype[t] = 0;
-        bco++;
+        t = etCounter;
+        etX[t] = 1 * 29 * 100;
+        etY[t] = (2 * 29 - 12 + 10) * 100 - 1000;
+        etType[t] = 80;
+        etXType[t] = 0;
+        etCounter++;
 
 //リフト
-        srco = 0;
-        t = srco;
-        sra[t] = 33 * 29 * 100;
-        srb[t] = (3 * 29 - 12) * 100;
-        src[t] = 90 * 100;
-        srtype[t] = 0;
-        sracttype[t] = 0;
+        liftCounter = 0;
+        t = liftCounter;
+        liftX[t] = 33 * 29 * 100;
+        liftY[t] = (3 * 29 - 12) * 100;
+        liftWidth[t] = 90 * 100;
+        liftType[t] = 0;
+        liftActType[t] = 0;
         sre[t] = 0;
         srsp[t] = 1;
-        srco++;
-        t = srco;
-        sra[t] = 39 * 29 * 100 - 2000;
-        srb[t] = (6 * 29 - 12) * 100;
-        src[t] = 90 * 100;
-        srtype[t] = 0;
-        sracttype[t] = 1;
+        liftCounter++;
+        t = liftCounter;
+        liftX[t] = 39 * 29 * 100 - 2000;
+        liftY[t] = (6 * 29 - 12) * 100;
+        liftWidth[t] = 90 * 100;
+        liftType[t] = 0;
+        liftActType[t] = 1;
         sre[t] = 0;
-        srco++;
-        t = srco;
-        sra[t] = 45 * 29 * 100 + 1500;
-        srb[t] = (10 * 29 - 12) * 100;
-        src[t] = 90 * 100;
-        srtype[t] = 0;
-        sracttype[t] = 0;
+        liftCounter++;
+        t = liftCounter;
+        liftX[t] = 45 * 29 * 100 + 1500;
+        liftY[t] = (10 * 29 - 12) * 100;
+        liftWidth[t] = 90 * 100;
+        liftType[t] = 0;
+        liftActType[t] = 0;
         sre[t] = 0;
         srsp[t] = 2;
-        srco++;
+        liftCounter++;
 
-        t = srco;
-        sra[t] = 95 * 29 * 100;
-        srb[t] = (7 * 29 - 12) * 100;
-        src[t] = 180 * 100;
-        srtype[t] = 0;
-        sracttype[t] = 0;
+        t = liftCounter;
+        liftX[t] = 95 * 29 * 100;
+        liftY[t] = (7 * 29 - 12) * 100;
+        liftWidth[t] = 180 * 100;
+        liftType[t] = 0;
+        liftActType[t] = 0;
         sre[t] = 0;
         srsp[t] = 10;
-        srco++;
-        t = srco;
-        sra[t] = 104 * 29 * 100;
-        srb[t] = (9 * 29 - 12) * 100;
-        src[t] = 90 * 100;
-        srtype[t] = 0;
-        sracttype[t] = 0;
+        liftCounter++;
+        t = liftCounter;
+        liftX[t] = 104 * 29 * 100;
+        liftY[t] = (9 * 29 - 12) * 100;
+        liftWidth[t] = 90 * 100;
+        liftType[t] = 0;
+        liftActType[t] = 0;
         sre[t] = 0;
         srsp[t] = 12;
-        srco++;
-        t = srco;
-        sra[t] = 117 * 29 * 100;
-        srb[t] = (3 * 29 - 12) * 100;
-        src[t] = 90 * 100;
-        srtype[t] = 0;
-        sracttype[t] = 1;
+        liftCounter++;
+        t = liftCounter;
+        liftX[t] = 117 * 29 * 100;
+        liftY[t] = (3 * 29 - 12) * 100;
+        liftWidth[t] = 90 * 100;
+        liftType[t] = 0;
+        liftActType[t] = 1;
         sre[t] = 0;
         srsp[t] = 15;
-        srco++;
-        t = srco;
-        sra[t] = 124 * 29 * 100;
-        srb[t] = (5 * 29 - 12) * 100;
-        src[t] = 210 * 100;
-        srtype[t] = 0;
-        sracttype[t] = 0;
+        liftCounter++;
+        t = liftCounter;
+        liftX[t] = 124 * 29 * 100;
+        liftY[t] = (5 * 29 - 12) * 100;
+        liftWidth[t] = 210 * 100;
+        liftType[t] = 0;
+        liftActType[t] = 0;
         sre[t] = 0;
         srsp[t] = 10;
-        srco++;
+        liftCounter++;
 
         if (stagepoint == 1) {
             stagepoint = 0;
@@ -5180,17 +5156,17 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	};
 
-        sco = 0;
-        t = sco;
-        sa[t] = 14 * 29 * 100 - 5;
-        sb[t] = (11 * 29 - 12) * 100;
-        sc[t] = 6000;
-        sd[t] = 15000 - 200;
-        stype[t] = 50;
-        sxtype[t] = 1;
-        sco++;
-//t=sco;sa[t]=12*29*100;sb[t]=(11*29-12)*100;sc[t]=3000;sd[t]=6000-200;stype[t]=40;sxtype[t]=0;sco++;
-//t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtype[t]=1;sco++;
+        groundCounter = 0;
+        t = groundCounter;
+        groundX[t] = 14 * 29 * 100 - 5;
+        groundY[t] = (11 * 29 - 12) * 100;
+        groundWidth[t] = 6000;
+        groundHeight[t] = 15000 - 200;
+        groundType[t] = 50;
+        groundXType[t] = 1;
+        groundCounter++;
+//t=groundCounter;groundX[t]=12*29*100;groundY[t]=(11*29-12)*100;groundWidth[t]=3000;groundHeight[t]=6000-200;groundType[t]=40;groundXType[t]=0;groundCounter++;
+//t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;groundHeight[t]=70000;groundType[t]=100;groundXType[t]=1;groundCounter++;
 
         createBlock(12 * 29, 4 * 29 - 12, 112, 0);
 //ヒント3
@@ -5240,179 +5216,179 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	};
 
-        sco = 0;        //sco=140;
-        t = sco;
-        sa[t] = 35 * 29 * 100 - 1500 + 750;
-        sb[t] = (8 * 29 - 12) * 100 - 1500;
-        sc[t] = 1500;
-        sd[t] = 3000;
-        stype[t] = 105;
-        sco++;
-        t = sco;
-        sa[t] = 67 * 29 * 100;
-        sb[t] = (4 * 29 - 12) * 100;
-        sc[t] = 9000 - 1;
-        sd[t] = 3000 * 1 - 1;
-        stype[t] = 51;
-        sxtype[t] = 3;
-        sgtype[t] = 0;
-        sco++;
-        t = sco;
-        sa[t] = 73 * 29 * 100;
-        sb[t] = (13 * 29 - 12) * 100;
-        sc[t] = 3000 * 1 - 1;
-        sd[t] = 3000;
-        stype[t] = 52;
-        sco++;
-//t=sco;sa[t]=79*29*100;sb[t]=(13*29-12)*100;sc[t]=30*3*100-1;sd[t]=6000-200;stype[t]=51;sxtype[t]=4;sco++;
-//t=sco;sa[t]=83*29*100;sb[t]=(-2*29-12)*100;sc[t]=30*5*100-1;sd[t]=3000-200;stype[t]=51;sxtype[t]=4;sco++;
-        t = sco;
-        sa[t] = 123 * 29 * 100;
-        sb[t] = (1 * 29 - 12) * 100;
-        sc[t] = 30 * 6 * 100 - 1 + 0;
-        sd[t] = 3000 - 200;
-        stype[t] = 51;
-        sxtype[t] = 10;
-        sco++;
+        groundCounter = 0;        //groundCounter=140;
+        t = groundCounter;
+        groundX[t] = 35 * 29 * 100 - 1500 + 750;
+        groundY[t] = (8 * 29 - 12) * 100 - 1500;
+        groundWidth[t] = 1500;
+        groundHeight[t] = 3000;
+        groundType[t] = 105;
+        groundCounter++;
+        t = groundCounter;
+        groundX[t] = 67 * 29 * 100;
+        groundY[t] = (4 * 29 - 12) * 100;
+        groundWidth[t] = 9000 - 1;
+        groundHeight[t] = 3000 * 1 - 1;
+        groundType[t] = 51;
+        groundXType[t] = 3;
+        groundGType[t] = 0;
+        groundCounter++;
+        t = groundCounter;
+        groundX[t] = 73 * 29 * 100;
+        groundY[t] = (13 * 29 - 12) * 100;
+        groundWidth[t] = 3000 * 1 - 1;
+        groundHeight[t] = 3000;
+        groundType[t] = 52;
+        groundCounter++;
+//t=groundCounter;groundX[t]=79*29*100;groundY[t]=(13*29-12)*100;groundWidth[t]=30*3*100-1;groundHeight[t]=6000-200;groundType[t]=51;groundXType[t]=4;groundCounter++;
+//t=groundCounter;groundX[t]=83*29*100;groundY[t]=(-2*29-12)*100;groundWidth[t]=30*5*100-1;groundHeight[t]=3000-200;groundType[t]=51;groundXType[t]=4;groundCounter++;
+        t = groundCounter;
+        groundX[t] = 123 * 29 * 100;
+        groundY[t] = (1 * 29 - 12) * 100;
+        groundWidth[t] = 30 * 6 * 100 - 1 + 0;
+        groundHeight[t] = 3000 - 200;
+        groundType[t] = 51;
+        groundXType[t] = 10;
+        groundCounter++;
 //スクロール消し
-        t = sco;
-        sa[t] = 124 * 29 * 100 + 3000;
-        sb[t] = (2 * 29 - 12) * 100;
-        sc[t] = 3000 * 1 - 1;
-        sd[t] = 300000;
-        stype[t] = 102;
-        sxtype[t] = 20;
-        sco++;
-        t = sco;
-        sa[t] = 148 * 29 * 100 + 1000;
-        sb[t] = (-12 * 29 - 12) * 100;
-        sc[t] = 3000 * 1 - 1;
-        sd[t] = 300000;
-        stype[t] = 102;
-        sxtype[t] = 30;
-        sco++;
+        t = groundCounter;
+        groundX[t] = 124 * 29 * 100 + 3000;
+        groundY[t] = (2 * 29 - 12) * 100;
+        groundWidth[t] = 3000 * 1 - 1;
+        groundHeight[t] = 300000;
+        groundType[t] = 102;
+        groundXType[t] = 20;
+        groundCounter++;
+        t = groundCounter;
+        groundX[t] = 148 * 29 * 100 + 1000;
+        groundY[t] = (-12 * 29 - 12) * 100;
+        groundWidth[t] = 3000 * 1 - 1;
+        groundHeight[t] = 300000;
+        groundType[t] = 102;
+        groundXType[t] = 30;
+        groundCounter++;
 
 //3連星
-        t = sco;
-        sa[t] = 100 * 29 * 100 + 1000;
-        sb[t] = -6000;
-        sc[t] = 3000;
-        sd[t] = 70000;
-        stype[t] = 102;
-        sxtype[t] = 12;
-        sco++;
+        t = groundCounter;
+        groundX[t] = 100 * 29 * 100 + 1000;
+        groundY[t] = -6000;
+        groundWidth[t] = 3000;
+        groundHeight[t] = 70000;
+        groundType[t] = 102;
+        groundXType[t] = 12;
+        groundCounter++;
 
 //地面1
-        t = sco;
-        sa[t] = 0 * 29 * 100 - 0;
-        sb[t] = 9 * 29 * 100 + 1700;
-        sc[t] = 3000 * 7 - 1;
-        sd[t] = 3000 * 5 - 1;
-        stype[t] = 200;
-        sxtype[t] = 0;
-        sco++;
-        t = sco;
-        sa[t] = 11 * 29 * 100;
-        sb[t] = -1 * 29 * 100 + 1700;
-        sc[t] = 3000 * 8 - 1;
-        sd[t] = 3000 * 4 - 1;
-        stype[t] = 200;
-        sxtype[t] = 0;
-        sco++;
+        t = groundCounter;
+        groundX[t] = 0 * 29 * 100 - 0;
+        groundY[t] = 9 * 29 * 100 + 1700;
+        groundWidth[t] = 3000 * 7 - 1;
+        groundHeight[t] = 3000 * 5 - 1;
+        groundType[t] = 200;
+        groundXType[t] = 0;
+        groundCounter++;
+        t = groundCounter;
+        groundX[t] = 11 * 29 * 100;
+        groundY[t] = -1 * 29 * 100 + 1700;
+        groundWidth[t] = 3000 * 8 - 1;
+        groundHeight[t] = 3000 * 4 - 1;
+        groundType[t] = 200;
+        groundXType[t] = 0;
+        groundCounter++;
 
-        bco = 0;
-        t = bco;
-        ba[t] = 8 * 29 * 100 - 1400;
-        bb[t] = (2 * 29 - 12) * 100 + 500;
-        btype[t] = 86;
-        bxtype[t] = 0;
-        bco++;
-        t = bco;
-        ba[t] = 42 * 29 * 100 - 1400;
-        bb[t] = (-2 * 29 - 12) * 100 + 500;
-        btype[t] = 86;
-        bxtype[t] = 0;
-        bco++;
-        t = bco;
-        ba[t] = 29 * 29 * 100 + 1500;
-        bb[t] = (7 * 29 - 12) * 100 + 1500;
-        btype[t] = 87;
-        bxtype[t] = 105;
-        bco++;
-        t = bco;
-        ba[t] = 47 * 29 * 100 + 1500;
-        bb[t] = (9 * 29 - 12) * 100 + 1500;
-        btype[t] = 87;
-        bxtype[t] = 110;
-        bco++;
-        t = bco;
-        ba[t] = 70 * 29 * 100 + 1500;
-        bb[t] = (9 * 29 - 12) * 100 + 1500;
-        btype[t] = 87;
-        bxtype[t] = 105;
-        bco++;
-        t = bco;
-        ba[t] = 66 * 29 * 100 + 1501;
-        bb[t] = (4 * 29 - 12) * 100 + 1500;
-        btype[t] = 87;
-        bxtype[t] = 101;
-        bco++;
-        t = bco;
-        ba[t] = 85 * 29 * 100 + 1501;
-        bb[t] = (4 * 29 - 12) * 100 + 1500;
-        btype[t] = 87;
-        bxtype[t] = 105;
-        bco++;
+        etCounter = 0;
+        t = etCounter;
+        etX[t] = 8 * 29 * 100 - 1400;
+        etY[t] = (2 * 29 - 12) * 100 + 500;
+        etType[t] = 86;
+        etXType[t] = 0;
+        etCounter++;
+        t = etCounter;
+        etX[t] = 42 * 29 * 100 - 1400;
+        etY[t] = (-2 * 29 - 12) * 100 + 500;
+        etType[t] = 86;
+        etXType[t] = 0;
+        etCounter++;
+        t = etCounter;
+        etX[t] = 29 * 29 * 100 + 1500;
+        etY[t] = (7 * 29 - 12) * 100 + 1500;
+        etType[t] = 87;
+        etXType[t] = 105;
+        etCounter++;
+        t = etCounter;
+        etX[t] = 47 * 29 * 100 + 1500;
+        etY[t] = (9 * 29 - 12) * 100 + 1500;
+        etType[t] = 87;
+        etXType[t] = 110;
+        etCounter++;
+        t = etCounter;
+        etX[t] = 70 * 29 * 100 + 1500;
+        etY[t] = (9 * 29 - 12) * 100 + 1500;
+        etType[t] = 87;
+        etXType[t] = 105;
+        etCounter++;
+        t = etCounter;
+        etX[t] = 66 * 29 * 100 + 1501;
+        etY[t] = (4 * 29 - 12) * 100 + 1500;
+        etType[t] = 87;
+        etXType[t] = 101;
+        etCounter++;
+        t = etCounter;
+        etX[t] = 85 * 29 * 100 + 1501;
+        etY[t] = (4 * 29 - 12) * 100 + 1500;
+        etType[t] = 87;
+        etXType[t] = 105;
+        etCounter++;
 
 //ステルスうめぇ
-        t = bco;
-        ba[t] = 57 * 29 * 100;
-        bb[t] = (2 * 29 - 12 + 10) * 100 - 500;
-        btype[t] = 80;
-        bxtype[t] = 1;
-        bco++;
+        t = etCounter;
+        etX[t] = 57 * 29 * 100;
+        etY[t] = (2 * 29 - 12 + 10) * 100 - 500;
+        etType[t] = 80;
+        etXType[t] = 1;
+        etCounter++;
 //ブロックもどき
-        t = bco;
-        ba[t] = 77 * 29 * 100;
-        bb[t] = (5 * 29 - 12) * 100;
-        btype[t] = 82;
-        bxtype[t] = 2;
-        bco++;
+        t = etCounter;
+        etX[t] = 77 * 29 * 100;
+        etY[t] = (5 * 29 - 12) * 100;
+        etType[t] = 82;
+        etXType[t] = 2;
+        etCounter++;
 //ボス
-        t = bco;
-        ba[t] = 130 * 29 * 100;
-        bb[t] = (8 * 29 - 12) * 100;
-        btype[t] = 30;
-        bxtype[t] = 0;
-        bco++;
+        t = etCounter;
+        etX[t] = 130 * 29 * 100;
+        etY[t] = (8 * 29 - 12) * 100;
+        etType[t] = 30;
+        etXType[t] = 0;
+        etCounter++;
 //クックル
-        t = bco;
-        ba[t] = 142 * 29 * 100;
-        bb[t] = (10 * 29 - 12) * 100;
-        btype[t] = 31;
-        bxtype[t] = 0;
-        bco++;
+        t = etCounter;
+        etX[t] = 142 * 29 * 100;
+        etY[t] = (10 * 29 - 12) * 100;
+        etType[t] = 31;
+        etXType[t] = 0;
+        etCounter++;
 
 //マグマ
-        nco = 0;
-        na[nco] = 7 * 29 * 100 - 300;
-        nb[nco] = 14 * 29 * 100 - 1200;
-        ntype[nco] = 6;
-        nco++;
-        if (nco >= BG_MAX)
-            nco = 0;
-        na[nco] = 41 * 29 * 100 - 300;
-        nb[nco] = 14 * 29 * 100 - 1200;
-        ntype[nco] = 6;
-        nco++;
-        if (nco >= BG_MAX)
-            nco = 0;
-        na[nco] = 149 * 29 * 100 - 1100;
-        nb[nco] = 10 * 29 * 100 - 600;
-        ntype[nco] = 100;
-        nco++;
-        if (nco >= BG_MAX)
-            nco = 0;
+        bgCounter = 0;
+        bgX[bgCounter] = 7 * 29 * 100 - 300;
+        bgY[bgCounter] = 14 * 29 * 100 - 1200;
+        bgType[bgCounter] = 6;
+        bgCounter++;
+        if (bgCounter >= BG_MAX)
+            bgCounter = 0;
+        bgX[bgCounter] = 41 * 29 * 100 - 300;
+        bgY[bgCounter] = 14 * 29 * 100 - 1200;
+        bgType[bgCounter] = 6;
+        bgCounter++;
+        if (bgCounter >= BG_MAX)
+            bgCounter = 0;
+        bgX[bgCounter] = 149 * 29 * 100 - 1100;
+        bgY[bgCounter] = 10 * 29 * 100 - 600;
+        bgType[bgCounter] = 100;
+        bgCounter++;
+        if (bgCounter >= BG_MAX)
+            bgCounter = 0;
 
         blocks.clear();
 //ON-OFFブロック
@@ -5454,24 +5430,24 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         createBlock(66 * 29, 4 * 29 - 12, 124);
 
 //リフト
-        srco = 0;
-        t = srco;
-        sra[t] = 93 * 29 * 100;
-        srb[t] = (10 * 29 - 12) * 100;
-        src[t] = 60 * 100;
-        srtype[t] = 0;
-        sracttype[t] = 1;
+        liftCounter = 0;
+        t = liftCounter;
+        liftX[t] = 93 * 29 * 100;
+        liftY[t] = (10 * 29 - 12) * 100;
+        liftWidth[t] = 60 * 100;
+        liftType[t] = 0;
+        liftActType[t] = 1;
         sre[t] = 0;
-        srco++;
+        liftCounter++;
         t = 20;
-        sra[t] = 119 * 29 * 100 + 300;
-        srb[t] = (10 * 29 - 12) * 100;
-        src[t] = 12 * 30 * 100 + 1000;
-        srtype[t] = 0;
-        sracttype[t] = 0;
+        liftX[t] = 119 * 29 * 100 + 300;
+        liftY[t] = (10 * 29 - 12) * 100;
+        liftWidth[t] = 12 * 30 * 100 + 1000;
+        liftType[t] = 0;
+        liftActType[t] = 0;
         srsp[t] = 21;
         sre[t] = 0;
-        srco++;
+        liftCounter++;
 
         stc = 0;
 
@@ -5526,76 +5502,76 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
             createBlock(85 * 29, i * 29 - 12, 4);
         }
         //
-        sco = 0;
-        sa[sco] = 30 * 29 * 100;
-        sb[sco] = (13 * 29 - 12) * 100;
-        sc[sco] = 12000 - 1;
-        sd[sco] = 3000;
-        stype[sco] = 52;
-        sxtype[sco] = 0;
-        sco += 1;
+        groundCounter = 0;
+        groundX[groundCounter] = 30 * 29 * 100;
+        groundY[groundCounter] = (13 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 12000 - 1;
+        groundHeight[groundCounter] = 3000;
+        groundType[groundCounter] = 52;
+        groundXType[groundCounter] = 0;
+        groundCounter += 1;
         //
-        sa[sco] = 51 * 29 * 100;
-        sb[sco] = (4 * 29 - 12) * 100;
-        sc[sco] = 9000 - 1;
-        sd[sco] = 3000;
-        stype[sco] = 51;
-        sxtype[sco] = 0;
-        sco += 1;
+        groundX[groundCounter] = 51 * 29 * 100;
+        groundY[groundCounter] = (4 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 9000 - 1;
+        groundHeight[groundCounter] = 3000;
+        groundType[groundCounter] = 51;
+        groundXType[groundCounter] = 0;
+        groundCounter += 1;
         //
-        sa[sco] = 84 * 29 * 100;
-        sb[sco] = (13 * 29 - 12) * 100;
-        sc[sco] = 9000 - 1;
-        sd[sco] = 3000;
-        stype[sco] = 52;
-        sxtype[sco] = 0;
-        sco += 1;
+        groundX[groundCounter] = 84 * 29 * 100;
+        groundY[groundCounter] = (13 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 9000 - 1;
+        groundHeight[groundCounter] = 3000;
+        groundType[groundCounter] = 52;
+        groundXType[groundCounter] = 0;
+        groundCounter += 1;
         //
-        sa[sco] = 105 * 29 * 100;
-        sb[sco] = (13 * 29 - 12) * 100;
-        sc[sco] = 15000 - 1;
-        sd[sco] = 3000;
-        stype[sco] = 52;
-        sxtype[sco] = 0;
-        sco += 1;
+        groundX[groundCounter] = 105 * 29 * 100;
+        groundY[groundCounter] = (13 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 15000 - 1;
+        groundHeight[groundCounter] = 3000;
+        groundType[groundCounter] = 52;
+        groundXType[groundCounter] = 0;
+        groundCounter += 1;
         //
-        bco = 0;
+        etCounter = 0;
         //
-        ba[bco] = 6 * 29 * 100;
-        bb[bco] = (3 * 29 - 12) * 100;
-        btype[bco] = 80;
-        bxtype[bco] = 0;
-        bco += 1;
+        etX[etCounter] = 6 * 29 * 100;
+        etY[etCounter] = (3 * 29 - 12) * 100;
+        etType[etCounter] = 80;
+        etXType[etCounter] = 0;
+        etCounter += 1;
         //
-        ba[bco] = 13 * 29 * 100;
-        bb[bco] = (6 * 29 - 12) * 100;
-        btype[bco] = 4;
-        bxtype[bco] = 1;
-        bco += 1;
+        etX[etCounter] = 13 * 29 * 100;
+        etY[etCounter] = (6 * 29 - 12) * 100;
+        etType[etCounter] = 4;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
-        ba[bco] = 23 * 29 * 100;
-        bb[bco] = (7 * 29 - 12) * 100;
-        btype[bco] = 80;
-        bxtype[bco] = 0;
-        bco += 1;
+        etX[etCounter] = 23 * 29 * 100;
+        etY[etCounter] = (7 * 29 - 12) * 100;
+        etType[etCounter] = 80;
+        etXType[etCounter] = 0;
+        etCounter += 1;
         //
-        ba[bco] = 25 * 29 * 100;
-        bb[bco] = (7 * 29 - 12) * 100;
-        btype[bco] = 80;
-        bxtype[bco] = 1;
-        bco += 1;
+        etX[etCounter] = 25 * 29 * 100;
+        etY[etCounter] = (7 * 29 - 12) * 100;
+        etType[etCounter] = 80;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
-        ba[bco] = 27 * 29 * 100;
-        bb[bco] = (7 * 29 - 12) * 100;
-        btype[bco] = 80;
-        bxtype[bco] = 0;
-        bco += 1;
+        etX[etCounter] = 27 * 29 * 100;
+        etY[etCounter] = (7 * 29 - 12) * 100;
+        etType[etCounter] = 80;
+        etXType[etCounter] = 0;
+        etCounter += 1;
         //
-        ba[bco] = 88 * 29 * 100;
-        bb[bco] = (12 * 29 - 12) * 100;
-        btype[bco] = 82;
-        bxtype[bco] = 1;
-        bco += 1;
+        etX[etCounter] = 88 * 29 * 100;
+        etY[etCounter] = (12 * 29 - 12) * 100;
+        etType[etCounter] = 82;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -5629,35 +5605,35 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
         };
         //
-        sa[sco] = 14 * 29 * 100 + 200;
-        sb[sco] = -6000;
-        sc[sco] = 5000;
-        sd[sco] = 70000;
-        stype[sco] = 100;
-        sco += 1;
+        groundX[groundCounter] = 14 * 29 * 100 + 200;
+        groundY[groundCounter] = -6000;
+        groundWidth[groundCounter] = 5000;
+        groundHeight[groundCounter] = 70000;
+        groundType[groundCounter] = 100;
+        groundCounter += 1;
         //
-        sa[sco] = 12 * 29 * 100 + 1200;
-        sb[sco] = -6000;
-        sc[sco] = 7000;
-        sd[sco] = 70000;
-        stype[sco] = 101;
-        sco += 1;
+        groundX[groundCounter] = 12 * 29 * 100 + 1200;
+        groundY[groundCounter] = -6000;
+        groundWidth[groundCounter] = 7000;
+        groundHeight[groundCounter] = 70000;
+        groundType[groundCounter] = 101;
+        groundCounter += 1;
         //
-        sa[sco] = 12 * 29 * 100;
-        sb[sco] = (13 * 29 - 12) * 100;
-        sc[sco] = 6000 - 1;
-        sd[sco] = 3000;
-        stype[sco] = 52;
-        sgtype[sco] = 0;
-        sco += 1;
+        groundX[groundCounter] = 12 * 29 * 100;
+        groundY[groundCounter] = (13 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 6000 - 1;
+        groundHeight[groundCounter] = 3000;
+        groundType[groundCounter] = 52;
+        groundGType[groundCounter] = 0;
+        groundCounter += 1;
         //
-        sa[sco] = 14 * 29 * 100;
-        sb[sco] = (9 * 29 - 12) * 100;
-        sc[sco] = 6000;
-        sd[sco] = 12000 - 200;
-        stype[sco] = 50;
-        sxtype[sco] = 1;
-        sco += 1;
+        groundX[groundCounter] = 14 * 29 * 100;
+        groundY[groundCounter] = (9 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 6000;
+        groundHeight[groundCounter] = 12000 - 200;
+        groundType[groundCounter] = 50;
+        groundXType[groundCounter] = 1;
+        groundCounter += 1;
         //
         createBlock(6 * 29, 9 * 29 - 12, 110);
         //
@@ -5695,137 +5671,137 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	};
         //
-        bco = 0;
-        ba[bco] = 32 * 29 * 100 - 1400;
-        bb[bco] = (-2 * 29 - 12) * 100 + 500;
-        btype[bco] = 86;
-        bxtype[bco] = 0;
-        bco += 1;
+        etCounter = 0;
+        etX[etCounter] = 32 * 29 * 100 - 1400;
+        etY[etCounter] = (-2 * 29 - 12) * 100 + 500;
+        etType[etCounter] = 86;
+        etXType[etCounter] = 0;
+        etCounter += 1;
         //
-        ba[bco] = (31 * 29 - 12) * 100;
-        bb[bco] = (7 * 29 - 12) * 100;
-        btype[bco] = 7;
-        bxtype[bco] = 0;
-        bco += 1;
+        etX[etCounter] = (31 * 29 - 12) * 100;
+        etY[etCounter] = (7 * 29 - 12) * 100;
+        etType[etCounter] = 7;
+        etXType[etCounter] = 0;
+        etCounter += 1;
         //
-        ba[bco] = 38 * 29 * 100 + 1500;
-        bb[bco] = (6 * 29 - 12) * 100 + 1500;
-        btype[bco] = 87;
-        bxtype[bco] = 107;
-        bco += 1;
+        etX[etCounter] = 38 * 29 * 100 + 1500;
+        etY[etCounter] = (6 * 29 - 12) * 100 + 1500;
+        etType[etCounter] = 87;
+        etXType[etCounter] = 107;
+        etCounter += 1;
         //
-        ba[bco] = 38 * 29 * 100 + 1500;
-        bb[bco] = (6 * 29 - 12) * 100 + 1500;
-        btype[bco] = 88;
-        bxtype[bco] = 107;
-        bco += 1;
+        etX[etCounter] = 38 * 29 * 100 + 1500;
+        etY[etCounter] = (6 * 29 - 12) * 100 + 1500;
+        etType[etCounter] = 88;
+        etXType[etCounter] = 107;
+        etCounter += 1;
         //
-        ba[bco] = 42 * 29 * 100 + 1500;
-        bb[bco] = (6 * 29 - 12) * 100 + 1500;
-        btype[bco] = 87;
-        bxtype[bco] = 107;
-        bco += 1;
+        etX[etCounter] = 42 * 29 * 100 + 1500;
+        etY[etCounter] = (6 * 29 - 12) * 100 + 1500;
+        etType[etCounter] = 87;
+        etXType[etCounter] = 107;
+        etCounter += 1;
         //
-        ba[bco] = 42 * 29 * 100 + 1500;
-        bb[bco] = (6 * 29 - 12) * 100 + 1500;
-        btype[bco] = 88;
-        bxtype[bco] = 107;
-        bco += 1;
+        etX[etCounter] = 42 * 29 * 100 + 1500;
+        etY[etCounter] = (6 * 29 - 12) * 100 + 1500;
+        etType[etCounter] = 88;
+        etXType[etCounter] = 107;
+        etCounter += 1;
         //
-        ba[bco] = 46 * 29 * 100 + 1500;
-        bb[bco] = (6 * 29 - 12) * 100 + 1500;
-        btype[bco] = 87;
-        bxtype[bco] = 107;
-        bco += 1;
+        etX[etCounter] = 46 * 29 * 100 + 1500;
+        etY[etCounter] = (6 * 29 - 12) * 100 + 1500;
+        etType[etCounter] = 87;
+        etXType[etCounter] = 107;
+        etCounter += 1;
         //
-        ba[bco] = 46 * 29 * 100 + 1500;
-        bb[bco] = (6 * 29 - 12) * 100 + 1500;
-        btype[bco] = 88;
-        bxtype[bco] = 107;
-        bco += 1;
+        etX[etCounter] = 46 * 29 * 100 + 1500;
+        etY[etCounter] = (6 * 29 - 12) * 100 + 1500;
+        etType[etCounter] = 88;
+        etXType[etCounter] = 107;
+        etCounter += 1;
         //
-        ba[bco] = 58 * 29 * 100;
-        bb[bco] = (7 * 29 - 12) * 100;
-        btype[bco] = 82;
-        bxtype[bco] = 1;
-        bco += 1;
+        etX[etCounter] = 58 * 29 * 100;
+        etY[etCounter] = (7 * 29 - 12) * 100;
+        etType[etCounter] = 82;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
-        ba[bco] = 66 * 29 * 100;
-        bb[bco] = (7 * 29 - 12) * 100;
-        btype[bco] = 82;
-        bxtype[bco] = 1;
-        bco += 1;
+        etX[etCounter] = 66 * 29 * 100;
+        etY[etCounter] = (7 * 29 - 12) * 100;
+        etType[etCounter] = 82;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
-        ba[bco] = 76 * 29 * 100 - 1400;
-        bb[bco] = (-2 * 29 - 12) * 100 + 500;
-        btype[bco] = 86;
-        bxtype[bco] = 0;
-        bco += 1;
+        etX[etCounter] = 76 * 29 * 100 - 1400;
+        etY[etCounter] = (-2 * 29 - 12) * 100 + 500;
+        etType[etCounter] = 86;
+        etXType[etCounter] = 0;
+        etCounter += 1;
         //
-        sco = 0;
-        sa[sco] = 2 * 29 * 100;
-        sb[sco] = (13 * 29 - 12) * 100;
-        sc[sco] = 300000 - 6001;
-        sd[sco] = 3000;
-        stype[sco] = 52;
-        sxtype[sco] = 0;
-        sco += 1;
+        groundCounter = 0;
+        groundX[groundCounter] = 2 * 29 * 100;
+        groundY[groundCounter] = (13 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 300000 - 6001;
+        groundHeight[groundCounter] = 3000;
+        groundType[groundCounter] = 52;
+        groundXType[groundCounter] = 0;
+        groundCounter += 1;
         //
-        sa[sco] = 3 * 29 * 100;
-        sb[sco] = (7 * 29 - 12) * 100;
-        sc[sco] = 3000;
-        sd[sco] = 3000;
-        stype[sco] = 105;
-        sxtype[sco] = 0;
-        sco += 1;
+        groundX[groundCounter] = 3 * 29 * 100;
+        groundY[groundCounter] = (7 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 3000;
+        groundHeight[groundCounter] = 3000;
+        groundType[groundCounter] = 105;
+        groundXType[groundCounter] = 0;
+        groundCounter += 1;
         //
-        sa[sco] = 107 * 29 * 100;
-        sb[sco] = (9 * 29 - 12) * 100;
-        sc[sco] = 9000 - 1;
-        sd[sco] = 24000;
-        stype[sco] = 52;
-        sxtype[sco] = 1;
-        sco += 1;
+        groundX[groundCounter] = 107 * 29 * 100;
+        groundY[groundCounter] = (9 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 9000 - 1;
+        groundHeight[groundCounter] = 24000;
+        groundType[groundCounter] = 52;
+        groundXType[groundCounter] = 1;
+        groundCounter += 1;
         //
-        sa[sco] = 111 * 29 * 100;
-        sb[sco] = (7 * 29 - 12) * 100;
-        sc[sco] = 3000;
-        sd[sco] = 6000 - 200;
-        stype[sco] = 40;
-        sxtype[sco] = 0;
-        sco += 1;
+        groundX[groundCounter] = 111 * 29 * 100;
+        groundY[groundCounter] = (7 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 3000;
+        groundHeight[groundCounter] = 6000 - 200;
+        groundType[groundCounter] = 40;
+        groundXType[groundCounter] = 0;
+        groundCounter += 1;
         //
-        sa[sco] = 113 * 29 * 100 + 1100;
-        sb[sco] = (0 * 29 - 12) * 100;
-        sc[sco] = 4700;
-        sd[sco] = 27000 - 1000;
-        stype[sco] = 0;
-        sxtype[sco] = 0;
-        sco += 1;
+        groundX[groundCounter] = 113 * 29 * 100 + 1100;
+        groundY[groundCounter] = (0 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 4700;
+        groundHeight[groundCounter] = 27000 - 1000;
+        groundType[groundCounter] = 0;
+        groundXType[groundCounter] = 0;
+        groundCounter += 1;
         //
-        sa[sco] = 128 * 29 * 100;
-        sb[sco] = (9 * 29 - 12) * 100;
-        sc[sco] = 9000 - 1;
-        sd[sco] = 24000;
-        stype[sco] = 52;
-        sxtype[sco] = 1;
-        sco += 1;
+        groundX[groundCounter] = 128 * 29 * 100;
+        groundY[groundCounter] = (9 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 9000 - 1;
+        groundHeight[groundCounter] = 24000;
+        groundType[groundCounter] = 52;
+        groundXType[groundCounter] = 1;
+        groundCounter += 1;
         //
-        sa[sco] = 131 * 29 * 100;
-        sb[sco] = (9 * 29 - 12) * 100;
-        sc[sco] = 3000;
-        sd[sco] = 6000 - 200;
-        stype[sco] = 40;
-        sxtype[sco] = 2;
-        sco += 1;
+        groundX[groundCounter] = 131 * 29 * 100;
+        groundY[groundCounter] = (9 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 3000;
+        groundHeight[groundCounter] = 6000 - 200;
+        groundType[groundCounter] = 40;
+        groundXType[groundCounter] = 2;
+        groundCounter += 1;
         //
-        sa[sco] = 133 * 29 * 100 + 1100;
-        sb[sco] = (0 * 29 - 12) * 100;
-        sc[sco] = 4700;
-        sd[sco] = 32000;
-        stype[sco] = 0;
-        sxtype[sco] = 0;
-        sco += 1;
+        groundX[groundCounter] = 133 * 29 * 100 + 1100;
+        groundY[groundCounter] = (0 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 4700;
+        groundHeight[groundCounter] = 32000;
+        groundType[groundCounter] = 0;
+        groundXType[groundCounter] = 0;
+        groundCounter += 1;
         //
         blocks.clear();
         createBlock(0 * 29, 0 * 29 - 12, 4, 0);
@@ -5882,78 +5858,78 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	};
         //
-        bco = 0;
-        ba[bco] = 9 * 29 * 100;
-        bb[bco] = (12 * 29 - 12) * 100;
-        btype[bco] = 82;
-        bxtype[bco] = 1;
-        bco += 1;
+        etCounter = 0;
+        etX[etCounter] = 9 * 29 * 100;
+        etY[etCounter] = (12 * 29 - 12) * 100;
+        etType[etCounter] = 82;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
-        ba[bco] = 10 * 29 * 100;
-        bb[bco] = (11 * 29 - 12) * 100;
-        btype[bco] = 82;
-        bxtype[bco] = 1;
-        bco += 1;
+        etX[etCounter] = 10 * 29 * 100;
+        etY[etCounter] = (11 * 29 - 12) * 100;
+        etType[etCounter] = 82;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
-        ba[bco] = 11 * 29 * 100;
-        bb[bco] = (10 * 29 - 12) * 100;
-        btype[bco] = 82;
-        bxtype[bco] = 1;
-        bco += 1;
+        etX[etCounter] = 11 * 29 * 100;
+        etY[etCounter] = (10 * 29 - 12) * 100;
+        etType[etCounter] = 82;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
-        ba[bco] = 12 * 29 * 100;
-        bb[bco] = (9 * 29 - 12) * 100;
-        btype[bco] = 82;
-        bxtype[bco] = 1;
-        bco += 1;
+        etX[etCounter] = 12 * 29 * 100;
+        etY[etCounter] = (9 * 29 - 12) * 100;
+        etType[etCounter] = 82;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
-        ba[bco] = 13 * 29 * 100;
-        bb[bco] = (8 * 29 - 12) * 100;
-        btype[bco] = 82;
-        bxtype[bco] = 1;
-        bco += 1;
+        etX[etCounter] = 13 * 29 * 100;
+        etY[etCounter] = (8 * 29 - 12) * 100;
+        etType[etCounter] = 82;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
-        ba[bco] = 14 * 29 * 100;
-        bb[bco] = (7 * 29 - 12) * 100;
-        btype[bco] = 82;
-        bxtype[bco] = 1;
-        bco += 1;
+        etX[etCounter] = 14 * 29 * 100;
+        etY[etCounter] = (7 * 29 - 12) * 100;
+        etType[etCounter] = 82;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
-        ba[bco] = 15 * 29 * 100;
-        bb[bco] = (6 * 29 - 12) * 100;
-        btype[bco] = 82;
-        bxtype[bco] = 1;
-        bco += 1;
+        etX[etCounter] = 15 * 29 * 100;
+        etY[etCounter] = (6 * 29 - 12) * 100;
+        etType[etCounter] = 82;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
-        ba[bco] = 16 * 29 * 100;
-        bb[bco] = (5 * 29 - 12) * 100;
-        btype[bco] = 82;
-        bxtype[bco] = 1;
-        bco += 1;
+        etX[etCounter] = 16 * 29 * 100;
+        etY[etCounter] = (5 * 29 - 12) * 100;
+        etType[etCounter] = 82;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
-        ba[bco] = 17 * 29 * 100;
-        bb[bco] = (5 * 29 - 12) * 100;
-        btype[bco] = 82;
-        bxtype[bco] = 1;
-        bco += 1;
+        etX[etCounter] = 17 * 29 * 100;
+        etY[etCounter] = (5 * 29 - 12) * 100;
+        etType[etCounter] = 82;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
-        ba[bco] = 18 * 29 * 100;
-        bb[bco] = (5 * 29 - 12) * 100;
-        btype[bco] = 82;
-        bxtype[bco] = 1;
-        bco += 1;
+        etX[etCounter] = 18 * 29 * 100;
+        etY[etCounter] = (5 * 29 - 12) * 100;
+        etType[etCounter] = 82;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
-        ba[bco] = 19 * 29 * 100;
-        bb[bco] = (5 * 29 - 12) * 100;
-        btype[bco] = 82;
-        bxtype[bco] = 1;
-        bco += 1;
+        etX[etCounter] = 19 * 29 * 100;
+        etY[etCounter] = (5 * 29 - 12) * 100;
+        etType[etCounter] = 82;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
-        ba[bco] = 20 * 29 * 100;
-        bb[bco] = (5 * 29 - 12) * 100;
-        btype[bco] = 82;
-        bxtype[bco] = 1;
-        bco += 1;
+        etX[etCounter] = 20 * 29 * 100;
+        etY[etCounter] = (5 * 29 - 12) * 100;
+        etType[etCounter] = 82;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -6005,65 +5981,65 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         //
         createBlock(60 * 29, 6 * 29 - 12, 300, 8);
 	/*
-	   bco = 1;
-	   ba[bco]=(54*29-12)*100;
-	   bb[bco]=(1*29-12)*100;
-	   btype[bco]=80;
-	   bxtype[bco]=0;
-	   bco += 1;
+	   etCounter = 1;
+	   etX[etCounter]=(54*29-12)*100;
+	   etY[etCounter]=(1*29-12)*100;
+	   etType[etCounter]=80;
+	   etXType[etCounter]=0;
+	   etCounter += 1;
 	 */
-        sco = 0;
-        ba[sco] = (102 * 29 - 12) * 100;
-        bb[sco] = (10 * 29 - 12) * 100;
-        btype[sco] = 50;
-        bxtype[sco] = 1;
-        sco += 1;
+        groundCounter = 0;
+        etX[groundCounter] = (102 * 29 - 12) * 100;
+        etY[groundCounter] = (10 * 29 - 12) * 100;
+        etType[groundCounter] = 50;
+        etXType[groundCounter] = 1;
+        groundCounter += 1;
         //
-        srco = 0;
-        sra[srco] = 1 * 29 * 100;
-        srb[srco] = (10 * 29 - 12) * 100;
-        src[srco] = 5 * 3000;
-        srtype[srco] = 0;
-        sracttype[srco] = 1;
-        sre[srco] = 0;
-        srsp[srco] = 10;
-        srco++;
+        liftCounter = 0;
+        liftX[liftCounter] = 1 * 29 * 100;
+        liftY[liftCounter] = (10 * 29 - 12) * 100;
+        liftWidth[liftCounter] = 5 * 3000;
+        liftType[liftCounter] = 0;
+        liftActType[liftCounter] = 1;
+        sre[liftCounter] = 0;
+        srsp[liftCounter] = 10;
+        liftCounter++;
         //
-        sra[srco] = 18 * 29 * 100;
-        srb[srco] = (4 * 29 - 12) * 100;
-        src[srco] = 3 * 3000;
-        srtype[srco] = 0;
-        sracttype[srco] = 0;
-        sre[srco] = 0;
-        srsp[srco] = 10;
-        srco++;
+        liftX[liftCounter] = 18 * 29 * 100;
+        liftY[liftCounter] = (4 * 29 - 12) * 100;
+        liftWidth[liftCounter] = 3 * 3000;
+        liftType[liftCounter] = 0;
+        liftActType[liftCounter] = 0;
+        sre[liftCounter] = 0;
+        srsp[liftCounter] = 10;
+        liftCounter++;
         //
-        sra[srco] = 35 * 29 * 100;
-        srb[srco] = (4 * 29 - 12) * 100;
-        src[srco] = 5 * 3000;
-        srtype[srco] = 0;
-        sracttype[srco] = 0;
-        sre[srco] = 0;
-        srsp[srco] = 10;
-        srco++;
+        liftX[liftCounter] = 35 * 29 * 100;
+        liftY[liftCounter] = (4 * 29 - 12) * 100;
+        liftWidth[liftCounter] = 5 * 3000;
+        liftType[liftCounter] = 0;
+        liftActType[liftCounter] = 0;
+        sre[liftCounter] = 0;
+        srsp[liftCounter] = 10;
+        liftCounter++;
         //
-        sra[srco] = 35 * 29 * 100;
-        srb[srco] = (8 * 29 - 12) * 100;
-        src[srco] = 5 * 3000;
-        srtype[srco] = 0;
-        sracttype[srco] = 0;
-        sre[srco] = 0;
-        srsp[srco] = 10;
-        srco++;
+        liftX[liftCounter] = 35 * 29 * 100;
+        liftY[liftCounter] = (8 * 29 - 12) * 100;
+        liftWidth[liftCounter] = 5 * 3000;
+        liftType[liftCounter] = 0;
+        liftActType[liftCounter] = 0;
+        sre[liftCounter] = 0;
+        srsp[liftCounter] = 10;
+        liftCounter++;
         //
-        sra[srco] = 94 * 29 * 100;
-        srb[srco] = (6 * 29 - 12) * 100;
-        src[srco] = 3 * 3000;
-        srtype[srco] = 0;
-        sracttype[srco] = 0;
-        sre[srco] = 0;
-        srsp[srco] = 1;
-        srco++;
+        liftX[liftCounter] = 94 * 29 * 100;
+        liftY[liftCounter] = (6 * 29 - 12) * 100;
+        liftWidth[liftCounter] = 3 * 3000;
+        liftType[liftCounter] = 0;
+        liftActType[liftCounter] = 0;
+        sre[liftCounter] = 0;
+        srsp[liftCounter] = 1;
+        liftCounter++;
         //
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -6116,43 +6092,43 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         //
         createBlock(7 * 29, 14 * 29 - 12, 5, 0);
         //
-        bco = 0;
-        ba[bco] = 2 * 29 * 100 - 1400;
-        bb[bco] = (-2 * 29 - 12) * 100 + 500;
-        btype[bco] = 86;
-        bxtype[bco] = 0;
-        bco += 1;
+        etCounter = 0;
+        etX[etCounter] = 2 * 29 * 100 - 1400;
+        etY[etCounter] = (-2 * 29 - 12) * 100 + 500;
+        etType[etCounter] = 86;
+        etXType[etCounter] = 0;
+        etCounter += 1;
         //
-        ba[bco] = 20 * 29 * 100 + 1500;
-        bb[bco] = (5 * 29 - 12) * 100 + 1500;
-        btype[bco] = 87;
-        bxtype[bco] = 107;
-        bco += 1;
+        etX[etCounter] = 20 * 29 * 100 + 1500;
+        etY[etCounter] = (5 * 29 - 12) * 100 + 1500;
+        etType[etCounter] = 87;
+        etXType[etCounter] = 107;
+        etCounter += 1;
         //
-        sco = 0;
-        sa[sco] = 17 * 29 * 100;
-        sb[sco] = (9 * 29 - 12) * 100;
-        sc[sco] = 21000 - 1;
-        sd[sco] = 3000 - 1;
-        stype[sco] = 52;
-        sxtype[sco] = 2;
-        sco += 1;
+        groundCounter = 0;
+        groundX[groundCounter] = 17 * 29 * 100;
+        groundY[groundCounter] = (9 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 21000 - 1;
+        groundHeight[groundCounter] = 3000 - 1;
+        groundType[groundCounter] = 52;
+        groundXType[groundCounter] = 2;
+        groundCounter += 1;
         //
-        sa[sco] = 27 * 29 * 100;
-        sb[sco] = (13 * 29 - 12) * 100;
-        sc[sco] = 6000;
-        sd[sco] = 6000;
-        stype[sco] = 50;
-        sxtype[sco] = 6;
-        sco += 1;
+        groundX[groundCounter] = 27 * 29 * 100;
+        groundY[groundCounter] = (13 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 6000;
+        groundHeight[groundCounter] = 6000;
+        groundType[groundCounter] = 50;
+        groundXType[groundCounter] = 6;
+        groundCounter += 1;
         //
-        sa[sco] = 34 * 29 * 100;
-        sb[sco] = (5 * 29 - 12) * 100;
-        sc[sco] = 6000;
-        sd[sco] = 30000;
-        stype[sco] = 50;
-        sxtype[sco] = 1;
-        sco += 1;
+        groundX[groundCounter] = 34 * 29 * 100;
+        groundY[groundCounter] = (5 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 6000;
+        groundHeight[groundCounter] = 30000;
+        groundType[groundCounter] = 50;
+        groundXType[groundCounter] = 1;
+        groundCounter += 1;
         //
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -6195,38 +6171,38 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         //
         createBlock(14 * 29, 13 * 29 - 12, 115, 1);
         //
-        sco = 0;
-        sa[sco] = 6 * 29 * 100;
-        sb[sco] = (6 * 29 - 12) * 100;
-        sc[sco] = 18000 - 1;
-        sd[sco] = 6000 - 1;
-        stype[sco] = 52;
-        sxtype[sco] = 0;
-        sco += 1;
+        groundCounter = 0;
+        groundX[groundCounter] = 6 * 29 * 100;
+        groundY[groundCounter] = (6 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 18000 - 1;
+        groundHeight[groundCounter] = 6000 - 1;
+        groundType[groundCounter] = 52;
+        groundXType[groundCounter] = 0;
+        groundCounter += 1;
         //
-        sa[sco] = 12 * 29 * 100;
-        sb[sco] = (8 * 29 - 12) * 100;
-        sc[sco] = 9000 - 1;
-        sd[sco] = 3000 - 1;
-        stype[sco] = 52;
-        sxtype[sco] = 2;
-        sco += 1;
+        groundX[groundCounter] = 12 * 29 * 100;
+        groundY[groundCounter] = (8 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 9000 - 1;
+        groundHeight[groundCounter] = 3000 - 1;
+        groundType[groundCounter] = 52;
+        groundXType[groundCounter] = 2;
+        groundCounter += 1;
         //
-        sa[sco] = 15 * 29 * 100;
-        sb[sco] = (11 * 29 - 12) * 100;
-        sc[sco] = 3000;
-        sd[sco] = 6000;
-        stype[sco] = 40;
-        sxtype[sco] = 2;
-        sco += 1;
+        groundX[groundCounter] = 15 * 29 * 100;
+        groundY[groundCounter] = (11 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 3000;
+        groundHeight[groundCounter] = 6000;
+        groundType[groundCounter] = 40;
+        groundXType[groundCounter] = 2;
+        groundCounter += 1;
         //
-        sa[sco] = 17 * 29 * 100 + 1100;
-        sb[sco] = (0 * 29 - 12) * 100;
-        sc[sco] = 4700;
-        sd[sco] = 38000;
-        stype[sco] = 0;
-        sxtype[sco] = 0;
-        sco += 1;
+        groundX[groundCounter] = 17 * 29 * 100 + 1100;
+        groundY[groundCounter] = (0 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 4700;
+        groundHeight[groundCounter] = 38000;
+        groundType[groundCounter] = 0;
+        groundXType[groundCounter] = 0;
+        groundCounter += 1;
         //
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -6279,184 +6255,184 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         //
         createBlock(121 * 29, 10 * 29 - 12, 142, 0);
         //
-        bco = 0;
-        ba[bco] = 0 * 29 * 100 + 1500;
-        bb[bco] = (8 * 29 - 12) * 100 + 1500;
-        btype[bco] = 88;
-        bxtype[bco] = 105;
-        bco += 1;
+        etCounter = 0;
+        etX[etCounter] = 0 * 29 * 100 + 1500;
+        etY[etCounter] = (8 * 29 - 12) * 100 + 1500;
+        etType[etCounter] = 88;
+        etXType[etCounter] = 105;
+        etCounter += 1;
         //
-        ba[bco] = 2 * 29 * 100;
-        bb[bco] = (0 * 29 - 12) * 100;
-        btype[bco] = 80;
-        bxtype[bco] = 1;
-        bco += 1;
+        etX[etCounter] = 2 * 29 * 100;
+        etY[etCounter] = (0 * 29 - 12) * 100;
+        etType[etCounter] = 80;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
-        ba[bco] = 3 * 29 * 100 + 1500;
-        bb[bco] = (8 * 29 - 12) * 100 + 1500;
-        btype[bco] = 87;
-        bxtype[bco] = 105;
-        bco += 1;
+        etX[etCounter] = 3 * 29 * 100 + 1500;
+        etY[etCounter] = (8 * 29 - 12) * 100 + 1500;
+        etType[etCounter] = 87;
+        etXType[etCounter] = 105;
+        etCounter += 1;
         //
-        ba[bco] = 6 * 29 * 100 + 1500;
-        bb[bco] = (8 * 29 - 12) * 100 + 1500;
-        btype[bco] = 88;
-        bxtype[bco] = 107;
-        bco += 1;
+        etX[etCounter] = 6 * 29 * 100 + 1500;
+        etY[etCounter] = (8 * 29 - 12) * 100 + 1500;
+        etType[etCounter] = 88;
+        etXType[etCounter] = 107;
+        etCounter += 1;
         //
-        ba[bco] = 9 * 29 * 100 + 1500;
-        bb[bco] = (8 * 29 - 12) * 100 + 1500;
-        btype[bco] = 88;
-        bxtype[bco] = 107;
-        bco += 1;
+        etX[etCounter] = 9 * 29 * 100 + 1500;
+        etY[etCounter] = (8 * 29 - 12) * 100 + 1500;
+        etType[etCounter] = 88;
+        etXType[etCounter] = 107;
+        etCounter += 1;
         //
-        ba[bco] = 25 * 29 * 100 - 1400;
-        bb[bco] = (2 * 29 - 12) * 100 - 400;
-        btype[bco] = 86;
-        bxtype[bco] = 0;
-        bco += 1;
+        etX[etCounter] = 25 * 29 * 100 - 1400;
+        etY[etCounter] = (2 * 29 - 12) * 100 - 400;
+        etType[etCounter] = 86;
+        etXType[etCounter] = 0;
+        etCounter += 1;
         //
-        ba[bco] = 40 * 29 * 100;
-        bb[bco] = (8 * 29 - 12) * 100;
-        btype[bco] = 82;
-        bxtype[bco] = 0;
-        bco += 1;
+        etX[etCounter] = 40 * 29 * 100;
+        etY[etCounter] = (8 * 29 - 12) * 100;
+        etType[etCounter] = 82;
+        etXType[etCounter] = 0;
+        etCounter += 1;
         //
-        ba[bco] = 42 * 29 * 100;
-        bb[bco] = (8 * 29 - 12) * 100;
-        btype[bco] = 82;
-        bxtype[bco] = 0;
-        bco += 1;
+        etX[etCounter] = 42 * 29 * 100;
+        etY[etCounter] = (8 * 29 - 12) * 100;
+        etType[etCounter] = 82;
+        etXType[etCounter] = 0;
+        etCounter += 1;
         //
-        ba[bco] = 43 * 29 * 100 + 1500;
-        bb[bco] = (6 * 29 - 12) * 100 + 1500;
-        btype[bco] = 88;
-        bxtype[bco] = 105;
-        bco += 1;
+        etX[etCounter] = 43 * 29 * 100 + 1500;
+        etY[etCounter] = (6 * 29 - 12) * 100 + 1500;
+        etType[etCounter] = 88;
+        etXType[etCounter] = 105;
+        etCounter += 1;
         //
-        ba[bco] = 47 * 29 * 100 + 1500;
-        bb[bco] = (6 * 29 - 12) * 100 + 1500;
-        btype[bco] = 87;
-        bxtype[bco] = 105;
-        bco += 1;
+        etX[etCounter] = 47 * 29 * 100 + 1500;
+        etY[etCounter] = (6 * 29 - 12) * 100 + 1500;
+        etType[etCounter] = 87;
+        etXType[etCounter] = 105;
+        etCounter += 1;
         //
-        ba[bco] = 57 * 29 * 100;
-        bb[bco] = (7 * 29 - 12) * 100;
-        btype[bco] = 82;
-        bxtype[bco] = 0;
-        bco += 1;
+        etX[etCounter] = 57 * 29 * 100;
+        etY[etCounter] = (7 * 29 - 12) * 100;
+        etType[etCounter] = 82;
+        etXType[etCounter] = 0;
+        etCounter += 1;
         //
-        ba[bco] = 77 * 29 * 100 - 1400;
-        bb[bco] = (2 * 29 - 12) * 100 - 400;
-        btype[bco] = 86;
-        bxtype[bco] = 0;
-        bco += 1;
+        etX[etCounter] = 77 * 29 * 100 - 1400;
+        etY[etCounter] = (2 * 29 - 12) * 100 - 400;
+        etType[etCounter] = 86;
+        etXType[etCounter] = 0;
+        etCounter += 1;
         //
-        ba[bco] = 83 * 29 * 100 - 1400;
-        bb[bco] = (2 * 29 - 12) * 100 - 400;
-        btype[bco] = 86;
-        bxtype[bco] = 0;
-        bco += 1;
+        etX[etCounter] = 83 * 29 * 100 - 1400;
+        etY[etCounter] = (2 * 29 - 12) * 100 - 400;
+        etType[etCounter] = 86;
+        etXType[etCounter] = 0;
+        etCounter += 1;
         //
-        ba[bco] = 88 * 29 * 100 + 1500;
-        bb[bco] = (9 * 29 - 12) * 100 + 1500;
-        btype[bco] = 87;
-        bxtype[bco] = 105;
-        bco += 1;
+        etX[etCounter] = 88 * 29 * 100 + 1500;
+        etY[etCounter] = (9 * 29 - 12) * 100 + 1500;
+        etType[etCounter] = 87;
+        etXType[etCounter] = 105;
+        etCounter += 1;
         //
-        ba[bco] = 88 * 29 * 100 + 1500;
-        bb[bco] = (9 * 29 - 12) * 100 + 1500;
-        btype[bco] = 88;
-        bxtype[bco] = 105;
-        bco += 1;
+        etX[etCounter] = 88 * 29 * 100 + 1500;
+        etY[etCounter] = (9 * 29 - 12) * 100 + 1500;
+        etType[etCounter] = 88;
+        etXType[etCounter] = 105;
+        etCounter += 1;
         //
-        ba[bco] = 90 * 29 * 100;
-        bb[bco] = (9 * 29 - 12) * 100;
-        btype[bco] = 82;
-        bxtype[bco] = 0;
-        bco += 1;
+        etX[etCounter] = 90 * 29 * 100;
+        etY[etCounter] = (9 * 29 - 12) * 100;
+        etType[etCounter] = 82;
+        etXType[etCounter] = 0;
+        etCounter += 1;
         //
-        ba[bco] = 107 * 29 * 100;
-        bb[bco] = (10 * 29 - 12) * 100;
-        btype[bco] = 30;
-        bxtype[bco] = 0;
-        bco += 1;
+        etX[etCounter] = 107 * 29 * 100;
+        etY[etCounter] = (10 * 29 - 12) * 100;
+        etType[etCounter] = 30;
+        etXType[etCounter] = 0;
+        etCounter += 1;
         //
-        sco = 0;
-        sa[sco] = 13 * 29 * 100;
-        sb[sco] = (8 * 29 - 12) * 100;
-        sc[sco] = 33000 - 1;
-        sd[sco] = 3000 - 1;
-        stype[sco] = 52;
-        sxtype[sco] = 2;
-        sco += 1;
+        groundCounter = 0;
+        groundX[groundCounter] = 13 * 29 * 100;
+        groundY[groundCounter] = (8 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 33000 - 1;
+        groundHeight[groundCounter] = 3000 - 1;
+        groundType[groundCounter] = 52;
+        groundXType[groundCounter] = 2;
+        groundCounter += 1;
         //
-        sa[sco] = 13 * 29 * 100;
-        sb[sco] = (0 * 29 - 12) * 100;
-        sc[sco] = 33000 - 1;
-        sd[sco] = 3000 - 1;
-        stype[sco] = 51;
-        sxtype[sco] = 3;
-        sco += 1;
+        groundX[groundCounter] = 13 * 29 * 100;
+        groundY[groundCounter] = (0 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 33000 - 1;
+        groundHeight[groundCounter] = 3000 - 1;
+        groundType[groundCounter] = 51;
+        groundXType[groundCounter] = 3;
+        groundCounter += 1;
         //
-        sa[sco] = 10 * 29 * 100;
-        sb[sco] = (13 * 29 - 12) * 100;
-        sc[sco] = 6000;
-        sd[sco] = 6000;
-        stype[sco] = 50;
-        sxtype[sco] = 6;
-        sco += 1;
+        groundX[groundCounter] = 10 * 29 * 100;
+        groundY[groundCounter] = (13 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 6000;
+        groundHeight[groundCounter] = 6000;
+        groundType[groundCounter] = 50;
+        groundXType[groundCounter] = 6;
+        groundCounter += 1;
         //
-        sa[sco] = 46 * 29 * 100;
-        sb[sco] = (12 * 29 - 12) * 100;
-        sc[sco] = 9000 - 1;
-        sd[sco] = 3000 - 1;
-        stype[sco] = 52;
-        sxtype[sco] = 2;
-        sco += 1;
+        groundX[groundCounter] = 46 * 29 * 100;
+        groundY[groundCounter] = (12 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 9000 - 1;
+        groundHeight[groundCounter] = 3000 - 1;
+        groundType[groundCounter] = 52;
+        groundXType[groundCounter] = 2;
+        groundCounter += 1;
         //
-        sa[sco] = 58 * 29 * 100;
-        sb[sco] = (13 * 29 - 12) * 100;
-        sc[sco] = 6000;
-        sd[sco] = 6000;
-        stype[sco] = 50;
-        sxtype[sco] = 6;
-        sco += 1;
+        groundX[groundCounter] = 58 * 29 * 100;
+        groundY[groundCounter] = (13 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 6000;
+        groundHeight[groundCounter] = 6000;
+        groundType[groundCounter] = 50;
+        groundXType[groundCounter] = 6;
+        groundCounter += 1;
         //
-        sa[sco] = 101 * 29 * 100 - 1500;
-        sb[sco] = (10 * 29 - 12) * 100 - 3000;
-        sc[sco] = 12000;
-        sd[sco] = 12000;
-        stype[sco] = 104;
-        sxtype[sco] = 0;
-        sco += 1;
+        groundX[groundCounter] = 101 * 29 * 100 - 1500;
+        groundY[groundCounter] = (10 * 29 - 12) * 100 - 3000;
+        groundWidth[groundCounter] = 12000;
+        groundHeight[groundCounter] = 12000;
+        groundType[groundCounter] = 104;
+        groundXType[groundCounter] = 0;
+        groundCounter += 1;
         //
-        sa[sco] = 102 * 29 * 100 + 3000;
-        sb[sco] = (2 * 29 - 12) * 100;
-        sc[sco] = 3000 - 1;
-        sd[sco] = 300000;
-        stype[sco] = 102;
-        sxtype[sco] = 20;
-        sco += 1;
+        groundX[groundCounter] = 102 * 29 * 100 + 3000;
+        groundY[groundCounter] = (2 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 3000 - 1;
+        groundHeight[groundCounter] = 300000;
+        groundType[groundCounter] = 102;
+        groundXType[groundCounter] = 20;
+        groundCounter += 1;
         //
-        srco = 0;
-        sra[srco] = 74 * 29 * 100 - 1500;
-        srb[srco] = (7 * 29 - 12) * 100;
-        src[srco] = 2 * 3000;
-        srtype[srco] = 0;
-        sracttype[srco] = 1;
-        sre[srco] = 0;
-        srsp[srco] = 0;
-        srco = 20;
+        liftCounter = 0;
+        liftX[liftCounter] = 74 * 29 * 100 - 1500;
+        liftY[liftCounter] = (7 * 29 - 12) * 100;
+        liftWidth[liftCounter] = 2 * 3000;
+        liftType[liftCounter] = 0;
+        liftActType[liftCounter] = 1;
+        sre[liftCounter] = 0;
+        srsp[liftCounter] = 0;
+        liftCounter = 20;
         //
-        sra[srco] = 97 * 29 * 100;
-        srb[srco] = (12 * 29 - 12) * 100;
-        src[srco] = 12 * 3000;
-        srtype[srco] = 0;
-        sracttype[srco] = 0;
-        sre[srco] = 0;
-        srsp[srco] = 21;
-        srco += 1;
+        liftX[liftCounter] = 97 * 29 * 100;
+        liftY[liftCounter] = (12 * 29 - 12) * 100;
+        liftWidth[liftCounter] = 12 * 3000;
+        liftType[liftCounter] = 0;
+        liftActType[liftCounter] = 0;
+        sre[liftCounter] = 0;
+        srsp[liftCounter] = 21;
+        liftCounter += 1;
         //
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -6499,69 +6475,69 @@ t=sco;sa[t]=14*29*100+1000;sb[t]=-6000;sc[t]=5000;sd[t]=70000;stype[t]=100;sxtyp
         //
         createBlock(64 * 29, 13 * 29 - 12, 115, 1);
         //
-        sco = 0;
-        sa[sco] = 13 * 29 * 100;
-        sb[sco] = (13 * 29 - 12) * 100;
-        sc[sco] = 9000 - 1;
-        sd[sco] = 3000;
-        stype[sco] = 52;
-        sxtype[sco] = 0;
-        sco += 1;
+        groundCounter = 0;
+        groundX[groundCounter] = 13 * 29 * 100;
+        groundY[groundCounter] = (13 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 9000 - 1;
+        groundHeight[groundCounter] = 3000;
+        groundType[groundCounter] = 52;
+        groundXType[groundCounter] = 0;
+        groundCounter += 1;
         //
-        sa[sco] = 84 * 29 * 100;
-        sb[sco] = (13 * 29 - 12) * 100;
-        sc[sco] = 9000 - 1;
-        sd[sco] = 3000;
-        stype[sco] = 52;
-        sxtype[sco] = 0;
-        sco += 1;
+        groundX[groundCounter] = 84 * 29 * 100;
+        groundY[groundCounter] = (13 * 29 - 12) * 100;
+        groundWidth[groundCounter] = 9000 - 1;
+        groundHeight[groundCounter] = 3000;
+        groundType[groundCounter] = 52;
+        groundXType[groundCounter] = 0;
+        groundCounter += 1;
         //
-        bco = 0;
-        ba[bco] = 108 * 29 * 100;
-        bb[bco] = (6 * 29 - 12) * 100;
-        btype[bco] = 6;
-        bxtype[bco] = 1;
-        bco += 1;
+        etCounter = 0;
+        etX[etCounter] = 108 * 29 * 100;
+        etY[etCounter] = (6 * 29 - 12) * 100;
+        etType[etCounter] = 6;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
-        ba[bco] = 33 * 29 * 100;
-        bb[bco] = (10 * 29 - 12) * 100;
-        btype[bco] = 82;
-        bxtype[bco] = 1;
-        bco += 1;
+        etX[etCounter] = 33 * 29 * 100;
+        etY[etCounter] = (10 * 29 - 12) * 100;
+        etType[etCounter] = 82;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
-        ba[bco] = 36 * 29 * 100;
-        bb[bco] = (0 * 29 - 12) * 100;
-        btype[bco] = 80;
-        bxtype[bco] = 1;
-        bco += 1;
+        etX[etCounter] = 36 * 29 * 100;
+        etY[etCounter] = (0 * 29 - 12) * 100;
+        etType[etCounter] = 80;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
-        ba[bco] = 78 * 29 * 100 + 1500;
-        bb[bco] = (7 * 29 - 12) * 100 + 1500;
-        btype[bco] = 88;
-        bxtype[bco] = 105;
-        bco += 1;
+        etX[etCounter] = 78 * 29 * 100 + 1500;
+        etY[etCounter] = (7 * 29 - 12) * 100 + 1500;
+        etType[etCounter] = 88;
+        etXType[etCounter] = 105;
+        etCounter += 1;
         //
-        ba[bco] = 80 * 29 * 100 + 1500;
-        bb[bco] = (7 * 29 - 12) * 100 + 1500;
-        btype[bco] = 87;
-        bxtype[bco] = 105;
-        bco += 1;
+        etX[etCounter] = 80 * 29 * 100 + 1500;
+        etY[etCounter] = (7 * 29 - 12) * 100 + 1500;
+        etType[etCounter] = 87;
+        etXType[etCounter] = 105;
+        etCounter += 1;
         //
-        ba[bco] = 85 * 29 * 100;
-        bb[bco] = (11 * 29 - 12) * 100;
-        btype[bco] = 82;
-        bxtype[bco] = 1;
-        bco += 1;
+        etX[etCounter] = 85 * 29 * 100;
+        etY[etCounter] = (11 * 29 - 12) * 100;
+        etType[etCounter] = 82;
+        etXType[etCounter] = 1;
+        etCounter += 1;
         //
-        srco = 0;
-        sra[srco] = 41 * 29 * 100;
-        srb[srco] = (3 * 29 - 12) * 100;
-        src[srco] = 3 * 3000;
-        srtype[srco] = 0;
-        sracttype[srco] = 0;
-        sre[srco] = 0;
-        srsp[srco] = 3;
-        srco = 0;
+        liftCounter = 0;
+        liftX[liftCounter] = 41 * 29 * 100;
+        liftY[liftCounter] = (3 * 29 - 12) * 100;
+        liftWidth[liftCounter] = 3 * 3000;
+        liftType[liftCounter] = 0;
+        liftActType[liftCounter] = 0;
+        sre[liftCounter] = 0;
+        srsp[liftCounter] = 3;
+        liftCounter = 0;
         //
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -6660,7 +6636,7 @@ void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype) {
             t1 = 3;
 
             aa[aco] = x;
-            ab[aco] = y;    //ag[aco]=0;ah[aco]=0;ai[aco]=bb[t];//ad[t]=0;aeon[t]=1;
+            ab[aco] = y;    //ag[aco]=0;ah[aco]=0;ai[aco]=etY[t];//ad[t]=0;aeon[t]=1;
             ac[aco] = c;
             ad[aco] = d;
             if (xtype > 100)
@@ -6668,7 +6644,7 @@ void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype) {
             //ae[aco]=0;af[aco]=0;
             atype[aco] = type;
             if (xtype >= 0 && xtype <= 99100)
-                axtype[aco] = xtype;    //ahp[aco]=iz[bxtype[t]];aytm[aco]=0;
+                axtype[aco] = xtype;    //ahp[aco]=iz[etXType[t]];aytm[aco]=0;
             //if (xtype==1)end();
             anotm[aco] = xnotm;
             if (aa[aco] - fx <= marioX + marioWidth / 2)
