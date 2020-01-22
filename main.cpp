@@ -2,6 +2,7 @@
 #include "utilities/colors.h"
 #include "entities/mario.h"
 #include "entities/block.h"
+#include "entities/enemy_template.h"
 
 int main(int argc, char *argv[]) {
     parseArgs(argc, argv);
@@ -870,12 +871,12 @@ void processSceneInGame() {
                     block->xtype = rand(4);
                 }
             }
-            for (int i = 0; i < ET_MAX; i++) {
+            for (int i = 0; i < ets.size(); i++) {
                 if (rand(2) <= 1) {
-                    etX[i] = (rand(500) - 1) * 29 * 100;
-                    etY[i] = rand(15) * 100 * 29 - 1200 - 3000;
+                    ets[i]->x = (rand(500) - 1) * 29 * 100;
+                    ets[i]->y = rand(15) * 100 * 29 - 1200 - 3000;
                     if (rand(6) == 0) {
-                        etType[i] = rand(9);
+                        ets[i]->type = rand(9);
                     }
                 }
             }
@@ -1871,7 +1872,7 @@ if (mtm==250)end();
                                     }
                                 }
                             }
-                            etXType[3] = 105;
+                            ets[3]->xtype = 105;
                         }
                     }
                 }
@@ -2595,51 +2596,51 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
     }            //EFFECT_MAX
 
 //敵キャラの配置
-    for (int i = 0; i < ET_MAX; i++) {
-        if (etX[i] >= -80000) {
+    for (int i = 0; i < ets.size(); i++) {
+        if (ets[i]->x >= -80000) {
 
-            if (btm[i] >= 0) {
-                btm[i] = btm[i] - 1;
+            if (ets[i]->btm >= 0) {
+                ets[i]->btm--;
             }
 
             for (int j = 0; j <= 1; j++) {
-                int screenX = etX[i] - fx;
-                int screenY = etY[i] - fy;
+                int screenX = ets[i]->x - fx;
+                int screenY = ets[i]->y - fy;
 
                 xx[0] = 0;
                 xx[1] = 0;
-
-                if (bz[i] == 0 && btm[i] < 0
-                        && screenX >= fxmax + 2000
-                        && screenX < fxmax + 2000 + marioSpeedX && j == 0) {
+                
+                if (!ets[i]->available && ets[i]->btm < 0
+                    && screenX >= fxmax + 2000
+                    && screenX < fxmax + 2000 + marioSpeedX && j == 0) {
                     xx[0] = 1;
                     amuki[aco] = 0;
                 }        // && mmuki==1
-                if (bz[i] == 0 && btm[i] < 0
-                        && screenX >= -400 - anx[etType[i]] + marioSpeedX
-                        && screenX < -400 - anx[etType[i]] && j == 1) {
+                if (!ets[i]->available && ets[i]->btm < 0
+                    && screenX >= -400 - anx[ets[i]->type] + marioSpeedX
+                    && screenX < -400 - anx[ets[i]->type] && j == 1) {
                     xx[0] = 1;
                     xx[1] = 1;
                     amuki[aco] = 1;
                 }        // && mmuki==0
-                if (bz[i] == 1 && screenX >= 0 - anx[etType[i]]
-                        && screenX <= fxmax + 4000
-                        && screenY >= -9000
-                        && screenY <= fymax + 4000 && btm[i] < 0) {
+                if (ets[i]->available && screenX >= 0 - anx[ets[i]->type]
+                    && screenX <= fxmax + 4000
+                    && screenY >= -9000
+                    && screenY <= fymax + 4000 && ets[i]->btm < 0) {
                     xx[0] = 1;
-                    bz[i] = 0;
+                    ets[i]->available = false;
                 }        // && xza<=5000// && checkpoint!=1
-//if (bz[i]==2){xx[0]=0;xx[1]=0;}
-//if (etType[i]>=100){bz[i]=2;}
+//if (ets[i]->available==2){xx[0]=0;xx[1]=0;}
+//if (ets[i]->type>=100){ets[i]->available=2;}
 
                 if (xx[0] == 1) {    //400
-                    btm[i] = 401;
-                    xx[0] = 0;    //if (etType[i]>=20 && etType[i]<=23){btm[i]=90000;}
-                    if (etType[i] >= 10) {
-                        btm[i] = 9999999;
+                    ets[i]->btm = 401;
+                    xx[0] = 0;    //if (ets[i]->type>=20 && ets[i]->type<=23){ets[i]->btm=90000;}
+                    if (ets[i]->type >= 10) {
+                        ets[i]->btm = 9999999;
                     }
 //10
-                    ayobi(etX[i], etY[i], 0, 0, 0, etType[i], etXType[i]);
+                    ayobi(ets[i]->x, ets[i]->y, 0, 0, 0, ets[i]->type, ets[i]->xtype);
                 }
 
             }        //tt
@@ -4096,12 +4097,6 @@ void stagecls() {
         groundXType[t] = 0;
     }
     //for (t=0;t<spmax;t++){spa[t]=-9000000;szyunni[t]=t;spb[t]=1;spc[t]=1;spd[t]=1;sptype[t]=0;spgtype[t]=0;}
-//    for (t = 0; t < blocks.size(); t++) {  // just clear the vector blocks
-//        blocks[t]->x = -9000000;
-//        blocks[t]->y = 1;
-//        blocks[t]->item = 0;
-//        blocks[t]->xtype = 0;
-//    }
     for (t = 0; t < LIFT_MAX; t++) {
         liftX[t] = -9000000;
         liftY[t] = 1;
@@ -4132,13 +4127,6 @@ void stagecls() {
         abrocktm[t] = 0;
         amsgtm[t] = 0;
     }
-    for (t = 0; t < ET_MAX; t++) {
-        etX[t] = -9000000;
-        etY[t] = 1;
-        bz[t] = 1;
-        btm[t] = 0;
-        etXType[t] = 0;
-    }
     for (t = 0; t < EFFECT_MAX; t++) {
         ea[t] = -9000000;
         eb[t] = 1;
@@ -4156,10 +4144,9 @@ void stagecls() {
     //for (t=0;t<gmax;t++){ga[t]=-9000000;gx[t]=0;gstring[t]="";}
 
     groundCounter = 0;
-//    blockCounter = 0;
     blocks.clear();
     aco = 0;
-    etCounter = 0;
+    ets.clear();
     eco = 0;
     bgCounter = 0;
     //haikeitouroku();
@@ -4247,13 +4234,7 @@ void stage() {
                 if (groundCounter >= GROUND_MAX)
                     groundCounter = 0;
             } else if (value >= 50 && value <= 79) {  //これなぜかバグの原因ｗ
-                // the original author says there are some bugs ...
-                etX[etCounter] = xx[21] * 100;
-                etY[etCounter] = xx[22] * 100;
-                etType[etCounter] = value - 50;
-                etCounter++;
-                if (etCounter >= ET_MAX)
-                    etCounter = 0;
+                createEnemyTemplate(xx[21] * 100, xx[22] * 100, value - 50, 0);
             } else if (value >= 80 && value <= 89) {
                 bgX[bgCounter] = xx[21] * 100;
                 bgY[bgCounter] = xx[22] * 100;
@@ -4402,20 +4383,10 @@ void stagep() {
         groundType[t] = 52;
         groundCounter++;
 
-        etCounter = 0;
-        t = etCounter;
-        etX[t] = 27 * 29 * 100;
-        etY[t] = (9 * 29 - 12) * 100;
-        etType[t] = 0;
-        etXType[t] = 0;
-        etCounter++;
-        t = etCounter;
-        etX[t] = 103 * 29 * 100;
-        etY[t] = (5 * 29 - 12 + 10) * 100;
-        etType[t] = 80;
-        etXType[t] = 0;
-        etCounter++;
-        //t=etCounter;etX[t]=13*29*100;etY[t]=(5*29-12)*100;etType[t]=81;etXType[t]=0;etCounter++;
+        ets.clear();
+        createEnemyTemplate(27 * 29 * 100, (9 * 29 - 12) * 100, 0, 0);
+        createEnemyTemplate(103 * 29 * 100, (5 * 29 - 12 + 10) * 100, 80, 0);
+        //t=etCounter;ets[t]->x=13*29*100;ets[t]->y=(5*29-12)*100;ets[t]->type=81;ets[t]->xtype=0;etCounter++;
 
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -4492,7 +4463,7 @@ void stagep() {
         groundCounter++;
 
         //ブロックもどき
-        //t=etCounter;etX[t]=7*29*100;etY[t]=(9*29-12)*100;etType[t]=82;etXType[t]=0;etCounter++;
+        //t=etCounter;ets[t]->x=7*29*100;ets[t]->y=(9*29-12)*100;ets[t]->type=82;ets[t]->xtype=0;etCounter++;
 
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -4692,28 +4663,13 @@ void stagep() {
         groundXType[t] = 5;
         groundCounter++;
 
-        etCounter = 0;
-        t = etCounter;
-        etX[t] = 18 * 29 * 100;
-        etY[t] = (10 * 29 - 12) * 100;
-        etType[t] = 82;
-        etXType[t] = 1;
-        etCounter++;
-//t=etCounter;etX[t]=52*29*100;etY[t]=(2*29-12)*100;etType[t]=82;etXType[t]=1;etCounter++;
-        t = etCounter;
-        etX[t] = 51 * 29 * 100 + 1000;
-        etY[t] = (2 * 29 - 12 + 10) * 100;
-        etType[t] = 80;
-        etXType[t] = 1;
-        etCounter++;
+        ets.clear();
+        createEnemyTemplate(18 * 29 * 100, (10 * 29 - 12) * 100, 82, 1);
+//t=etCounter;ets[t]->x=52*29*100;ets[t]->y=(2*29-12)*100;ets[t]->type=82;ets[t]->xtype=1;etCounter++;
+        createEnemyTemplate(51 * 29 * 100 + 1000, (2 * 29 - 12 + 10) * 100, 80, 1);
 
 //？ボール
-        t = etCounter;
-        etX[t] = 96 * 29 * 100 + 100;
-        etY[t] = (10 * 29 - 12) * 100;
-        etType[t] = 105;
-        etXType[t] = 0;
-        etCounter++;
+        createEnemyTemplate(96 * 29 * 100 + 100, (10 * 29 - 12) * 100, 105, 0);
 
 //リフト
         liftCounter = 0;
@@ -4832,13 +4788,8 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         groundCounter++;
 
 //ポールもどき
-        etCounter = 0;
-        t = etCounter;
-        etX[t] = 19 * 29 * 100;
-        etY[t] = (2 * 29 - 12) * 100;
-        etType[t] = 85;
-        etXType[t] = 0;
-        etCounter++;
+        ets.clear();
+        createEnemyTemplate(19 * 29 * 100, (2 * 29 - 12) * 100, 85, 0);
 
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -4914,19 +4865,9 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 //ファイア
 //createBlock(7*29,9*29-12,101);
 
-        etCounter = 0;
-        t = etCounter;
-        etX[t] = 101 * 29 * 100;
-        etY[t] = (5 * 29 - 12) * 100;
-        etType[t] = 4;
-        etXType[t] = 1;
-        etCounter++;
-        t = etCounter;
-        etX[t] = 146 * 29 * 100;
-        etY[t] = (10 * 29 - 12) * 100;
-        etType[t] = 6;
-        etXType[t] = 1;
-        etCounter++;
+        ets.clear();
+        createEnemyTemplate(101 * 29 * 100, (5 * 29 - 12) * 100, 4, 1);
+        createEnemyTemplate(146 * 29 * 100, (10 * 29 - 12) * 100, 6, 1);
 
         t = groundCounter;
         groundX[t] = 9 * 29 * 100;
@@ -4975,27 +4916,12 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         groundCounter++;
 
 //？ボール
-        t = etCounter;
-        etX[t] = 10 * 29 * 100 + 100;
-        etY[t] = (11 * 29 - 12) * 100;
-        etType[t] = 105;
-        etXType[t] = 1;
-        etCounter++;
+        createEnemyTemplate(10 * 29 * 100 + 100, (11 * 29 - 12) * 100, 105, 1);
 //ブロックもどき
-        t = etCounter;
-        etX[t] = 43 * 29 * 100;
-        etY[t] = (11 * 29 - 12) * 100;
-        etType[t] = 82;
-        etXType[t] = 1;
-        etCounter++;
-//t=etCounter;etX[t]=146*29*100;etY[t]=(12*29-12)*100;etType[t]=82;etXType[t]=1;etCounter++;
+        createEnemyTemplate(43 * 29 * 100, (11 * 29 - 12) * 100, 82, 1);
+//t=etCounter;ets[t]->x=146*29*100;ets[t]->y=(12*29-12)*100;ets[t]->type=82;ets[t]->xtype=1;etCounter++;
 //うめぇ
-        t = etCounter;
-        etX[t] = 1 * 29 * 100;
-        etY[t] = (2 * 29 - 12 + 10) * 100 - 1000;
-        etType[t] = 80;
-        etXType[t] = 0;
-        etCounter++;
+        createEnemyTemplate(1 * 29 * 100, (2 * 29 - 12 + 10) * 100 - 1000, 80, 0);
 
 //リフト
         liftCounter = 0;
@@ -5296,78 +5222,23 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         groundXType[t] = 0;
         groundCounter++;
 
-        etCounter = 0;
-        t = etCounter;
-        etX[t] = 8 * 29 * 100 - 1400;
-        etY[t] = (2 * 29 - 12) * 100 + 500;
-        etType[t] = 86;
-        etXType[t] = 0;
-        etCounter++;
-        t = etCounter;
-        etX[t] = 42 * 29 * 100 - 1400;
-        etY[t] = (-2 * 29 - 12) * 100 + 500;
-        etType[t] = 86;
-        etXType[t] = 0;
-        etCounter++;
-        t = etCounter;
-        etX[t] = 29 * 29 * 100 + 1500;
-        etY[t] = (7 * 29 - 12) * 100 + 1500;
-        etType[t] = 87;
-        etXType[t] = 105;
-        etCounter++;
-        t = etCounter;
-        etX[t] = 47 * 29 * 100 + 1500;
-        etY[t] = (9 * 29 - 12) * 100 + 1500;
-        etType[t] = 87;
-        etXType[t] = 110;
-        etCounter++;
-        t = etCounter;
-        etX[t] = 70 * 29 * 100 + 1500;
-        etY[t] = (9 * 29 - 12) * 100 + 1500;
-        etType[t] = 87;
-        etXType[t] = 105;
-        etCounter++;
-        t = etCounter;
-        etX[t] = 66 * 29 * 100 + 1501;
-        etY[t] = (4 * 29 - 12) * 100 + 1500;
-        etType[t] = 87;
-        etXType[t] = 101;
-        etCounter++;
-        t = etCounter;
-        etX[t] = 85 * 29 * 100 + 1501;
-        etY[t] = (4 * 29 - 12) * 100 + 1500;
-        etType[t] = 87;
-        etXType[t] = 105;
-        etCounter++;
+        ets.clear();
+        createEnemyTemplate(8 * 29 * 100 - 1400, (2 * 29 - 12) * 100 + 500, 86, 0);
+        createEnemyTemplate(42 * 29 * 100 - 1400, (-2 * 29 - 12) * 100 + 500, 86, 0);
+        createEnemyTemplate(29 * 29 * 100 + 1500, (7 * 29 - 12) * 100 + 1500, 87, 105);
+        createEnemyTemplate(47 * 29 * 100 + 1500, (9 * 29 - 12) * 100 + 1500, 87, 110);
+        createEnemyTemplate(70 * 29 * 100 + 1500, (9 * 29 - 12) * 100 + 1500, 87, 105);
+        createEnemyTemplate(66 * 29 * 100 + 1501, (4 * 29 - 12) * 100 + 1500, 87, 101);
+        createEnemyTemplate(85 * 29 * 100 + 1501, (4 * 29 - 12) * 100 + 1500, 87, 105);
 
 //ステルスうめぇ
-        t = etCounter;
-        etX[t] = 57 * 29 * 100;
-        etY[t] = (2 * 29 - 12 + 10) * 100 - 500;
-        etType[t] = 80;
-        etXType[t] = 1;
-        etCounter++;
+        createEnemyTemplate(57 * 29 * 100, (2 * 29 - 12 + 10) * 100 - 500, 80, 1);
 //ブロックもどき
-        t = etCounter;
-        etX[t] = 77 * 29 * 100;
-        etY[t] = (5 * 29 - 12) * 100;
-        etType[t] = 82;
-        etXType[t] = 2;
-        etCounter++;
+        createEnemyTemplate(77 * 29 * 100, (5 * 29 - 12) * 100, 82, 2);
 //ボス
-        t = etCounter;
-        etX[t] = 130 * 29 * 100;
-        etY[t] = (8 * 29 - 12) * 100;
-        etType[t] = 30;
-        etXType[t] = 0;
-        etCounter++;
+        createEnemyTemplate(130 * 29 * 100, (8 * 29 - 12) * 100, 30, 0);
 //クックル
-        t = etCounter;
-        etX[t] = 142 * 29 * 100;
-        etY[t] = (10 * 29 - 12) * 100;
-        etType[t] = 31;
-        etXType[t] = 0;
-        etCounter++;
+        createEnemyTemplate(142 * 29 * 100, (10 * 29 - 12) * 100, 31, 0);
 
 //マグマ
         bgCounter = 0;
@@ -5535,43 +5406,19 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         groundXType[groundCounter] = 0;
         groundCounter += 1;
         //
-        etCounter = 0;
+        ets.clear();
         //
-        etX[etCounter] = 6 * 29 * 100;
-        etY[etCounter] = (3 * 29 - 12) * 100;
-        etType[etCounter] = 80;
-        etXType[etCounter] = 0;
-        etCounter += 1;
+        createEnemyTemplate(6 * 29 * 100, (3 * 29 - 12) * 100, 80, 0);
         //
-        etX[etCounter] = 13 * 29 * 100;
-        etY[etCounter] = (6 * 29 - 12) * 100;
-        etType[etCounter] = 4;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        createEnemyTemplate(13 * 29 * 100, (6 * 29 - 12) * 100, 4, 1);
         //
-        etX[etCounter] = 23 * 29 * 100;
-        etY[etCounter] = (7 * 29 - 12) * 100;
-        etType[etCounter] = 80;
-        etXType[etCounter] = 0;
-        etCounter += 1;
+        createEnemyTemplate(23 * 29 * 100, (7 * 29 - 12) * 100, 80, 0);
         //
-        etX[etCounter] = 25 * 29 * 100;
-        etY[etCounter] = (7 * 29 - 12) * 100;
-        etType[etCounter] = 80;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        createEnemyTemplate(25 * 29 * 100, (7 * 29 - 12) * 100, 80, 1);
         //
-        etX[etCounter] = 27 * 29 * 100;
-        etY[etCounter] = (7 * 29 - 12) * 100;
-        etType[etCounter] = 80;
-        etXType[etCounter] = 0;
-        etCounter += 1;
+        createEnemyTemplate(27 * 29 * 100, (7 * 29 - 12) * 100, 80, 0);
         //
-        etX[etCounter] = 88 * 29 * 100;
-        etY[etCounter] = (12 * 29 - 12) * 100;
-        etType[etCounter] = 82;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        createEnemyTemplate(88 * 29 * 100, (12 * 29 - 12) * 100, 82, 1);
         //
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -5671,72 +5518,28 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	};
         //
-        etCounter = 0;
-        etX[etCounter] = 32 * 29 * 100 - 1400;
-        etY[etCounter] = (-2 * 29 - 12) * 100 + 500;
-        etType[etCounter] = 86;
-        etXType[etCounter] = 0;
-        etCounter += 1;
+        ets.clear();
+        createEnemyTemplate(32 * 29 * 100 - 1400, (-2 * 29 - 12) * 100 + 500, 86, 0);
         //
-        etX[etCounter] = (31 * 29 - 12) * 100;
-        etY[etCounter] = (7 * 29 - 12) * 100;
-        etType[etCounter] = 7;
-        etXType[etCounter] = 0;
-        etCounter += 1;
+        createEnemyTemplate((31 * 29 - 12) * 100, (7 * 29 - 12) * 100, 7, 0);
         //
-        etX[etCounter] = 38 * 29 * 100 + 1500;
-        etY[etCounter] = (6 * 29 - 12) * 100 + 1500;
-        etType[etCounter] = 87;
-        etXType[etCounter] = 107;
-        etCounter += 1;
+        createEnemyTemplate(38 * 29 * 100 + 1500, (6 * 29 - 12) * 100 + 1500, 87, 107);
         //
-        etX[etCounter] = 38 * 29 * 100 + 1500;
-        etY[etCounter] = (6 * 29 - 12) * 100 + 1500;
-        etType[etCounter] = 88;
-        etXType[etCounter] = 107;
-        etCounter += 1;
+        createEnemyTemplate(38 * 29 * 100 + 1500, (6 * 29 - 12) * 100 + 1500, 88, 107);
         //
-        etX[etCounter] = 42 * 29 * 100 + 1500;
-        etY[etCounter] = (6 * 29 - 12) * 100 + 1500;
-        etType[etCounter] = 87;
-        etXType[etCounter] = 107;
-        etCounter += 1;
+        createEnemyTemplate(42 * 29 * 100 + 1500, (6 * 29 - 12) * 100 + 1500, 87, 107);
         //
-        etX[etCounter] = 42 * 29 * 100 + 1500;
-        etY[etCounter] = (6 * 29 - 12) * 100 + 1500;
-        etType[etCounter] = 88;
-        etXType[etCounter] = 107;
-        etCounter += 1;
+        createEnemyTemplate(42 * 29 * 100 + 1500, (6 * 29 - 12) * 100 + 1500, 88, 107);
         //
-        etX[etCounter] = 46 * 29 * 100 + 1500;
-        etY[etCounter] = (6 * 29 - 12) * 100 + 1500;
-        etType[etCounter] = 87;
-        etXType[etCounter] = 107;
-        etCounter += 1;
+        createEnemyTemplate(46 * 29 * 100 + 1500, (6 * 29 - 12) * 100 + 1500, 87, 107);
         //
-        etX[etCounter] = 46 * 29 * 100 + 1500;
-        etY[etCounter] = (6 * 29 - 12) * 100 + 1500;
-        etType[etCounter] = 88;
-        etXType[etCounter] = 107;
-        etCounter += 1;
+        createEnemyTemplate(46 * 29 * 100 + 1500, (6 * 29 - 12) * 100 + 1500, 88, 107);
         //
-        etX[etCounter] = 58 * 29 * 100;
-        etY[etCounter] = (7 * 29 - 12) * 100;
-        etType[etCounter] = 82;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        createEnemyTemplate(58 * 29 * 100, (7 * 29 - 12) * 100, 82, 1);
         //
-        etX[etCounter] = 66 * 29 * 100;
-        etY[etCounter] = (7 * 29 - 12) * 100;
-        etType[etCounter] = 82;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        createEnemyTemplate(66 * 29 * 100, (7 * 29 - 12) * 100, 82, 1);
         //
-        etX[etCounter] = 76 * 29 * 100 - 1400;
-        etY[etCounter] = (-2 * 29 - 12) * 100 + 500;
-        etType[etCounter] = 86;
-        etXType[etCounter] = 0;
-        etCounter += 1;
+        createEnemyTemplate(76 * 29 * 100 - 1400, (-2 * 29 - 12) * 100 + 500, 86, 0);
         //
         groundCounter = 0;
         groundX[groundCounter] = 2 * 29 * 100;
@@ -5858,78 +5661,30 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	};
         //
-        etCounter = 0;
-        etX[etCounter] = 9 * 29 * 100;
-        etY[etCounter] = (12 * 29 - 12) * 100;
-        etType[etCounter] = 82;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        ets.clear();
+        createEnemyTemplate(9 * 29 * 100, (12 * 29 - 12) * 100, 82, 1);
         //
-        etX[etCounter] = 10 * 29 * 100;
-        etY[etCounter] = (11 * 29 - 12) * 100;
-        etType[etCounter] = 82;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        createEnemyTemplate(10 * 29 * 100, (11 * 29 - 12) * 100, 82, 1);
         //
-        etX[etCounter] = 11 * 29 * 100;
-        etY[etCounter] = (10 * 29 - 12) * 100;
-        etType[etCounter] = 82;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        createEnemyTemplate(11 * 29 * 100, (10 * 29 - 12) * 100, 82, 1);
         //
-        etX[etCounter] = 12 * 29 * 100;
-        etY[etCounter] = (9 * 29 - 12) * 100;
-        etType[etCounter] = 82;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        createEnemyTemplate(12 * 29 * 100, (9 * 29 - 12) * 100, 82, 1);
         //
-        etX[etCounter] = 13 * 29 * 100;
-        etY[etCounter] = (8 * 29 - 12) * 100;
-        etType[etCounter] = 82;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        createEnemyTemplate(13 * 29 * 100, (8 * 29 - 12) * 100, 82, 1);
         //
-        etX[etCounter] = 14 * 29 * 100;
-        etY[etCounter] = (7 * 29 - 12) * 100;
-        etType[etCounter] = 82;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        createEnemyTemplate(14 * 29 * 100, (7 * 29 - 12) * 100, 82, 1);
         //
-        etX[etCounter] = 15 * 29 * 100;
-        etY[etCounter] = (6 * 29 - 12) * 100;
-        etType[etCounter] = 82;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        createEnemyTemplate(15 * 29 * 100, (6 * 29 - 12) * 100, 82, 1);
         //
-        etX[etCounter] = 16 * 29 * 100;
-        etY[etCounter] = (5 * 29 - 12) * 100;
-        etType[etCounter] = 82;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        createEnemyTemplate(16 * 29 * 100, (5 * 29 - 12) * 100, 82, 1);
         //
-        etX[etCounter] = 17 * 29 * 100;
-        etY[etCounter] = (5 * 29 - 12) * 100;
-        etType[etCounter] = 82;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        createEnemyTemplate(17 * 29 * 100, (5 * 29 - 12) * 100, 82, 1);
         //
-        etX[etCounter] = 18 * 29 * 100;
-        etY[etCounter] = (5 * 29 - 12) * 100;
-        etType[etCounter] = 82;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        createEnemyTemplate(18 * 29 * 100, (5 * 29 - 12) * 100, 82, 1);
         //
-        etX[etCounter] = 19 * 29 * 100;
-        etY[etCounter] = (5 * 29 - 12) * 100;
-        etType[etCounter] = 82;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        createEnemyTemplate(19 * 29 * 100, (5 * 29 - 12) * 100, 82, 1);
         //
-        etX[etCounter] = 20 * 29 * 100;
-        etY[etCounter] = (5 * 29 - 12) * 100;
-        etType[etCounter] = 82;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        createEnemyTemplate(20 * 29 * 100, (5 * 29 - 12) * 100, 82, 1);
         //
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -5982,18 +5737,14 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         createBlock(60 * 29, 6 * 29 - 12, 300, 8);
 	/*
 	   etCounter = 1;
-	   etX[etCounter]=(54*29-12)*100;
-	   etY[etCounter]=(1*29-12)*100;
-	   etType[etCounter]=80;
-	   etXType[etCounter]=0;
+	   ets[etCounter]->x=(54*29-12)*100;
+	   ets[etCounter]->y=(1*29-12)*100;
+	   ets[etCounter]->type=80;
+	   ets[etCounter]->xtype=0;
 	   etCounter += 1;
 	 */
         groundCounter = 0;
-        etX[groundCounter] = (102 * 29 - 12) * 100;
-        etY[groundCounter] = (10 * 29 - 12) * 100;
-        etType[groundCounter] = 50;
-        etXType[groundCounter] = 1;
-        groundCounter += 1;
+        createEnemyTemplate((102 * 29 - 12) * 100, (10 * 29 - 12) * 100, 50, 1);
         //
         liftCounter = 0;
         liftX[liftCounter] = 1 * 29 * 100;
@@ -6092,18 +5843,10 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         //
         createBlock(7 * 29, 14 * 29 - 12, 5, 0);
         //
-        etCounter = 0;
-        etX[etCounter] = 2 * 29 * 100 - 1400;
-        etY[etCounter] = (-2 * 29 - 12) * 100 + 500;
-        etType[etCounter] = 86;
-        etXType[etCounter] = 0;
-        etCounter += 1;
+        ets.clear();
+        createEnemyTemplate(2 * 29 * 100 - 1400, (-2 * 29 - 12) * 100 + 500, 86, 0);
         //
-        etX[etCounter] = 20 * 29 * 100 + 1500;
-        etY[etCounter] = (5 * 29 - 12) * 100 + 1500;
-        etType[etCounter] = 87;
-        etXType[etCounter] = 107;
-        etCounter += 1;
+        createEnemyTemplate(20 * 29 * 100 + 1500, (5 * 29 - 12) * 100 + 1500, 87, 107);
         //
         groundCounter = 0;
         groundX[groundCounter] = 17 * 29 * 100;
@@ -6255,108 +5998,40 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         //
         createBlock(121 * 29, 10 * 29 - 12, 142, 0);
         //
-        etCounter = 0;
-        etX[etCounter] = 0 * 29 * 100 + 1500;
-        etY[etCounter] = (8 * 29 - 12) * 100 + 1500;
-        etType[etCounter] = 88;
-        etXType[etCounter] = 105;
-        etCounter += 1;
+        ets.clear();
+        createEnemyTemplate(0 * 29 * 100 + 1500, (8 * 29 - 12) * 100 + 1500, 88, 105);
         //
-        etX[etCounter] = 2 * 29 * 100;
-        etY[etCounter] = (0 * 29 - 12) * 100;
-        etType[etCounter] = 80;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        createEnemyTemplate(2 * 29 * 100, (0 * 29 - 12) * 100, 80, 1);
         //
-        etX[etCounter] = 3 * 29 * 100 + 1500;
-        etY[etCounter] = (8 * 29 - 12) * 100 + 1500;
-        etType[etCounter] = 87;
-        etXType[etCounter] = 105;
-        etCounter += 1;
+        createEnemyTemplate(3 * 29 * 100 + 1500, (8 * 29 - 12) * 100 + 1500, 87, 105);
         //
-        etX[etCounter] = 6 * 29 * 100 + 1500;
-        etY[etCounter] = (8 * 29 - 12) * 100 + 1500;
-        etType[etCounter] = 88;
-        etXType[etCounter] = 107;
-        etCounter += 1;
+        createEnemyTemplate(6 * 29 * 100 + 1500, (8 * 29 - 12) * 100 + 1500, 88, 107);
         //
-        etX[etCounter] = 9 * 29 * 100 + 1500;
-        etY[etCounter] = (8 * 29 - 12) * 100 + 1500;
-        etType[etCounter] = 88;
-        etXType[etCounter] = 107;
-        etCounter += 1;
+        createEnemyTemplate(9 * 29 * 100 + 1500, (8 * 29 - 12) * 100 + 1500, 88, 107);
         //
-        etX[etCounter] = 25 * 29 * 100 - 1400;
-        etY[etCounter] = (2 * 29 - 12) * 100 - 400;
-        etType[etCounter] = 86;
-        etXType[etCounter] = 0;
-        etCounter += 1;
+        createEnemyTemplate(25 * 29 * 100 - 1400, (2 * 29 - 12) * 100 - 400, 86, 0);
         //
-        etX[etCounter] = 40 * 29 * 100;
-        etY[etCounter] = (8 * 29 - 12) * 100;
-        etType[etCounter] = 82;
-        etXType[etCounter] = 0;
-        etCounter += 1;
+        createEnemyTemplate(40 * 29 * 100, (8 * 29 - 12) * 100, 82, 0);
         //
-        etX[etCounter] = 42 * 29 * 100;
-        etY[etCounter] = (8 * 29 - 12) * 100;
-        etType[etCounter] = 82;
-        etXType[etCounter] = 0;
-        etCounter += 1;
+        createEnemyTemplate(42 * 29 * 100, (8 * 29 - 12) * 100, 82, 0);
         //
-        etX[etCounter] = 43 * 29 * 100 + 1500;
-        etY[etCounter] = (6 * 29 - 12) * 100 + 1500;
-        etType[etCounter] = 88;
-        etXType[etCounter] = 105;
-        etCounter += 1;
+        createEnemyTemplate(43 * 29 * 100 + 1500, (6 * 29 - 12) * 100 + 1500, 88, 105);
         //
-        etX[etCounter] = 47 * 29 * 100 + 1500;
-        etY[etCounter] = (6 * 29 - 12) * 100 + 1500;
-        etType[etCounter] = 87;
-        etXType[etCounter] = 105;
-        etCounter += 1;
+        createEnemyTemplate(47 * 29 * 100 + 1500, (6 * 29 - 12) * 100 + 1500, 87, 105);
         //
-        etX[etCounter] = 57 * 29 * 100;
-        etY[etCounter] = (7 * 29 - 12) * 100;
-        etType[etCounter] = 82;
-        etXType[etCounter] = 0;
-        etCounter += 1;
+        createEnemyTemplate(57 * 29 * 100, (7 * 29 - 12) * 100, 82, 0);
         //
-        etX[etCounter] = 77 * 29 * 100 - 1400;
-        etY[etCounter] = (2 * 29 - 12) * 100 - 400;
-        etType[etCounter] = 86;
-        etXType[etCounter] = 0;
-        etCounter += 1;
+        createEnemyTemplate(77 * 29 * 100 - 1400, (2 * 29 - 12) * 100 - 400, 86, 0);
         //
-        etX[etCounter] = 83 * 29 * 100 - 1400;
-        etY[etCounter] = (2 * 29 - 12) * 100 - 400;
-        etType[etCounter] = 86;
-        etXType[etCounter] = 0;
-        etCounter += 1;
+        createEnemyTemplate(83 * 29 * 100 - 1400, (2 * 29 - 12) * 100 - 400, 86, 0);
         //
-        etX[etCounter] = 88 * 29 * 100 + 1500;
-        etY[etCounter] = (9 * 29 - 12) * 100 + 1500;
-        etType[etCounter] = 87;
-        etXType[etCounter] = 105;
-        etCounter += 1;
+        createEnemyTemplate(88 * 29 * 100 + 1500, (9 * 29 - 12) * 100 + 1500, 87, 105);
         //
-        etX[etCounter] = 88 * 29 * 100 + 1500;
-        etY[etCounter] = (9 * 29 - 12) * 100 + 1500;
-        etType[etCounter] = 88;
-        etXType[etCounter] = 105;
-        etCounter += 1;
+        createEnemyTemplate(88 * 29 * 100 + 1500, (9 * 29 - 12) * 100 + 1500, 88, 105);
         //
-        etX[etCounter] = 90 * 29 * 100;
-        etY[etCounter] = (9 * 29 - 12) * 100;
-        etType[etCounter] = 82;
-        etXType[etCounter] = 0;
-        etCounter += 1;
+        createEnemyTemplate(90 * 29 * 100, (9 * 29 - 12) * 100, 82, 0);
         //
-        etX[etCounter] = 107 * 29 * 100;
-        etY[etCounter] = (10 * 29 - 12) * 100;
-        etType[etCounter] = 30;
-        etXType[etCounter] = 0;
-        etCounter += 1;
+        createEnemyTemplate(107 * 29 * 100, (10 * 29 - 12) * 100, 30, 0);
         //
         groundCounter = 0;
         groundX[groundCounter] = 13 * 29 * 100;
@@ -6492,42 +6167,18 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         groundXType[groundCounter] = 0;
         groundCounter += 1;
         //
-        etCounter = 0;
-        etX[etCounter] = 108 * 29 * 100;
-        etY[etCounter] = (6 * 29 - 12) * 100;
-        etType[etCounter] = 6;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        ets.clear();
+        createEnemyTemplate(108 * 29 * 100, (6 * 29 - 12) * 100, 6, 1);
         //
-        etX[etCounter] = 33 * 29 * 100;
-        etY[etCounter] = (10 * 29 - 12) * 100;
-        etType[etCounter] = 82;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        createEnemyTemplate(33 * 29 * 100, (10 * 29 - 12) * 100, 82, 1);
         //
-        etX[etCounter] = 36 * 29 * 100;
-        etY[etCounter] = (0 * 29 - 12) * 100;
-        etType[etCounter] = 80;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        createEnemyTemplate(36 * 29 * 100, (0 * 29 - 12) * 100, 80, 1);
         //
-        etX[etCounter] = 78 * 29 * 100 + 1500;
-        etY[etCounter] = (7 * 29 - 12) * 100 + 1500;
-        etType[etCounter] = 88;
-        etXType[etCounter] = 105;
-        etCounter += 1;
+        createEnemyTemplate(78 * 29 * 100 + 1500, (7 * 29 - 12) * 100 + 1500, 88, 105);
         //
-        etX[etCounter] = 80 * 29 * 100 + 1500;
-        etY[etCounter] = (7 * 29 - 12) * 100 + 1500;
-        etType[etCounter] = 87;
-        etXType[etCounter] = 105;
-        etCounter += 1;
+        createEnemyTemplate(80 * 29 * 100 + 1500, (7 * 29 - 12) * 100 + 1500, 87, 105);
         //
-        etX[etCounter] = 85 * 29 * 100;
-        etY[etCounter] = (11 * 29 - 12) * 100;
-        etType[etCounter] = 82;
-        etXType[etCounter] = 1;
-        etCounter += 1;
+        createEnemyTemplate(85 * 29 * 100, (11 * 29 - 12) * 100, 82, 1);
         //
         liftCounter = 0;
         liftX[liftCounter] = 41 * 29 * 100;
@@ -6636,7 +6287,7 @@ void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype) {
             t1 = 3;
 
             aa[aco] = x;
-            ab[aco] = y;    //ag[aco]=0;ah[aco]=0;ai[aco]=etY[t];//ad[t]=0;aeon[t]=1;
+            ab[aco] = y;    //ag[aco]=0;ah[aco]=0;ai[aco]=ets[t]->y;//ad[t]=0;aeon[t]=1;
             ac[aco] = c;
             ad[aco] = d;
             if (xtype > 100)
@@ -6644,7 +6295,7 @@ void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype) {
             //ae[aco]=0;af[aco]=0;
             atype[aco] = type;
             if (xtype >= 0 && xtype <= 99100)
-                axtype[aco] = xtype;    //ahp[aco]=iz[etXType[t]];aytm[aco]=0;
+                axtype[aco] = xtype;    //ahp[aco]=iz[ets[t]->xtype];aytm[aco]=0;
             //if (xtype==1)end();
             anotm[aco] = xnotm;
             if (aa[aco] - fx <= marioX + marioWidth / 2)
@@ -6708,7 +6359,7 @@ void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype) {
             }
         }            //t1
 
-        //if (bz[t]==1){bz[t]=0;}
+        //if (ets[t]->available==1){ets[t]->available=0;}
     }                //rz
 
 }                //ayobi

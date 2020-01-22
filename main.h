@@ -182,11 +182,7 @@ int atm[ENEMY_MAX], a2tm[ENEMY_MAX];
 int amsgtm[ENEMY_MAX], amsgtype[ENEMY_MAX];
 
 //敵出現  Enemy Templates
-#define ET_MAX 81
-int etCounter;
-int etX[ET_MAX], etY[ET_MAX], btm[ET_MAX];
-int etType[ET_MAX], etXType[ET_MAX], bz[ET_MAX];
-
+// moved to enemy_template.h
 
 //背景  Background Items
 #define BG_MAX 41

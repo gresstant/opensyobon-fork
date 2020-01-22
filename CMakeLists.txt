@@ -11,7 +11,7 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
 add_executable(OSAFork main.cpp loadg.cpp resource.cpp resource.h
                        utilities/DxLib.cpp utilities/draw.cpp utilities/draw.h utilities/color.cpp utilities/color.h utilities/colors.h
-                       entities/mario.cpp entities/mario.h entities/block.cpp entities/block.h)
+                       entities/mario.cpp entities/mario.h entities/block.cpp entities/block.h entities/enemy_template.cpp entities/enemy_template.h)
 
 # I'm listing versions that I uses to get it working.
 # But still you can try other versions that are different from mine.
