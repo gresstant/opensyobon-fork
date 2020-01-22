@@ -4,6 +4,7 @@
 #include "entities/block.h"
 #include "entities/enemy_template.h"
 #include "entities/background.h"
+#include "entities/ground.h"
 
 int main(int argc, char *argv[]) {
     parseArgs(argc, argv);
@@ -1962,8 +1963,7 @@ if (mtm==250)end();
                              || groundXType[t] == 4 && marioY >= 25000)
                             && groundGType[t] == 0
                             && marioHP >= 1
-                            && marioX + marioWidth >
-                               screenX + xx[0] + 3000 - 300
+                            && marioX + marioWidth > screenX + xx[0] + 3000 - 300
                             && marioX < screenX + groundWidth[t] - xx[0]) {
                         groundGType[t] = 1;
                         sr[t] = 0;
@@ -4136,50 +4136,15 @@ void stage() {
                 if (liftCounter >= LIFT_MAX)
                     liftCounter = 0;
             } else if (value == 30) {
-                groundX[groundCounter] = xx[21] * 100;
-                groundY[groundCounter] = xx[22] * 100;
-                groundWidth[groundCounter] = 3000;
-                groundHeight[groundCounter] = 6000;
-                groundType[groundCounter] = 500;
-                groundCounter++;
-                if (groundCounter >= GROUND_MAX)
-                    groundCounter = 0;
+                syobi(xx[21] * 100, xx[22] * 100, 3000, 6000, 500);
             } else if (value == 40) {
-                groundX[groundCounter] = xx[21] * 100;
-                groundY[groundCounter] = xx[22] * 100;
-                groundWidth[groundCounter] = 6000;
-                groundHeight[groundCounter] = 3000;
-                groundType[groundCounter] = 1;
-                groundCounter++;
-                if (groundCounter >= GROUND_MAX)
-                    groundCounter = 0;
+                syobi(xx[21] * 100, xx[22] * 100, 6000, 3000, 1);
             } else if (value == 41) {
-                groundX[groundCounter] = xx[21] * 100 + 500;
-                groundY[groundCounter] = xx[22] * 100;
-                groundWidth[groundCounter] = 5000;
-                groundHeight[groundCounter] = 3000;
-                groundType[groundCounter] = 2;
-                groundCounter++;
-                if (groundCounter >= GROUND_MAX)
-                    groundCounter = 0;
+                syobi(xx[21] * 100 + 500, xx[22] * 100, 5000, 3000, 2);
             } else if (value == 43) {
-                groundX[groundCounter] = xx[21] * 100;
-                groundY[groundCounter] = xx[22] * 100 + 500;
-                groundWidth[groundCounter] = 2900;
-                groundHeight[groundCounter] = 5300;
-                groundType[groundCounter] = 1;
-                groundCounter++;
-                if (groundCounter >= GROUND_MAX)
-                    groundCounter = 0;
+                syobi(xx[21] * 100, xx[22] * 100 + 500, 2900, 5300, 1);
             } else if (value == 44) {
-                groundX[groundCounter] = xx[21] * 100;
-                groundY[groundCounter] = xx[22] * 100 + 700;
-                groundWidth[groundCounter] = 3900;
-                groundHeight[groundCounter] = 5000;
-                groundType[groundCounter] = 5;
-                groundCounter++;
-                if (groundCounter >= GROUND_MAX)
-                    groundCounter = 0;
+                syobi(xx[21] * 100, xx[22] * 100 + 700, 3900, 5000, 5);
             } else if (value >= 50 && value <= 79) {  //これなぜかバグの原因ｗ
                 createEnemyTemplate(xx[21] * 100, xx[22] * 100, value - 50, 0);
             } else if (value >= 80 && value <= 89) {
@@ -4187,14 +4152,7 @@ void stage() {
             } else if (value == 9) {  // コイン Coin
                 createBlock(i * 29, j * 29 - 12, 800);
             } else if (value == 99) {
-                groundX[groundCounter] = xx[21] * 100;
-                groundY[groundCounter] = xx[22] * 100;
-                groundWidth[groundCounter] = 3000;
-                groundHeight[groundCounter] = (12 - j) * 3000;
-                groundType[groundCounter] = 300;
-                groundCounter++;
-                if (groundCounter >= GROUND_MAX)
-                    groundCounter = 0;
+                syobi(xx[21] * 100, xx[22] * 100, 3000, (12 - j) * 3000, 300);
             }
         }
     }
@@ -4266,41 +4224,11 @@ void stagep() {
         createBlock(67 * 29, 9 * 29 - 12, 104);
 
         groundCounter = 0;
-        t = groundCounter;
-        groundX[t] = 20 * 29 * 100 + 500;
-        groundY[t] = -6000;
-        groundWidth[t] = 5000;
-        groundHeight[t] = 70000;
-        groundType[t] = 100;
-        groundCounter++;
-        t = groundCounter;
-        groundX[t] = 54 * 29 * 100 - 500;
-        groundY[t] = -6000;
-        groundWidth[t] = 7000;
-        groundHeight[t] = 70000;
-        groundType[t] = 101;
-        groundCounter++;
-        t = groundCounter;
-        groundX[t] = 112 * 29 * 100 + 1000;
-        groundY[t] = -6000;
-        groundWidth[t] = 3000;
-        groundHeight[t] = 70000;
-        groundType[t] = 102;
-        groundCounter++;
-        t = groundCounter;
-        groundX[t] = 117 * 29 * 100;
-        groundY[t] = (2 * 29 - 12) * 100 - 1500;
-        groundWidth[t] = 15000;
-        groundHeight[t] = 3000;
-        groundType[t] = 103;
-        groundCounter++;
-        t = groundCounter;
-        groundX[t] = 125 * 29 * 100;
-        groundY[t] = -6000;
-        groundWidth[t] = 9000;
-        groundHeight[t] = 70000;
-        groundType[t] = 101;
-        groundCounter++;
+        syobi(20 * 29 * 100 + 500, -6000, 5000, 70000, 100);
+        syobi(54 * 29 * 100 - 500, -6000, 7000, 70000, 101);
+        syobi(112 * 29 * 100 + 1000, -6000, 3000, 70000, 102);
+        syobi(117 * 29 * 100, (2 * 29 - 12) * 100 - 1500, 15000, 3000, 103);
+        syobi(125 * 29 * 100, -6000, 9000, 70000, 101);
         //t=groundCounter;groundX[t]=77*29*100;groundY[t]=(6*29-12)*100-1500;groundWidth[t]=12000;groundHeight[t]=3000;groundType[t]=103;groundCounter++;
         t = 28;
         groundX[t] = 29 * 29 * 100 + 500;
@@ -4309,21 +4237,8 @@ void stagep() {
         groundHeight[t] = 12000 - 200;
         groundType[t] = 50;
         groundCounter++;
-        t = groundCounter;
-        groundX[t] = 49 * 29 * 100;
-        groundY[t] = (5 * 29 - 12) * 100;
-        groundWidth[t] = 9000 - 1;
-        groundHeight[t] = 3000;
-        groundType[t] = 51;
-        groundGType[t] = 0;
-        groundCounter++;
-        t = groundCounter;
-        groundX[t] = 72 * 29 * 100;
-        groundY[t] = (13 * 29 - 12) * 100;
-        groundWidth[t] = 3000 * 5 - 1;
-        groundHeight[t] = 3000;
-        groundType[t] = 52;
-        groundCounter++;
+        syobi(49 * 29 * 100, (5 * 29 - 12) * 100, 9000 - 1, 3000, 51, 0, 0);
+        syobi(72 * 29 * 100, (13 * 29 - 12) * 100, 3000 * 5 - 1, 3000, 52);
 
         ets.clear();
         createEnemyTemplate(27 * 29 * 100, (9 * 29 - 12) * 100, 0, 0);
@@ -4379,30 +4294,9 @@ void stagep() {
 
         //t=28;
         groundCounter = 0;
-        t = groundCounter;
-        groundX[t] = 14 * 29 * 100 + 500;
-        groundY[t] = (9 * 29 - 12) * 100;
-        groundWidth[t] = 6000;
-        groundHeight[t] = 12000 - 200;
-        groundType[t] = 50;
-        groundXType[t] = 1;
-        groundCounter++;
-        t = groundCounter;
-        groundX[t] = 12 * 29 * 100;
-        groundY[t] = (11 * 29 - 12) * 100;
-        groundWidth[t] = 3000;
-        groundHeight[t] = 6000 - 200;
-        groundType[t] = 40;
-        groundXType[t] = 0;
-        groundCounter++;
-        t = groundCounter;
-        groundX[t] = 14 * 29 * 100 + 1000;
-        groundY[t] = -6000;
-        groundWidth[t] = 5000;
-        groundHeight[t] = 70000;
-        groundType[t] = 100;
-        groundXType[t] = 1;
-        groundCounter++;
+        syobi(14 * 29 * 100 + 500, (9 * 29 - 12) * 100, 6000, 12000 - 200, 50, 1);
+        syobi(12 * 29 * 100, (11 * 29 - 12) * 100, 3000, 6000 - 200, 40, 0);
+        syobi(14 * 29 * 100 + 1000, -6000, 5000, 70000, 100, 1);
 
         //ブロックもどき
         //t=etCounter;ets[t]->x=7*29*100;ets[t]->y=(9*29-12)*100;ets[t]->type=82;ets[t]->xtype=0;etCounter++;
@@ -4462,53 +4356,13 @@ void stagep() {
 //blocks[blockCounter]->xtype=1;createBlock(11*29,9*29-12,114);//毒1
 
         groundCounter = 0;
-        t = groundCounter;
-        groundX[t] = 2 * 29 * 100;
-        groundY[t] = (13 * 29 - 12) * 100;
-        groundWidth[t] = 3000 * 1 - 1;
-        groundHeight[t] = 3000;
-        groundType[t] = 52;
-        groundCounter++;
+        syobi(2 * 29 * 100, (13 * 29 - 12) * 100, 3000 * 1 - 1, 3000, 52);
 //t=groundCounter;groundX[t]=19*29*100;groundY[t]=(13*29-12)*100;groundWidth[t]=3000*1-1;groundHeight[t]=3000;groundType[t]=52;groundCounter++;
-        t = groundCounter;
-        groundX[t] = 24 * 29 * 100;
-        groundY[t] = (13 * 29 - 12) * 100;
-        groundWidth[t] = 3000 * 1 - 1;
-        groundHeight[t] = 3000;
-        groundType[t] = 52;
-        groundCounter++;
-        t = groundCounter;
-        groundX[t] = 43 * 29 * 100 + 500;
-        groundY[t] = -6000;
-        groundWidth[t] = 3000;
-        groundHeight[t] = 70000;
-        groundType[t] = 102;
-        groundXType[t] = 1;
-        groundCounter++;
-        t = groundCounter;
-        groundX[t] = 53 * 29 * 100 + 500;
-        groundY[t] = -6000;
-        groundWidth[t] = 3000;
-        groundHeight[t] = 70000;
-        groundType[t] = 102;
-        groundXType[t] = 2;
-        groundCounter++;
-        t = groundCounter;
-        groundX[t] = 129 * 29 * 100;
-        groundY[t] = (7 * 29 - 12) * 100;
-        groundWidth[t] = 3000;
-        groundHeight[t] = 6000 - 200;
-        groundType[t] = 40;
-        groundXType[t] = 2;
-        groundCounter++;
-        t = groundCounter;
-        groundX[t] = 154 * 29 * 100;
-        groundY[t] = 3000;
-        groundWidth[t] = 9000;
-        groundHeight[t] = 3000;
-        groundType[t] = 102;
-        groundXType[t] = 7;
-        groundCounter++;
+        syobi(24 * 29 * 100, (13 * 29 - 12) * 100, 3000 * 1 - 1, 3000, 52);
+        syobi(43 * 29 * 100 + 500, -6000, 3000, 70000, 102, 1);
+        syobi(53 * 29 * 100 + 500, -6000, 3000, 70000, 102, 2);
+        syobi(129 * 29 * 100, (7 * 29 - 12) * 100, 3000, 6000 - 200, 40, 2);
+        syobi(154 * 29 * 100, 3000, 9000, 3000, 102, 7);
 
 //ブロックもどき
 
@@ -4551,59 +4405,17 @@ void stagep() {
         sr[t] = 0;
         groundGType[t] = 48;
         groundCounter++;
-        t = groundCounter;
-        groundX[t] = 102 * 29 * 100;
-        groundY[t] = (9 * 29 - 12) * 100;
-        groundWidth[t] = 6000;
-        groundHeight[t] = 12000 - 200;
-        groundType[t] = 50;
-        groundXType[t] = 2;
-        groundCounter++;
-        t = groundCounter;
-        groundX[t] = 123 * 29 * 100;
-        groundY[t] = (9 * 29 - 12) * 100;
-        groundWidth[t] = 3000 * 5 - 1;
-        groundHeight[t] = 3000 * 5;
-        groundType[t] = 52;
-        groundXType[t] = 1;
-        groundCounter++;
+        syobi(102 * 29 * 100, (9 * 29 - 12) * 100, 6000, 12000 - 200, 50, 2);
+        syobi(123 * 29 * 100, (9 * 29 - 12) * 100, 3000 * 5 - 1, 3000 * 5, 52, 1);
 
-        t = groundCounter;
-        groundX[t] = 131 * 29 * 100;
-        groundY[t] = (1 * 29 - 12) * 100;
-        groundWidth[t] = 4700;
-        groundHeight[t] = 3000 * 8 - 700;
-        groundType[t] = 1;
-        groundXType[t] = 0;
-        groundCounter++;
+        syobi(131 * 29 * 100, (1 * 29 - 12) * 100, 4700, 3000 * 8 - 700, 1, 0);
 
 //t=groundCounter;groundX[t]=44*29*100;groundY[t]=-6000;groundWidth[t]=9000;groundHeight[t]=70000;groundType[t]=102;groundCounter++;
 
 //オワタゾーン
-        t = groundCounter;
-        groundX[t] = 143 * 29 * 100;
-        groundY[t] = (9 * 29 - 12) * 100;
-        groundWidth[t] = 6000;
-        groundHeight[t] = 12000 - 200;
-        groundType[t] = 50;
-        groundXType[t] = 5;
-        groundCounter++;
-        t = groundCounter;
-        groundX[t] = 148 * 29 * 100;
-        groundY[t] = (9 * 29 - 12) * 100;
-        groundWidth[t] = 6000;
-        groundHeight[t] = 12000 - 200;
-        groundType[t] = 50;
-        groundXType[t] = 5;
-        groundCounter++;
-        t = groundCounter;
-        groundX[t] = 153 * 29 * 100;
-        groundY[t] = (9 * 29 - 12) * 100;
-        groundWidth[t] = 6000;
-        groundHeight[t] = 12000 - 200;
-        groundType[t] = 50;
-        groundXType[t] = 5;
-        groundCounter++;
+        syobi(143 * 29 * 100, (9 * 29 - 12) * 100, 6000, 12000 - 200, 50, 5);
+        syobi(148 * 29 * 100, (9 * 29 - 12) * 100, 6000, 12000 - 200, 50, 5);
+        syobi(153 * 29 * 100, (9 * 29 - 12) * 100, 6000, 12000 - 200, 50, 5);
 
         ets.clear();
         createEnemyTemplate(18 * 29 * 100, (10 * 29 - 12) * 100, 82, 1);
@@ -4712,14 +4524,7 @@ t=groundCounter;groundX[t]=12*29*100;groundY[t]=(11*29-12)*100;groundWidth[t]=30
 t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;groundHeight[t]=70000;groundType[t]=100;groundXType[t]=1;groundCounter++;
 */
 
-        t = groundCounter;
-        groundX[t] = 5 * 29 * 100 + 500;
-        groundY[t] = -6000;
-        groundWidth[t] = 3000;
-        groundHeight[t] = 70000;
-        groundType[t] = 102;
-        groundXType[t] = 8;
-        groundCounter++;
+        syobi(5 * 29 * 100 + 500, -6000, 3000, 70000, 102, 8);
 //空飛ぶ土管
         t = 28;
         groundX[t] = 44 * 29 * 100 + 500;
@@ -4811,51 +4616,18 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         createEnemyTemplate(101 * 29 * 100, (5 * 29 - 12) * 100, 4, 1);
         createEnemyTemplate(146 * 29 * 100, (10 * 29 - 12) * 100, 6, 1);
 
-        t = groundCounter;
-        groundX[t] = 9 * 29 * 100;
-        groundY[t] = (13 * 29 - 12) * 100;
-        groundWidth[t] = 9000 - 1;
-        groundHeight[t] = 3000;
-        groundType[t] = 52;
-        groundCounter++;
+        syobi(9 * 29 * 100, (13 * 29 - 12) * 100, 9000 - 1, 3000, 52);
 //t=groundCounter;groundX[t]=58*29*100;groundY[t]=(13*29-12)*100;groundWidth[t]=9000-1;groundHeight[t]=3000;groundType[t]=52;groundCounter++;
 
 //土管
-        t = groundCounter;
-        groundX[t] = 65 * 29 * 100 + 500;
-        groundY[t] = (10 * 29 - 12) * 100;
-        groundWidth[t] = 6000;
-        groundHeight[t] = 9000 - 200;
-        groundType[t] = 50;
-        groundXType[t] = 1;
-        groundCounter++;
+        syobi(65 * 29 * 100 + 500, (10 * 29 - 12) * 100, 6000, 9000 - 200, 50, 1);
 //t=28;groundX[t]=65*29*100;groundY[t]=(10*29-12)*100;groundWidth[t]=6000;groundHeight[t]=9000-200;groundType[t]=50;groundCounter++;
 
 //トラップ
-        t = groundCounter;
-        groundX[t] = 74 * 29 * 100;
-        groundY[t] = (8 * 29 - 12) * 100 - 1500;
-        groundWidth[t] = 6000;
-        groundHeight[t] = 3000;
-        groundType[t] = 103;
-        groundXType[t] = 1;
-        groundCounter++;
-        t = groundCounter;
-        groundX[t] = 96 * 29 * 100 - 3000;
-        groundY[t] = -6000;
-        groundWidth[t] = 9000;
-        groundHeight[t] = 70000;
-        groundType[t] = 102;
-        groundXType[t] = 10;
-        groundCounter++;
+        syobi(74 * 29 * 100, (8 * 29 - 12) * 100 - 1500, 6000, 3000, 103, 1);
+        syobi(96 * 29 * 100 - 3000, -6000, 9000, 70000, 102, 10);
 //ポール砲
-        t = groundCounter;
-        groundX[t] = 131 * 29 * 100 - 1500;
-        groundY[t] = (1 * 29 - 12) * 100 - 3000;
-        groundWidth[t] = 15000;
-        groundHeight[t] = 14000;
-        groundType[t] = 104;
-        groundCounter++;
+        syobi(131 * 29 * 100 - 1500, (1 * 29 - 12) * 100 - 3000, 15000, 14000, 104);
 
 //？ボール
         createEnemyTemplate(10 * 29 * 100 + 100, (11 * 29 - 12) * 100, 105, 1);
@@ -5025,14 +4797,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 	};
 
         groundCounter = 0;
-        t = groundCounter;
-        groundX[t] = 14 * 29 * 100 - 5;
-        groundY[t] = (11 * 29 - 12) * 100;
-        groundWidth[t] = 6000;
-        groundHeight[t] = 15000 - 200;
-        groundType[t] = 50;
-        groundXType[t] = 1;
-        groundCounter++;
+        syobi(14 * 29 * 100 - 5, (11 * 29 - 12) * 100, 6000, 15000 - 200, 50, 1);
 //t=groundCounter;groundX[t]=12*29*100;groundY[t]=(11*29-12)*100;groundWidth[t]=3000;groundHeight[t]=6000-200;groundType[t]=40;groundXType[t]=0;groundCounter++;
 //t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;groundHeight[t]=70000;groundType[t]=100;groundXType[t]=1;groundCounter++;
 
@@ -5085,84 +4850,22 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 	};
 
         groundCounter = 0;        //groundCounter=140;
-        t = groundCounter;
-        groundX[t] = 35 * 29 * 100 - 1500 + 750;
-        groundY[t] = (8 * 29 - 12) * 100 - 1500;
-        groundWidth[t] = 1500;
-        groundHeight[t] = 3000;
-        groundType[t] = 105;
-        groundCounter++;
-        t = groundCounter;
-        groundX[t] = 67 * 29 * 100;
-        groundY[t] = (4 * 29 - 12) * 100;
-        groundWidth[t] = 9000 - 1;
-        groundHeight[t] = 3000 * 1 - 1;
-        groundType[t] = 51;
-        groundXType[t] = 3;
-        groundGType[t] = 0;
-        groundCounter++;
-        t = groundCounter;
-        groundX[t] = 73 * 29 * 100;
-        groundY[t] = (13 * 29 - 12) * 100;
-        groundWidth[t] = 3000 * 1 - 1;
-        groundHeight[t] = 3000;
-        groundType[t] = 52;
-        groundCounter++;
+        syobi(35 * 29 * 100 - 1500 + 750, (8 * 29 - 12) * 100 - 1500, 1500, 3000, 105);
+        syobi(67 * 29 * 100, (4 * 29 - 12) * 100, 9000 - 1, 3000 * 1 - 1, 51, 3, 0);
+        syobi(73 * 29 * 100, (13 * 29 - 12) * 100, 3000 * 1 - 1, 3000, 52);
 //t=groundCounter;groundX[t]=79*29*100;groundY[t]=(13*29-12)*100;groundWidth[t]=30*3*100-1;groundHeight[t]=6000-200;groundType[t]=51;groundXType[t]=4;groundCounter++;
 //t=groundCounter;groundX[t]=83*29*100;groundY[t]=(-2*29-12)*100;groundWidth[t]=30*5*100-1;groundHeight[t]=3000-200;groundType[t]=51;groundXType[t]=4;groundCounter++;
-        t = groundCounter;
-        groundX[t] = 123 * 29 * 100;
-        groundY[t] = (1 * 29 - 12) * 100;
-        groundWidth[t] = 30 * 6 * 100 - 1 + 0;
-        groundHeight[t] = 3000 - 200;
-        groundType[t] = 51;
-        groundXType[t] = 10;
-        groundCounter++;
+        syobi(123 * 29 * 100, (1 * 29 - 12) * 100, 30 * 6 * 100 - 1 + 0, 3000 - 200, 51, 10);
 //スクロール消し
-        t = groundCounter;
-        groundX[t] = 124 * 29 * 100 + 3000;
-        groundY[t] = (2 * 29 - 12) * 100;
-        groundWidth[t] = 3000 * 1 - 1;
-        groundHeight[t] = 300000;
-        groundType[t] = 102;
-        groundXType[t] = 20;
-        groundCounter++;
-        t = groundCounter;
-        groundX[t] = 148 * 29 * 100 + 1000;
-        groundY[t] = (-12 * 29 - 12) * 100;
-        groundWidth[t] = 3000 * 1 - 1;
-        groundHeight[t] = 300000;
-        groundType[t] = 102;
-        groundXType[t] = 30;
-        groundCounter++;
+        syobi(124 * 29 * 100 + 3000, (2 * 29 - 12) * 100, 3000 * 1 - 1, 300000, 102, 20);
+        syobi(148 * 29 * 100 + 1000, (-12 * 29 - 12) * 100, 3000 * 1 - 1, 300000, 102, 30);
 
 //3連星
-        t = groundCounter;
-        groundX[t] = 100 * 29 * 100 + 1000;
-        groundY[t] = -6000;
-        groundWidth[t] = 3000;
-        groundHeight[t] = 70000;
-        groundType[t] = 102;
-        groundXType[t] = 12;
-        groundCounter++;
+        syobi(100 * 29 * 100 + 1000, -6000, 3000, 70000, 102, 12);
 
 //地面1
-        t = groundCounter;
-        groundX[t] = 0 * 29 * 100 - 0;
-        groundY[t] = 9 * 29 * 100 + 1700;
-        groundWidth[t] = 3000 * 7 - 1;
-        groundHeight[t] = 3000 * 5 - 1;
-        groundType[t] = 200;
-        groundXType[t] = 0;
-        groundCounter++;
-        t = groundCounter;
-        groundX[t] = 11 * 29 * 100;
-        groundY[t] = -1 * 29 * 100 + 1700;
-        groundWidth[t] = 3000 * 8 - 1;
-        groundHeight[t] = 3000 * 4 - 1;
-        groundType[t] = 200;
-        groundXType[t] = 0;
-        groundCounter++;
+        syobi(0 * 29 * 100 - 0, 9 * 29 * 100 + 1700, 3000 * 7 - 1, 3000 * 5 - 1, 200, 0);
+        syobi(11 * 29 * 100, -1 * 29 * 100 + 1700, 3000 * 8 - 1, 3000 * 4 - 1, 200, 0);
 
         ets.clear();
         createEnemyTemplate(8 * 29 * 100 - 1400, (2 * 29 - 12) * 100 + 500, 86, 0);
@@ -5301,37 +5004,13 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         }
         //
         groundCounter = 0;
-        groundX[groundCounter] = 30 * 29 * 100;
-        groundY[groundCounter] = (13 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 12000 - 1;
-        groundHeight[groundCounter] = 3000;
-        groundType[groundCounter] = 52;
-        groundXType[groundCounter] = 0;
-        groundCounter += 1;
+        syobi(30 * 29 * 100, (13 * 29 - 12) * 100, 12000 - 1, 3000, 52, 0);
         //
-        groundX[groundCounter] = 51 * 29 * 100;
-        groundY[groundCounter] = (4 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 9000 - 1;
-        groundHeight[groundCounter] = 3000;
-        groundType[groundCounter] = 51;
-        groundXType[groundCounter] = 0;
-        groundCounter += 1;
+        syobi(51 * 29 * 100, (4 * 29 - 12) * 100, 9000 - 1, 3000, 51, 0);
         //
-        groundX[groundCounter] = 84 * 29 * 100;
-        groundY[groundCounter] = (13 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 9000 - 1;
-        groundHeight[groundCounter] = 3000;
-        groundType[groundCounter] = 52;
-        groundXType[groundCounter] = 0;
-        groundCounter += 1;
+        syobi(84 * 29 * 100, (13 * 29 - 12) * 100, 9000 - 1, 3000, 52, 0);
         //
-        groundX[groundCounter] = 105 * 29 * 100;
-        groundY[groundCounter] = (13 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 15000 - 1;
-        groundHeight[groundCounter] = 3000;
-        groundType[groundCounter] = 52;
-        groundXType[groundCounter] = 0;
-        groundCounter += 1;
+        syobi(105 * 29 * 100, (13 * 29 - 12) * 100, 15000 - 1, 3000, 52, 0);
         //
         ets.clear();
         //
@@ -5379,35 +5058,13 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
         };
         //
-        groundX[groundCounter] = 14 * 29 * 100 + 200;
-        groundY[groundCounter] = -6000;
-        groundWidth[groundCounter] = 5000;
-        groundHeight[groundCounter] = 70000;
-        groundType[groundCounter] = 100;
-        groundCounter += 1;
+        syobi(14 * 29 * 100 + 200, -6000, 5000, 70000, 100);
         //
-        groundX[groundCounter] = 12 * 29 * 100 + 1200;
-        groundY[groundCounter] = -6000;
-        groundWidth[groundCounter] = 7000;
-        groundHeight[groundCounter] = 70000;
-        groundType[groundCounter] = 101;
-        groundCounter += 1;
+        syobi(12 * 29 * 100 + 1200, -6000, 7000, 70000, 101);
         //
-        groundX[groundCounter] = 12 * 29 * 100;
-        groundY[groundCounter] = (13 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 6000 - 1;
-        groundHeight[groundCounter] = 3000;
-        groundType[groundCounter] = 52;
-        groundGType[groundCounter] = 0;
-        groundCounter += 1;
+        syobi(12 * 29 * 100, (13 * 29 - 12) * 100, 6000 - 1, 3000, 52, 0, 0);
         //
-        groundX[groundCounter] = 14 * 29 * 100;
-        groundY[groundCounter] = (9 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 6000;
-        groundHeight[groundCounter] = 12000 - 200;
-        groundType[groundCounter] = 50;
-        groundXType[groundCounter] = 1;
-        groundCounter += 1;
+        syobi(14 * 29 * 100, (9 * 29 - 12) * 100, 6000, 12000 - 200, 50, 1);
         //
         createBlock(6 * 29, 9 * 29 - 12, 110);
         //
@@ -5469,69 +5126,21 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         createEnemyTemplate(76 * 29 * 100 - 1400, (-2 * 29 - 12) * 100 + 500, 86, 0);
         //
         groundCounter = 0;
-        groundX[groundCounter] = 2 * 29 * 100;
-        groundY[groundCounter] = (13 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 300000 - 6001;
-        groundHeight[groundCounter] = 3000;
-        groundType[groundCounter] = 52;
-        groundXType[groundCounter] = 0;
-        groundCounter += 1;
+        syobi(2 * 29 * 100, (13 * 29 - 12) * 100, 300000 - 6001, 3000, 52, 0);
         //
-        groundX[groundCounter] = 3 * 29 * 100;
-        groundY[groundCounter] = (7 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 3000;
-        groundHeight[groundCounter] = 3000;
-        groundType[groundCounter] = 105;
-        groundXType[groundCounter] = 0;
-        groundCounter += 1;
+        syobi(3 * 29 * 100, (7 * 29 - 12) * 100, 3000, 3000, 105, 0);
         //
-        groundX[groundCounter] = 107 * 29 * 100;
-        groundY[groundCounter] = (9 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 9000 - 1;
-        groundHeight[groundCounter] = 24000;
-        groundType[groundCounter] = 52;
-        groundXType[groundCounter] = 1;
-        groundCounter += 1;
+        syobi(107 * 29 * 100, (9 * 29 - 12) * 100, 9000 - 1, 24000, 52, 1);
         //
-        groundX[groundCounter] = 111 * 29 * 100;
-        groundY[groundCounter] = (7 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 3000;
-        groundHeight[groundCounter] = 6000 - 200;
-        groundType[groundCounter] = 40;
-        groundXType[groundCounter] = 0;
-        groundCounter += 1;
+        syobi(111 * 29 * 100, (7 * 29 - 12) * 100, 3000, 6000 - 200, 40, 0);
         //
-        groundX[groundCounter] = 113 * 29 * 100 + 1100;
-        groundY[groundCounter] = (0 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 4700;
-        groundHeight[groundCounter] = 27000 - 1000;
-        groundType[groundCounter] = 0;
-        groundXType[groundCounter] = 0;
-        groundCounter += 1;
+        syobi(113 * 29 * 100 + 1100, (0 * 29 - 12) * 100, 4700, 27000 - 1000, 0, 0);
         //
-        groundX[groundCounter] = 128 * 29 * 100;
-        groundY[groundCounter] = (9 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 9000 - 1;
-        groundHeight[groundCounter] = 24000;
-        groundType[groundCounter] = 52;
-        groundXType[groundCounter] = 1;
-        groundCounter += 1;
+        syobi(128 * 29 * 100, (9 * 29 - 12) * 100, 9000 - 1, 24000, 52, 1);
         //
-        groundX[groundCounter] = 131 * 29 * 100;
-        groundY[groundCounter] = (9 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 3000;
-        groundHeight[groundCounter] = 6000 - 200;
-        groundType[groundCounter] = 40;
-        groundXType[groundCounter] = 2;
-        groundCounter += 1;
+        syobi(131 * 29 * 100, (9 * 29 - 12) * 100, 3000, 6000 - 200, 40, 2);
         //
-        groundX[groundCounter] = 133 * 29 * 100 + 1100;
-        groundY[groundCounter] = (0 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 4700;
-        groundHeight[groundCounter] = 32000;
-        groundType[groundCounter] = 0;
-        groundXType[groundCounter] = 0;
-        groundCounter += 1;
+        syobi(133 * 29 * 100 + 1100, (0 * 29 - 12) * 100, 4700, 32000, 0, 0);
         //
         blocks.clear();
         createBlock(0 * 29, 0 * 29 - 12, 4, 0);
@@ -5776,29 +5385,11 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         createEnemyTemplate(20 * 29 * 100 + 1500, (5 * 29 - 12) * 100 + 1500, 87, 107);
         //
         groundCounter = 0;
-        groundX[groundCounter] = 17 * 29 * 100;
-        groundY[groundCounter] = (9 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 21000 - 1;
-        groundHeight[groundCounter] = 3000 - 1;
-        groundType[groundCounter] = 52;
-        groundXType[groundCounter] = 2;
-        groundCounter += 1;
+        syobi(17 * 29 * 100, (9 * 29 - 12) * 100, 21000 - 1, 3000 - 1, 52, 2);
         //
-        groundX[groundCounter] = 27 * 29 * 100;
-        groundY[groundCounter] = (13 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 6000;
-        groundHeight[groundCounter] = 6000;
-        groundType[groundCounter] = 50;
-        groundXType[groundCounter] = 6;
-        groundCounter += 1;
+        syobi(27 * 29 * 100, (13 * 29 - 12) * 100, 6000, 6000, 50, 6);
         //
-        groundX[groundCounter] = 34 * 29 * 100;
-        groundY[groundCounter] = (5 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 6000;
-        groundHeight[groundCounter] = 30000;
-        groundType[groundCounter] = 50;
-        groundXType[groundCounter] = 1;
-        groundCounter += 1;
+        syobi(34 * 29 * 100, (5 * 29 - 12) * 100, 6000, 30000, 50, 1);
         //
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -5842,37 +5433,13 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         createBlock(14 * 29, 13 * 29 - 12, 115, 1);
         //
         groundCounter = 0;
-        groundX[groundCounter] = 6 * 29 * 100;
-        groundY[groundCounter] = (6 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 18000 - 1;
-        groundHeight[groundCounter] = 6000 - 1;
-        groundType[groundCounter] = 52;
-        groundXType[groundCounter] = 0;
-        groundCounter += 1;
+        syobi(6 * 29 * 100, (6 * 29 - 12) * 100, 18000 - 1, 6000 - 1, 52, 0);
         //
-        groundX[groundCounter] = 12 * 29 * 100;
-        groundY[groundCounter] = (8 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 9000 - 1;
-        groundHeight[groundCounter] = 3000 - 1;
-        groundType[groundCounter] = 52;
-        groundXType[groundCounter] = 2;
-        groundCounter += 1;
+        syobi(12 * 29 * 100, (8 * 29 - 12) * 100, 9000 - 1, 3000 - 1, 52, 2);
         //
-        groundX[groundCounter] = 15 * 29 * 100;
-        groundY[groundCounter] = (11 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 3000;
-        groundHeight[groundCounter] = 6000;
-        groundType[groundCounter] = 40;
-        groundXType[groundCounter] = 2;
-        groundCounter += 1;
+        syobi(15 * 29 * 100, (11 * 29 - 12) * 100, 3000, 6000, 40, 2);
         //
-        groundX[groundCounter] = 17 * 29 * 100 + 1100;
-        groundY[groundCounter] = (0 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 4700;
-        groundHeight[groundCounter] = 38000;
-        groundType[groundCounter] = 0;
-        groundXType[groundCounter] = 0;
-        groundCounter += 1;
+        syobi(17 * 29 * 100 + 1100, (0 * 29 - 12) * 100, 4700, 38000, 0, 0);
         //
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -5961,61 +5528,19 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         createEnemyTemplate(107 * 29 * 100, (10 * 29 - 12) * 100, 30, 0);
         //
         groundCounter = 0;
-        groundX[groundCounter] = 13 * 29 * 100;
-        groundY[groundCounter] = (8 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 33000 - 1;
-        groundHeight[groundCounter] = 3000 - 1;
-        groundType[groundCounter] = 52;
-        groundXType[groundCounter] = 2;
-        groundCounter += 1;
+        syobi(13 * 29 * 100, (8 * 29 - 12) * 100, 33000 - 1, 3000 - 1, 52, 2);
         //
-        groundX[groundCounter] = 13 * 29 * 100;
-        groundY[groundCounter] = (0 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 33000 - 1;
-        groundHeight[groundCounter] = 3000 - 1;
-        groundType[groundCounter] = 51;
-        groundXType[groundCounter] = 3;
-        groundCounter += 1;
+        syobi(13 * 29 * 100, (0 * 29 - 12) * 100, 33000 - 1, 3000 - 1, 51, 3);
         //
-        groundX[groundCounter] = 10 * 29 * 100;
-        groundY[groundCounter] = (13 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 6000;
-        groundHeight[groundCounter] = 6000;
-        groundType[groundCounter] = 50;
-        groundXType[groundCounter] = 6;
-        groundCounter += 1;
+        syobi(10 * 29 * 100, (13 * 29 - 12) * 100, 6000, 6000, 50, 6);
         //
-        groundX[groundCounter] = 46 * 29 * 100;
-        groundY[groundCounter] = (12 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 9000 - 1;
-        groundHeight[groundCounter] = 3000 - 1;
-        groundType[groundCounter] = 52;
-        groundXType[groundCounter] = 2;
-        groundCounter += 1;
+        syobi(46 * 29 * 100, (12 * 29 - 12) * 100, 9000 - 1, 3000 - 1, 52, 2);
         //
-        groundX[groundCounter] = 58 * 29 * 100;
-        groundY[groundCounter] = (13 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 6000;
-        groundHeight[groundCounter] = 6000;
-        groundType[groundCounter] = 50;
-        groundXType[groundCounter] = 6;
-        groundCounter += 1;
+        syobi(58 * 29 * 100, (13 * 29 - 12) * 100, 6000, 6000, 50, 6);
         //
-        groundX[groundCounter] = 101 * 29 * 100 - 1500;
-        groundY[groundCounter] = (10 * 29 - 12) * 100 - 3000;
-        groundWidth[groundCounter] = 12000;
-        groundHeight[groundCounter] = 12000;
-        groundType[groundCounter] = 104;
-        groundXType[groundCounter] = 0;
-        groundCounter += 1;
+        syobi(101 * 29 * 100 - 1500, (10 * 29 - 12) * 100 - 3000, 12000, 12000, 104, 0);
         //
-        groundX[groundCounter] = 102 * 29 * 100 + 3000;
-        groundY[groundCounter] = (2 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 3000 - 1;
-        groundHeight[groundCounter] = 300000;
-        groundType[groundCounter] = 102;
-        groundXType[groundCounter] = 20;
-        groundCounter += 1;
+        syobi(102 * 29 * 100 + 3000, (2 * 29 - 12) * 100, 3000 - 1, 300000, 102, 20);
         //
         liftCounter = 0;
         liftX[liftCounter] = 74 * 29 * 100 - 1500;
@@ -6078,21 +5603,9 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         createBlock(64 * 29, 13 * 29 - 12, 115, 1);
         //
         groundCounter = 0;
-        groundX[groundCounter] = 13 * 29 * 100;
-        groundY[groundCounter] = (13 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 9000 - 1;
-        groundHeight[groundCounter] = 3000;
-        groundType[groundCounter] = 52;
-        groundXType[groundCounter] = 0;
-        groundCounter += 1;
+        syobi(13 * 29 * 100, (13 * 29 - 12) * 100, 9000 - 1, 3000, 52, 0);
         //
-        groundX[groundCounter] = 84 * 29 * 100;
-        groundY[groundCounter] = (13 * 29 - 12) * 100;
-        groundWidth[groundCounter] = 9000 - 1;
-        groundHeight[groundCounter] = 3000;
-        groundType[groundCounter] = 52;
-        groundXType[groundCounter] = 0;
-        groundCounter += 1;
+        syobi(84 * 29 * 100, (13 * 29 - 12) * 100, 9000 - 1, 3000, 52, 0);
         //
         ets.clear();
         createEnemyTemplate(108 * 29 * 100, (6 * 29 - 12) * 100, 6, 1);

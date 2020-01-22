@@ -121,14 +121,8 @@ int key, keytm;
 //三角関数
 double pai = 3.1415926535;
 
-
 //地面  Ground (including tubes ...)
-#define GROUND_MAX 31
-int groundCounter;
-int groundX[GROUND_MAX], groundY[GROUND_MAX], groundWidth[GROUND_MAX], groundHeight[GROUND_MAX];
-int groundType[GROUND_MAX], groundXType[GROUND_MAX], sr[GROUND_MAX], groundGType[GROUND_MAX];
-
-
+// moved to ground.h
 
 // region プレイヤー Player
 
