@@ -3,6 +3,7 @@
 #include "entities/mario.h"
 #include "entities/block.h"
 #include "entities/enemy_template.h"
+#include "entities/background.h"
 
 int main(int argc, char *argv[]) {
     parseArgs(argc, argv);
@@ -59,8 +60,8 @@ void paint() {
 }                //paint()
 
 void paintSceneInGame() {
-    for (int i = 0; i < BG_MAX; i++) {
-        paintSceneInGameBgItem(i);
+    for (const auto& bgItem : bgItems) {
+        paintSceneInGameBgItem(*bgItem);
     }
 
     for (int i = 0; i < EFFECT_MAX; i++) {
@@ -483,35 +484,6 @@ void paintSceneInGame() {
     }            //blacktm
 }
 
-// 背景
-void paintSceneInGameBgItem(int index) {
-    int screenX = bgX[index] - fx;
-    int screenY = bgY[index] - fy;
-    int width = 16000;
-    int height = 16000;
-
-    if (screenX + width >= -10 && screenX <= fxmax && screenY + height >= -10 && height <= fymax) {
-        if (bgType[index] != 3) {
-            if ((bgType[index] == 1 || bgType[index] == 2) && stagecolor == 5) {
-                drawImage(grap[bgType[index] + 30][4], screenX / 100, screenY / 100);
-            } else {
-                drawImage(grap[bgType[index]][4], screenX / 100, screenY / 100);
-            }
-        } else if (bgType[index] == 3) {
-            drawImage(grap[bgType[index]][4], screenX / 100 - 5, screenY / 100);
-        } else if (bgType[index] == 100) {  // 51
-            DrawFormatString(screenX / 100 + fmaZ, screenY / 100 + fmb,
-                             GetColor(255, 255, 255), "51");
-        } else if (bgType[index] == 101) {
-            DrawFormatString(screenX / 100 + fmaZ, screenY / 100 + fmb,
-                             GetColor(255, 255, 255), "ゲームクリアー");
-        } else if (bgType[index] == 102) {
-            DrawFormatString(screenX / 100 + fmaZ, screenY / 100 + fmb,
-                             GetColor(255, 255, 255), "プレイしてくれてありがとー");
-        }
-    }
-}
-
 // グラ
 void paintSceneInGameEffectItem(int index) {
     int screenX = ea[index] - fx;
@@ -871,12 +843,12 @@ void processSceneInGame() {
                     block->xtype = rand(4);
                 }
             }
-            for (int i = 0; i < ets.size(); i++) {
+            for (const auto& et : ets) {
                 if (rand(2) <= 1) {
-                    ets[i]->x = (rand(500) - 1) * 29 * 100;
-                    ets[i]->y = rand(15) * 100 * 29 - 1200 - 3000;
+                    et->x = (rand(500) - 1) * 29 * 100;
+                    et->y = rand(15) * 100 * 29 - 1200 - 3000;
                     if (rand(6) == 0) {
-                        ets[i]->type = rand(9);
+                        et->type = rand(9);
                     }
                 }
             }
@@ -1307,31 +1279,11 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
             if (mtm == 200) {
                 ot(oto[17]);
                 if (marioType == MarioType::WIN_SWORD) {
-                    bgX[bgCounter] = 117 * 29 * 100 - 1100;
-                    bgY[bgCounter] = 4 * 29 * 100;
-                    bgType[bgCounter] = 101;
-                    bgCounter++;
-                    if (bgCounter >= BG_MAX)
-                        bgCounter = 0;
-                    bgX[bgCounter] = 115 * 29 * 100 - 1100;
-                    bgY[bgCounter] = 6 * 29 * 100;
-                    bgType[bgCounter] = 102;
-                    bgCounter++;
-                    if (bgCounter >= BG_MAX)
-                        bgCounter = 0;
+                    nyobi(117 * 29 * 100 - 1100, 4 * 29 * 100, 101);
+                    nyobi(115 * 29 * 100 - 1100, 6 * 29 * 100, 102);
                 } else {
-                    bgX[bgCounter] = 157 * 29 * 100 - 1100;
-                    bgY[bgCounter] = 4 * 29 * 100;
-                    bgType[bgCounter] = 101;
-                    bgCounter++;
-                    if (bgCounter >= BG_MAX)
-                        bgCounter = 0;
-                    bgX[bgCounter] = 155 * 29 * 100 - 1100;
-                    bgY[bgCounter] = 6 * 29 * 100;
-                    bgType[bgCounter] = 102;
-                    bgCounter++;
-                    if (bgCounter >= BG_MAX)
-                        bgCounter = 0;
+                    nyobi(157 * 29 * 100 - 1100, 4 * 29 * 100, 101);
+                    nyobi(155 * 29 * 100 - 1100, 6 * 29 * 100, 102);
                 }
             }
 //スタッフロールへ
@@ -2596,51 +2548,51 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
     }            //EFFECT_MAX
 
 //敵キャラの配置
-    for (int i = 0; i < ets.size(); i++) {
-        if (ets[i]->x >= -80000) {
+    for (const auto& et : ets) {
+        if (et->x >= -80000) {
 
-            if (ets[i]->btm >= 0) {
-                ets[i]->btm--;
+            if (et->btm >= 0) {
+                et->btm--;
             }
 
-            for (int j = 0; j <= 1; j++) {
-                int screenX = ets[i]->x - fx;
-                int screenY = ets[i]->y - fy;
+            for (int i = 0; i <= 1; i++) {
+                int screenX = et->x - fx;
+                int screenY = et->y - fy;
 
                 xx[0] = 0;
                 xx[1] = 0;
                 
-                if (!ets[i]->available && ets[i]->btm < 0
+                if (!et->available && et->btm < 0
                     && screenX >= fxmax + 2000
-                    && screenX < fxmax + 2000 + marioSpeedX && j == 0) {
+                    && screenX < fxmax + 2000 + marioSpeedX && i == 0) {
                     xx[0] = 1;
                     amuki[aco] = 0;
                 }        // && mmuki==1
-                if (!ets[i]->available && ets[i]->btm < 0
-                    && screenX >= -400 - anx[ets[i]->type] + marioSpeedX
-                    && screenX < -400 - anx[ets[i]->type] && j == 1) {
+                if (!et->available && et->btm < 0
+                    && screenX >= -400 - anx[et->type] + marioSpeedX
+                    && screenX < -400 - anx[et->type] && i == 1) {
                     xx[0] = 1;
                     xx[1] = 1;
                     amuki[aco] = 1;
                 }        // && mmuki==0
-                if (ets[i]->available && screenX >= 0 - anx[ets[i]->type]
+                if (et->available && screenX >= 0 - anx[et->type]
                     && screenX <= fxmax + 4000
                     && screenY >= -9000
-                    && screenY <= fymax + 4000 && ets[i]->btm < 0) {
+                    && screenY <= fymax + 4000 && et->btm < 0) {
                     xx[0] = 1;
-                    ets[i]->available = false;
+                    et->available = false;
                 }        // && xza<=5000// && checkpoint!=1
-//if (ets[i]->available==2){xx[0]=0;xx[1]=0;}
-//if (ets[i]->type>=100){ets[i]->available=2;}
+//if (et->available==2){xx[0]=0;xx[1]=0;}
+//if (et->type>=100){et->available=2;}
 
                 if (xx[0] == 1) {    //400
-                    ets[i]->btm = 401;
-                    xx[0] = 0;    //if (ets[i]->type>=20 && ets[i]->type<=23){ets[i]->btm=90000;}
-                    if (ets[i]->type >= 10) {
-                        ets[i]->btm = 9999999;
+                    et->btm = 401;
+                    xx[0] = 0;    //if (et->type>=20 && et->type<=23){et->btm=90000;}
+                    if (et->type >= 10) {
+                        et->btm = 9999999;
                     }
 //10
-                    ayobi(ets[i]->x, ets[i]->y, 0, 0, 0, ets[i]->type, ets[i]->xtype);
+                    ayobi(et->x, et->y, 0, 0, 0, et->type, et->xtype);
                 }
 
             }        //tt
@@ -4134,11 +4086,6 @@ void stagecls() {
         ed[t] = 1;
         egtype[t] = 0;
     }
-    for (t = 0; t < BG_MAX; t++) {
-        bgX[t] = -9000000;
-        bgY[t] = 1;
-        bgType[t] = 0;
-    }
     //for (t=0;t<cmax;t++){ca[t]=-9000000;cb[t]=1;contm[t]=0;ctype[t]=0;ce[t]=0;cf[t]=0;}
     //for (t=0;t<vmax;t++){va[t]=-9000000;vtype[t]=0;vb[t]=0;vc[t]=1;vd[t]=1;}
     //for (t=0;t<gmax;t++){ga[t]=-9000000;gx[t]=0;gstring[t]="";}
@@ -4148,7 +4095,7 @@ void stagecls() {
     aco = 0;
     ets.clear();
     eco = 0;
-    bgCounter = 0;
+    bgItems.clear();
     //haikeitouroku();
 }                //stagecls()
 
@@ -4236,12 +4183,7 @@ void stage() {
             } else if (value >= 50 && value <= 79) {  //これなぜかバグの原因ｗ
                 createEnemyTemplate(xx[21] * 100, xx[22] * 100, value - 50, 0);
             } else if (value >= 80 && value <= 89) {
-                bgX[bgCounter] = xx[21] * 100;
-                bgY[bgCounter] = xx[22] * 100;
-                bgType[bgCounter] = value - 80;
-                bgCounter++;
-                if (bgCounter >= BG_MAX)
-                    bgCounter = 0;
+                nyobi(xx[21] * 100, xx[22] * 100, value - 80);
             } else if (value == 9) {  // コイン Coin
                 createBlock(i * 29, j * 29 - 12, 800);
             } else if (value == 99) {
@@ -5241,25 +5183,10 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         createEnemyTemplate(142 * 29 * 100, (10 * 29 - 12) * 100, 31, 0);
 
 //マグマ
-        bgCounter = 0;
-        bgX[bgCounter] = 7 * 29 * 100 - 300;
-        bgY[bgCounter] = 14 * 29 * 100 - 1200;
-        bgType[bgCounter] = 6;
-        bgCounter++;
-        if (bgCounter >= BG_MAX)
-            bgCounter = 0;
-        bgX[bgCounter] = 41 * 29 * 100 - 300;
-        bgY[bgCounter] = 14 * 29 * 100 - 1200;
-        bgType[bgCounter] = 6;
-        bgCounter++;
-        if (bgCounter >= BG_MAX)
-            bgCounter = 0;
-        bgX[bgCounter] = 149 * 29 * 100 - 1100;
-        bgY[bgCounter] = 10 * 29 * 100 - 600;
-        bgType[bgCounter] = 100;
-        bgCounter++;
-        if (bgCounter >= BG_MAX)
-            bgCounter = 0;
+        bgItems.clear();
+        nyobi(7 * 29 * 100 - 300, 14 * 29 * 100 - 1200, 6);
+        nyobi(41 * 29 * 100 - 300, 14 * 29 * 100 - 1200, 6);
+        nyobi(149 * 29 * 100 - 1100, 10 * 29 * 100 - 600, 100);
 
         blocks.clear();
 //ON-OFFブロック

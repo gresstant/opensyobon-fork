@@ -139,3 +139,7 @@ void drawString(const std::string& str, int x, int y) {
 void drawString(const char* str, int x, int y) {
     DrawString(x, y, str, stateColor.getSDLColor(screen->format));
 }
+
+void drawString(const Color& color, const char* str, int x, int y) {
+    DrawString(x, y, str, color.getSDLColor(screen->format));
+}

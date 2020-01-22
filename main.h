@@ -67,7 +67,6 @@ void processSceneTitle();
 
 void paint();
 void paintSceneInGame();
-void paintSceneInGameBgItem(int index);
 void paintSceneInGameEffectItem(int index);
 void paintSceneInGameLift(int index);
 void paintSceneInGameEnemy(int index);
@@ -185,10 +184,7 @@ int amsgtm[ENEMY_MAX], amsgtype[ENEMY_MAX];
 // moved to enemy_template.h
 
 //背景  Background Items
-#define BG_MAX 41
-int bgCounter;
-int bgX[BG_MAX], bgY[BG_MAX], bgType[BG_MAX];
-
+// moved to background.h
 
 //リフト  Lift (Elevator)
 #define LIFT_MAX 21
