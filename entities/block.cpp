@@ -11,18 +11,10 @@ std::vector<std::unique_ptr<LegacyBlock>> blocks;
 
 //ブロック出現
 
-void createBlock(int x, int y, int type) {
-    auto blockPtr = std::make_unique<LegacyBlock>();
-    blockPtr->x = x * 100;
-    blockPtr->y = y * 100;
-    blockPtr->type = type;
-    blocks.push_back(std::move(blockPtr));
-}
-
 void createBlock(int x, int y, int type, int xtype) {
     auto blockPtr = std::make_unique<LegacyBlock>();
-    blockPtr->x = x * 100;
-    blockPtr->y = y * 100;
+    blockPtr->x = x;
+    blockPtr->y = y;
     blockPtr->type = type;
     blockPtr->xtype = xtype;
     blocks.push_back(std::move(blockPtr));

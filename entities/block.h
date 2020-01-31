@@ -14,8 +14,7 @@ public:
     int item;
 };
 
-void createBlock(int x, int y, int type);
-void createBlock(int x, int y, int type, int xtype);
+void createBlock(int x, int y, int type, int xtype = 0);
 void blockBreak(LegacyBlock& block);
 void blockBreak(int index);
 void paintSceneInGameBlock(const LegacyBlock& block);

@@ -1127,6 +1127,7 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
                 marioSpeedX = 0;
                 marioSpeedY = 0;
                 t = 28;
+                printf("mtm = %d\n", mtm);
                 if (mtm <= 16) {
                     marioY += 240;
                     mzz = 100;
@@ -1189,6 +1190,7 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
                 }
 
             } else {
+                printf("mtm = %d, marioXType = %d\n", mtm, marioXType);
                 marioSpeedX = 0;
                 marioSpeedY = 0;
                 if (mtm <= 16 && marioXType != 3) {
@@ -1218,7 +1220,7 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
                         stc++;
                     }
                     marioY = -80000000;
-                    marioXType = 0;
+                    marioXType = 0;  // seems no effect ...
                     blackx = 1;
                     blacktm = 20;
                     stagerr = 0;
@@ -1437,7 +1439,8 @@ if (mtm==250)end();
         int xx3 = xx[3] = 3000;    //xx[2]=1000
         int screenX = block->x - fx;
         int screenY = block->y - fy;    //xx[15]=0;
-        if (block->x - fx + xx1 >= -10 - xx3 && block->x - fx <= fxmax + 12000 + xx3) {
+
+        if (screenX + xx1 >= -10 - xx3 && screenX <= fxmax + 12000 + xx3) {  // is block on screen
             if (marioType != MarioType::DYING && marioType != MarioType::HUGE && marioType != MarioType::AFTER_ORANGE_NOTE) {
                 if (block->type < 1000 && block->type != 800 && block->type != 140 && block->type != 141) {    // && block->type!=5){
                     //if (!(mztm>=1 && mztype==1 && actaon[3]==1)){
@@ -1587,26 +1590,20 @@ if (mtm==250)end();
 
                 if (block->type == 800) {
 //if (xx0+xx2>=-xx[14] && xx0<=fxmax+xx[14] && xx1+xx3>=-10-9000 && xx1<=fymax+10000){
-                    if (marioY >
-                        screenY - xx0 * 2 - 2000
-                        && marioY <
-                           screenY + xx1 - xx0 * 2 +
-                           2000
-                        && marioX + marioWidth > screenX - 400
-                        && marioX < screenX + xx1) {
+                    if (marioY > screenY - xx0 * 2 - 2000
+                            && marioY < screenY + xx1 - xx0 * 2 + 2000
+                            && marioX + marioWidth > screenX - 400
+                            && marioX < screenX + xx1) {
                         block->x = -800000;
                         ot(oto[4]);
                     }
                 }
 //剣とってクリア
                 if (block->type == 140) {
-                    if (marioY >
-                        screenY - xx0 * 2 - 2000
-                        && marioY <
-                           screenY + xx1 - xx0 * 2 +
-                           2000
-                        && marioX + marioWidth > screenX - 400
-                        && marioX < screenX + xx1) {
+                    if (marioY > screenY - xx0 * 2 - 2000
+                            && marioY < screenY + xx1 - xx0 * 2 + 2000
+                            && marioX + marioWidth > screenX - 400
+                            && marioX < screenX + xx1) {
                         block->x = -800000;    //ot(oto[4]);
                         liftActType[20] = 1;
                         sron[20] = 1;
@@ -1709,7 +1706,7 @@ if (mtm==250)end();
                         block->hp = 999;
                     }
                 }        //110
-                if (block->type == 111 && block->x - fx >= 0) {
+                if (block->type == 111 && screenX >= 0) {
                     block->hp++;
                     if (block->hp >= 16) {
                         block->hp = 0;
@@ -1726,7 +1723,7 @@ if (mtm==250)end();
                         block->item = 0;
                     }
                 }        //110
-                if (block->type == 113 && block->x - fx >= 0) {
+                if (block->type == 113 && screenX >= 0) {
                     if (block->item <= 19)
                         block->hp++;
                     if (block->hp >= 3) {
@@ -1787,7 +1784,7 @@ if (mtm==250)end();
                         ot(oto[8]);
 //ot(oto[13]);
                         block->type = 3;    //abrocktm[aco]=18;ayobi(block->x,block->y,0,0,0,104,1);
-                        createBlock(block->x / 100, (block->y / 100) - 29, 400);
+                        createBlock(block->x, block->y - 29 * 100, 400);
                     }
                 }        //116
 
@@ -1913,7 +1910,7 @@ if (mtm==250)end();
     }            //ブロック
 
 //壁
-    for (t = 0; t < GROUND_MAX; t++) {
+    for (int t = 0; t < GROUND_MAX; t++) {
         if (groundX[t] - fx + groundWidth[t] >= -12000 && groundX[t] - fx <= fxmax) {
             xx[0] = 200;
             xx[1] = 2400;
@@ -4114,45 +4111,38 @@ void stage() {
 
     for (int i = 0; i <= 1000; i++) {
         for (int j = 0; j <= 16; j++) {
-            xx[10] = 0;  // TODO stop assigning xx[...] if they really have no special meaning.
-            if (stagedate[j][i] >= 1 && stagedate[j][i] <= 255)
-                xx[10] = (int) stagedate[j][i];
-            xx[21] = i * 29;
-            xx[22] = j * 29 - 12;
-            xx[23] = xx[10];
-
-            int value = xx[10];
-            int x = xx[21];
-            int y = xx[22];
+            int value = stagedate[j][i] >= 1 && stagedate[j][i] <= 255 ? (int) stagedate[j][i] : 0;
+            int x = i * 29;
+            int y = j * 29 - 12;
 
             if (value >= 1 && value != 9 && value <= 19) {
-                createBlock(i * 29, j * 29 - 12, value);
+                createBlock(i * 29 * 100, (j * 29 - 12) * 100, value);
             } else if (value >= 20 && value <= 29) {
-                liftX[liftCounter] = xx[21] * 100;
-                liftY[liftCounter] = xx[22] * 100;
+                liftX[liftCounter] = x * 100;
+                liftY[liftCounter] = y * 100;
                 liftWidth[liftCounter] = 3000;
                 liftType[liftCounter] = 0;
                 liftCounter++;
                 if (liftCounter >= LIFT_MAX)
                     liftCounter = 0;
             } else if (value == 30) {
-                syobi(xx[21] * 100, xx[22] * 100, 3000, 6000, 500);
+                syobi(x * 100, y * 100, 3000, 6000, 500);
             } else if (value == 40) {
-                syobi(xx[21] * 100, xx[22] * 100, 6000, 3000, 1);
+                syobi(x * 100, y * 100, 6000, 3000, 1);
             } else if (value == 41) {
-                syobi(xx[21] * 100 + 500, xx[22] * 100, 5000, 3000, 2);
+                syobi(x * 100 + 500, y * 100, 5000, 3000, 2);
             } else if (value == 43) {
-                syobi(xx[21] * 100, xx[22] * 100 + 500, 2900, 5300, 1);
+                syobi(x * 100, y * 100 + 500, 2900, 5300, 1);
             } else if (value == 44) {
-                syobi(xx[21] * 100, xx[22] * 100 + 700, 3900, 5000, 5);
+                syobi(x * 100, y * 100 + 700, 3900, 5000, 5);
             } else if (value >= 50 && value <= 79) {  //これなぜかバグの原因ｗ
-                createEnemyTemplate(xx[21] * 100, xx[22] * 100, value - 50, 0);
+                createEnemyTemplate(x * 100, y * 100, value - 50, 0);
             } else if (value >= 80 && value <= 89) {
-                nyobi(xx[21] * 100, xx[22] * 100, value - 80);
+                nyobi(x * 100, y * 100, value - 80);
             } else if (value == 9) {  // コイン Coin
-                createBlock(i * 29, j * 29 - 12, 800);
+                createBlock(i * 29 * 100, (j * 29 - 12) * 100, 800);
             } else if (value == 99) {
-                syobi(xx[21] * 100, xx[22] * 100, 3000, (12 - j) * 3000, 300);
+                syobi(x * 100, y * 100, 3000, (12 - j) * 3000, 300);
             }
         }
     }
@@ -4215,13 +4205,13 @@ void stagep() {
         };
 
         //追加情報
-        createBlock(8 * 29, 9 * 29 - 12, 100);
-        createBlock(13 * 29, 9 * 29 - 12, 102, 2);
-        createBlock(14 * 29, 5 * 29 - 12, 101, 0);
-        createBlock(35 * 29, 8 * 29 - 12, 110);
-        createBlock(47 * 29, 9 * 29 - 12, 103);
-        createBlock(59 * 29, 9 * 29 - 12, 112);
-        createBlock(67 * 29, 9 * 29 - 12, 104);
+        createBlock(8 * 29 * 100, (9 * 29 - 12) * 100, 100);
+        createBlock(13 * 29 * 100, (9 * 29 - 12) * 100, 102, 2);
+        createBlock(14 * 29 * 100, (5 * 29 - 12) * 100, 101, 0);
+        createBlock(35 * 29 * 100, (8 * 29 - 12) * 100, 110);
+        createBlock(47 * 29 * 100, (9 * 29 - 12) * 100, 103);
+        createBlock(59 * 29 * 100, (9 * 29 - 12) * 100, 112);
+        createBlock(67 * 29 * 100, (9 * 29 - 12) * 100, 104);
 
         groundCounter = 0;
         syobi(20 * 29 * 100 + 500, -6000, 5000, 70000, 100);
@@ -4286,11 +4276,11 @@ void stagep() {
 
         blocks.clear();
         //ヒント1
-        createBlock(4 * 29, 9 * 29 - 12, 300, 1);
-        //createBlock(7*29,9*29-12,300);
+        createBlock(4 * 29 * 100, (9 * 29 - 12) * 100, 300, 1);
+        //createBlock(7 * 29 * 100, (9*29-12) * 100, 300);
 
         //毒1
-        createBlock(13 * 29, 8 * 29 - 12, 114);
+        createBlock(13 * 29 * 100, (8 * 29 - 12) * 100, 114);
 
         //t=28;
         groundCounter = 0;
@@ -4341,17 +4331,17 @@ void stagep() {
 	};
 
         blocks.clear();
-        createBlock(7 * 29, 9 * 29 - 12, 102, 2);
-        createBlock(10 * 29, 9 * 29 - 12, 101);
+        createBlock(7 * 29 * 100, (9 * 29 - 12) * 100, 102, 2);
+        createBlock(10 * 29 * 100, (9 * 29 - 12) * 100, 101);
 
-        createBlock(49 * 29, 9 * 29 - 12, 114, 2);
+        createBlock(49 * 29 * 100, (9 * 29 - 12) * 100, 114, 2);
 
         for (t = 0; t >= -7; t--) {
-            createBlock(53 * 29, t * 29 - 12, 1);
+            createBlock(53 * 29 * 100, (t * 29 - 12) * 100, 1);
         }
 
-        createBlock(80 * 29, 5 * 29 - 12, 104, 1);
-        createBlock(78 * 29, 5 * 29 - 12, 102, 2);
+        createBlock(80 * 29 * 100, (5 * 29 - 12) * 100, 104, 1);
+        createBlock(78 * 29 * 100, (5 * 29 - 12) * 100, 102, 2);
 
 //blocks[blockCounter]->xtype=1;createBlock(11*29,9*29-12,114);//毒1
 
@@ -4582,32 +4572,32 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 	};
 
         blocks.clear();
-        createBlock(22 * 29, 3 * 29 - 12, 1);
+        createBlock(22 * 29 * 100, (3 * 29 - 12) * 100, 1);
 //毒1
-        createBlock(54 * 29, 9 * 29 - 12, 116);
+        createBlock(54 * 29 * 100, (9 * 29 - 12) * 100, 116);
 //音符+
-        createBlock(18 * 29, 14 * 29 - 12, 117);
-        createBlock(19 * 29, 14 * 29 - 12, 117);
-        createBlock(20 * 29, 14 * 29 - 12, 117);
-        createBlock(61 * 29, 9 * 29 - 12, 101, 1);    //5
-        createBlock(74 * 29, 9 * 29 - 12, 7);    //6
+        createBlock(18 * 29 * 100, (14 * 29 - 12) * 100, 117);
+        createBlock(19 * 29 * 100, (14 * 29 - 12) * 100, 117);
+        createBlock(20 * 29 * 100, (14 * 29 - 12) * 100, 117);
+        createBlock(61 * 29 * 100, (9 * 29 - 12) * 100, 101, 1);    //5
+        createBlock(74 * 29 * 100, (9 * 29 - 12) * 100, 7);    //6
 
 //ヒント2
-        createBlock(28 * 29, 9 * 29 - 12, 300, 2);    //7
+        createBlock(28 * 29 * 100, (9 * 29 - 12) * 100, 300, 2);    //7
 //ファイア
-        createBlock(7 * 29, 9 * 29 - 12, 101, 3);
+        createBlock(7 * 29 * 100, (9 * 29 - 12) * 100, 101, 3);
 //ヒント3
-        createBlock(70 * 29, 8 * 29 - 12, 300, 4);    //9
+        createBlock(70 * 29 * 100, (8 * 29 - 12) * 100, 300, 4);    //9
 
 //もろいぶろっく×３
-        createBlock(58 * 29, 13 * 29 - 12, 115, 1);
-        createBlock(59 * 29, 13 * 29 - 12, 115, 1);
-        createBlock(60 * 29, 13 * 29 - 12, 115, 1);
+        createBlock(58 * 29 * 100, (13 * 29 - 12) * 100, 115, 1);
+        createBlock(59 * 29 * 100, (13 * 29 - 12) * 100, 115, 1);
+        createBlock(60 * 29 * 100, (13 * 29 - 12) * 100, 115, 1);
 
 //ヒントブレイク
-        createBlock(111 * 29, 6 * 29 - 12, 301, 0);
+        createBlock(111 * 29 * 100, (6 * 29 - 12) * 100, 301, 0);
 //ジャンプ
-        createBlock(114 * 29, 9 * 29 - 12, 120, 0);
+        createBlock(114 * 29 * 100, (9 * 29 - 12) * 100, 120, 0);
 
 //ファイア
 //createBlock(7*29,9*29-12,101);
@@ -4801,9 +4791,9 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 //t=groundCounter;groundX[t]=12*29*100;groundY[t]=(11*29-12)*100;groundWidth[t]=3000;groundHeight[t]=6000-200;groundType[t]=40;groundXType[t]=0;groundCounter++;
 //t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;groundHeight[t]=70000;groundType[t]=100;groundXType[t]=1;groundCounter++;
 
-        createBlock(12 * 29, 4 * 29 - 12, 112, 0);
+        createBlock(12 * 29 * 100, (4 * 29 - 12) * 100, 112, 0);
 //ヒント3
-        createBlock(12 * 29, 8 * 29 - 12, 300, 3);
+        createBlock(12 * 29 * 100, (8 * 29 - 12) * 100, 300, 3);
 //blocks[blockCounter]->xtype=0;createBlock(13*29,4*29-12,110);
 
 //stc=0;
@@ -4893,42 +4883,42 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 
         blocks.clear();
 //ON-OFFブロック
-        createBlock(29 * 29, 3 * 29 - 12, 130, 1);
+        createBlock(29 * 29 * 100, (3 * 29 - 12) * 100, 130, 1);
 //1-2
-        createBlock(34 * 29, 9 * 29 - 12, 5);
-        createBlock(35 * 29, 9 * 29 - 12, 5);
+        createBlock(34 * 29 * 100, (9 * 29 - 12) * 100, 5);
+        createBlock(35 * 29 * 100, (9 * 29 - 12) * 100, 5);
 //隠し
-        createBlock(55 * 29 + 15, 6 * 29 - 12, 7);
+        createBlock((55 * 29 + 15) * 100, (6 * 29 - 12) * 100, 7);
 //createBlock(62*29,9*29-12,2);
 //隠しON-OFF
-        createBlock(50 * 29, 9 * 29 - 12, 114, 10);
+        createBlock(50 * 29 * 100, (9 * 29 - 12) * 100, 114, 10);
 //ヒント3
-        createBlock(1 * 29, 5 * 29 - 12, 300, 5);
+        createBlock(1 * 29 * 100, (5 * 29 - 12) * 100, 300, 5);
 //ファイア
-        createBlock(86 * 29, 9 * 29 - 12, 101, 3);
+        createBlock(86 * 29 * 100, (9 * 29 - 12) * 100, 101, 3);
 //キノコなし　普通
 //blocks[blockCounter]->xtype=2;createBlock(81*29,1*29-12,5);
 //音符
-        createBlock(86 * 29, 6 * 29 - 12, 117, 2);
+        createBlock(86 * 29 * 100, (6 * 29 - 12) * 100, 117, 2);
 
 //もろいぶろっく×３
         for (t = 0; t <= 2; t++) {
-            createBlock((79 + t) * 29, 13 * 29 - 12, 115, 3);
+            createBlock((79 + t) * 29 * 100, (13 * 29 - 12) * 100, 115, 3);
         }
 
 //ジャンプ
-        createBlock(105 * 29, 11 * 29 - 12, 120, 3);
+        createBlock(105 * 29 * 100, (11 * 29 - 12) * 100, 120, 3);
 //毒1
-        createBlock(109 * 29, 7 * 29 - 12, 102, 3);
+        createBlock(109 * 29 * 100, (7 * 29 - 12) * 100, 102, 3);
 //デフラグ
-        createBlock(111 * 29, 7 * 29 - 12, 101, 4);
+        createBlock(111 * 29 * 100, (7 * 29 - 12) * 100, 101, 4);
 //剣
-        createBlock(132 * 29, 8 * 29 - 12 - 3, 140);
-        createBlock(131 * 29, 9 * 29 - 12, 141);
+        createBlock(132 * 29 * 100, (8 * 29 - 12 - 3) * 100, 140);
+        createBlock(131 * 29 * 100, (9 * 29 - 12) * 100, 141);
 //メロン
-        createBlock(161 * 29, 12 * 29 - 12, 142);
+        createBlock(161 * 29 * 100, (12 * 29 - 12) * 100, 142);
 //ファイアバー強化
-        createBlock(66 * 29, 4 * 29 - 12, 124);
+        createBlock(66 * 29 * 100, (4 * 29 - 12) * 100, 124);
 
 //リフト
         liftCounter = 0;
@@ -4989,18 +4979,18 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         //追加情報
         blocks.clear();
         //
-        createBlock(1 * 29, 9 * 29 - 12, 300, 6);
+        createBlock(1 * 29 * 100, (9 * 29 - 12) * 100, 300, 6);
         //
-        createBlock(40 * 29, 9 * 29 - 12, 110, 0);
+        createBlock(40 * 29 * 100, (9 * 29 - 12) * 100, 110, 0);
         //
-        createBlock(79 * 29, 7 * 29 - 12, 300, 7);
+        createBlock(79 * 29 * 100, (7 * 29 - 12) * 100, 300, 7);
         //
-        createBlock(83 * 29, 7 * 29 - 12, 102, 2);
+        createBlock(83 * 29 * 100, (7 * 29 - 12) * 100, 102, 2);
         //
-        createBlock(83 * 29, 2 * 29 - 12, 114, 0);
+        createBlock(83 * 29 * 100, (2 * 29 - 12) * 100, 114, 0);
         //
         for (int i = -1; i > -7; i -= 1) {
-            createBlock(85 * 29, i * 29 - 12, 4);
+            createBlock(85 * 29 * 100, (i * 29 - 12) * 100, 4);
         }
         //
         groundCounter = 0;
@@ -5143,24 +5133,24 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         syobi(133 * 29 * 100 + 1100, (0 * 29 - 12) * 100, 4700, 32000, 0, 0);
         //
         blocks.clear();
-        createBlock(0 * 29, 0 * 29 - 12, 4, 0);
-        createBlock(2 * 29, 9 * 29 - 12, 4, 0);
-        createBlock(3 * 29, 9 * 29 - 12, 4, 0);
+        createBlock(0 * 29 * 100, (0 * 29 - 12) * 100, 4, 0);
+        createBlock(2 * 29 * 100, (9 * 29 - 12) * 100, 4, 0);
+        createBlock(3 * 29 * 100, (9 * 29 - 12) * 100, 4, 0);
         //
-        createBlock(5 * 29, 9 * 29 - 12, 115, 1);
-        createBlock(6 * 29, 9 * 29 - 12, 115, 1);
+        createBlock(5 * 29 * 100, (9 * 29 - 12) * 100, 115, 1);
+        createBlock(6 * 29 * 100, (9 * 29 - 12) * 100, 115, 1);
         //
-        createBlock(5 * 29, 10 * 29 - 12, 115, 1);
-        createBlock(6 * 29, 10 * 29 - 12, 115, 1);
+        createBlock(5 * 29 * 100, (10 * 29 - 12) * 100, 115, 1);
+        createBlock(6 * 29 * 100, (10 * 29 - 12) * 100, 115, 1);
         //
-        createBlock(5 * 29, 11 * 29 - 12, 115, 1);
-        createBlock(6 * 29, 11 * 29 - 12, 115, 1);
+        createBlock(5 * 29 * 100, (11 * 29 - 12) * 100, 115, 1);
+        createBlock(6 * 29 * 100, (11 * 29 - 12) * 100, 115, 1);
         //
-        createBlock(5 * 29, 12 * 29 - 12, 115, 1);
-        createBlock(6 * 29, 12 * 29 - 12, 115, 1);
+        createBlock(5 * 29 * 100, (12 * 29 - 12) * 100, 115, 1);
+        createBlock(6 * 29 * 100, (12 * 29 - 12) * 100, 115, 1);
         //
-        createBlock(70 * 29, 7 * 29 - 12, 115, 1);
-        createBlock(71 * 29, 7 * 29 - 12, 115, 1);
+        createBlock(70 * 29 * 100, (7 * 29 - 12) * 100, 115, 1);
+        createBlock(71 * 29 * 100, (7 * 29 - 12) * 100, 115, 1);
         //
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -5259,18 +5249,18 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         blocks.clear();
 //        blocks[blockCounter]->xtype = 0;  // default value of xtype is 0, so i assume this line is ensuring xtype being 0.
         for (int i = -1; i > -7; i -= 1) {
-            createBlock(55 * 29, i * 29 - 12, 4, 0);
+            createBlock(55 * 29 * 100, (i * 29 - 12) * 100, 4, 0);
         }
         //
-        createBlock(64 * 29, 12 * 29 - 12, 120, 0);
+        createBlock(64 * 29 * 100, (12 * 29 - 12) * 100, 120, 0);
         //
-        createBlock(66 * 29, 3 * 29 - 12, 115, 1);
+        createBlock(66 * 29 * 100, (3 * 29 - 12) * 100, 115, 1);
         //
-        createBlock(67 * 29, 3 * 29 - 12, 115, 1);
+        createBlock(67 * 29 * 100, (3 * 29 - 12) * 100, 115, 1);
         //
-        createBlock(68 * 29, 3 * 29 - 12, 115, 1);
+        createBlock(68 * 29 * 100, (3 * 29 - 12) * 100, 115, 1);
         //
-        createBlock(60 * 29, 6 * 29 - 12, 300, 8);
+        createBlock(60 * 29 * 100, (6 * 29 - 12) * 100, 300, 8);
 	/*
 	   etCounter = 1;
 	   ets[etCounter]->x=(54*29-12)*100;
@@ -5369,15 +5359,15 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 	};
         //
         blocks.clear();
-        createBlock(0 * 29, -1 * 29 - 12, 5, 0);
+        createBlock(0 * 29 * 100, (-1 * 29 - 12) * 100, 5, 0);
         //
-        createBlock(4 * 29, -1 * 29 - 12, 5, 0);
+        createBlock(4 * 29 * 100, (-1 * 29 - 12) * 100, 5, 0);
         //
-        createBlock(1 * 29, 14 * 29 - 12, 5, 0);
+        createBlock(1 * 29 * 100, (14 * 29 - 12) * 100, 5, 0);
         //
-        createBlock(6 * 29, 14 * 29 - 12, 5, 0);
+        createBlock(6 * 29 * 100, (14 * 29 - 12) * 100, 5, 0);
         //
-        createBlock(7 * 29, 14 * 29 - 12, 5, 0);
+        createBlock(7 * 29 * 100, (14 * 29 - 12) * 100, 5, 0);
         //
         ets.clear();
         createEnemyTemplate(2 * 29 * 100 - 1400, (-2 * 29 - 12) * 100 + 500, 86, 0);
@@ -5426,11 +5416,11 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         };
         //
         blocks.clear();
-        createBlock(12 * 29, 13 * 29 - 12, 115, 1);
+        createBlock(12 * 29 * 100, (13 * 29 - 12) * 100, 115, 1);
         //
-        createBlock(13 * 29, 13 * 29 - 12, 115, 1);
+        createBlock(13 * 29 * 100, (13 * 29 - 12) * 100, 115, 1);
         //
-        createBlock(14 * 29, 13 * 29 - 12, 115, 1);
+        createBlock(14 * 29 * 100, (13 * 29 - 12) * 100, 115, 1);
         //
         groundCounter = 0;
         syobi(6 * 29 * 100, (6 * 29 - 12) * 100, 18000 - 1, 6000 - 1, 52, 0);
@@ -5476,21 +5466,21 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 	};
         //
         blocks.clear();
-        createBlock(1 * 29, 14 * 29 - 12, 5, 0);
+        createBlock(1 * 29 * 100, (14 * 29 - 12) * 100, 5, 0);
         //
-        createBlock(2 * 29, 14 * 29 - 12, 5, 0);
+        createBlock(2 * 29 * 100, (14 * 29 - 12) * 100, 5, 0);
         //
-        createBlock(3 * 29, 4 * 29 - 12, 300, 9);
+        createBlock(3 * 29 * 100, (4 * 29 - 12) * 100, 300, 9);
         //
-        createBlock(32 * 29, 9 * 29 - 12, 115, 1);
+        createBlock(32 * 29 * 100, (9 * 29 - 12) * 100, 115, 1);
         //
-        createBlock(76 * 29, 14 * 29 - 12, 5, 0);
+        createBlock(76 * 29 * 100, (14 * 29 - 12) * 100, 5, 0);
         //
-        createBlock(108 * 29, 11 * 29 - 12, 141, 0);
+        createBlock(108 * 29 * 100, (11 * 29 - 12) * 100, 141, 0);
         //
-        createBlock(109 * 29, 10 * 29 - 12 - 3, 140, 0);
+        createBlock(109 * 29 * 100, (10 * 29 - 12 - 3) * 100, 140, 0);
         //
-        createBlock(121 * 29, 10 * 29 - 12, 142, 0);
+        createBlock(121 * 29 * 100, (10 * 29 - 12) * 100, 142, 0);
         //
         ets.clear();
         createEnemyTemplate(0 * 29 * 100 + 1500, (8 * 29 - 12) * 100 + 1500, 88, 105);
@@ -5596,11 +5586,11 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         //追加情報
         blocks.clear();
         //
-        createBlock(2 * 29, 9 * 29 - 12, 300, 10);
+        createBlock(2 * 29 * 100, (9 * 29 - 12) * 100, 300, 10);
         //
-        createBlock(63 * 29, 13 * 29 - 12, 115, 1);
+        createBlock(63 * 29 * 100, (13 * 29 - 12) * 100, 115, 1);
         //
-        createBlock(64 * 29, 13 * 29 - 12, 115, 1);
+        createBlock(64 * 29 * 100, (13 * 29 - 12) * 100, 115, 1);
         //
         groundCounter = 0;
         syobi(13 * 29 * 100, (13 * 29 - 12) * 100, 9000 - 1, 3000, 52, 0);
