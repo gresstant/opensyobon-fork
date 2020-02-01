@@ -22,6 +22,8 @@ public:
     virtual bool onEnemyStand(int enemyId);
     virtual bool onEnemyTouchLeft(int enemyId);
     virtual bool onEnemyTouchRight(int enemyId);
+private:
+    bool needOnTouch = true;
 };
 
 void createBlock(int x, int y, int type, int xtype = 0);

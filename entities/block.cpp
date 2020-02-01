@@ -1,9 +1,19 @@
 #include "block.h"
 #include "../utilities/draw.h"
 #include "mario.h"
+#include "enemy_template.h"
 
 extern int fx, fy, fxmax, stagecolor;
+
+#define ENEMY_MAX 24
+extern int liftActType[21], sron[21];
+extern int abrocktm[24], aco;
+extern int atype[ENEMY_MAX], axtype[ENEMY_MAX];
+extern int stageonoff;
+
+extern int tmsgtm, tmsgtype, tmsgx, tmsgy, tmsgnobix, tmsgnobiy, tmsg;
 extern int mmsgtm, mmsgtype;
+
 extern Mix_Chunk *oto[19];
 void ot(Mix_Chunk * x);
 void eyobi(int x, int y, int xc, int xd, int xe, int xf, int width, int height, int gtype, int tm);
@@ -113,15 +123,233 @@ void paintSceneInGameBlock(const LegacyBlock& block) {
 }
 
 bool LegacyBlock::onTick() {
-    return false;
+    constexpr int xx0 = 200;
+    const int screenX = this->x - fx;
+    const int screenY = this->y - fy;
+
+    if (this->type == 100 && this->xtype == 0) {
+        if (marioY > screenY - xx0 * 2 - 2000
+            && marioY < screenY + blockHeight - xx0 * 2 + 2000
+            && marioX + marioWidth > screenX - 400
+            && marioX < screenX + blockWidth
+            && marioSpeedY <= 0) {
+            this->y = marioY + fy - 1200 - blockHeight;
+        }
+    } else if (this->type == 110) {
+        // do nothing. make it return true. see afterMarioHit.
+    } else if (this->type == 111 && screenX >= 0) {  // 毒きのこ量産  lots of purple mushrooms appear
+        this->hp++;
+        if (this->hp >= 16) {
+            this->hp = 0;
+            ot(oto[8]);
+            abrocktm[aco] = 16;
+            ayobi(this->x, this->y, 0, 0, 0, 102, 1);
+        }
+    } else if (this->type == 112) {
+        // do nothing. make it return true. see afterMarioHit.
+    } else if (this->type == 113 && screenX >= 0) {  // コイン量産  lots of coins appear
+        if (this->item <= 19)
+            this->hp++;
+        if (this->hp >= 3) {
+            this->hp = 0;
+            this->item++;
+            ot(oto[4]);
+            eyobi(this->x + 10, this->y, 0, -800, 0, 40, blockWidth, blockHeight, 0, 16);
+            //block->type=3;
+        }
+    } else if (this->type == 130) {  // ON-OFF
+        if (stageonoff == 0)
+            this->type = 131;
+    } else if (this->type == 131) {  // ON-OFF
+        if (stageonoff == 1)
+            this->type = 130;
+    } else if (this->type == 300) {  // ヒント  hint
+        if (this->xtype >= 500 && this->x >= -6000) {
+            if (this->xtype <= 539)
+                this->xtype++;
+            if (this->xtype >= 540) {
+                this->x -= 500;
+            }
+        }
+    } else {
+        return false;
+    }
+
+    return true;
 }
 
-bool onMarioTouch(LegacyBlock* that) {
-    return false;
+bool onMarioTouch(LegacyBlock* block) {
+    if (block->type == 800) {
+        block->x = -800000;
+        ot(oto[4]);
+    } else if (block->type == 140) {  // 剣とってクリア
+        block->x = -800000;    //ot(oto[4]);
+        liftActType[20] = 1;
+        sron[20] = 1;
+        Mix_HaltMusic();
+        marioType = MarioType::WIN_SWORD;
+        mtm = 0;
+        ot(oto[16]);
+    } else {
+        return false;
+    }
+
+    return true;
+}
+
+// mainly for question blocks
+void afterMarioHit(LegacyBlock* block, int xx17) {
+    if (!xx17) return;
+
+    const int screenX = block->x - fx;
+
+    if (block->type == 100) {  // 特殊的  special
+        if (block->xtype == 0) {
+            ot(oto[4]);
+            eyobi(block->x + 10, block->y, 0, -800, 0, 40, blockWidth, blockHeight, 0, 16);
+            block->type = 3;
+        } else if (block->xtype == 1) {
+            if (marioX + marioWidth > screenX - 400 && marioX < screenX + blockWidth / 2 - 1500) {
+                block->x += blockWidth;
+            } else if (marioX + marioWidth >= screenX + blockWidth / 2 - 1500 && marioX < screenX + blockWidth) {
+                block->x -= blockWidth;
+            }
+        }
+    } else if (block->type == 101) {  // 敵出現  enemy appears
+        ot(oto[8]);
+        block->type = 3;
+        abrocktm[aco] = 16;
+        if (block->xtype == 0) {
+            ayobi(block->x, block->y, 0, 0, 0, 0, 0);
+        } else if (block->xtype == 1) {
+            ayobi(block->x, block->y, 0, 0, 0, 4, 0);
+        } else if (block->xtype == 3) {
+            ayobi(block->x, block->y, 0, 0, 0, 101, 0);
+        } else if (block->xtype == 4) {
+            abrocktm[aco] = 20;
+            ayobi(block->x - 400, block->y - 1600, 0, 0, 0, 6, 0);
+        } else if (block->xtype == 10) {
+            ayobi(block->x, block->y, 0, 0, 0, 101, 0);
+        }
+    } else if (block->type == 102) {  // おいしいきのこ出現  fine mushroom appears
+        ot(oto[8]);
+        block->type = 3;
+        abrocktm[aco] = 16;
+        if (block->xtype == 0) {
+            ayobi(block->x, block->y, 0, 0, 0, 100, 0);
+        } else if (block->xtype == 2) {
+            ayobi(block->x, block->y, 0, 0, 0, 100, 2);
+        } else if (block->xtype == 3) {
+            ayobi(block->x, block->y, 0, 0, 0, 102, 1);
+        }
+    } else if (block->type == 103) {  // まずいきのこ出現  bad mushroom appears
+        ot(oto[8]);
+        block->type = 3;
+        abrocktm[aco] = 16;
+        ayobi(block->x, block->y, 0, 0, 0, 100, 1);
+    } else if (block->type == 104) {  // 悪スター出し  bad star appears
+        ot(oto[8]);
+        block->type = 3;
+        abrocktm[aco] = 16;
+        ayobi(block->x, block->y, 0, 0, 0, 110, 0);
+    } else if (block->type == 110) {  // 毒きのこ量産  lots of purple mushrooms appear
+        // see LegacyBlock::onTick
+        block->type = 111;
+        block->hp = 999;
+    } else if (block->type == 112) {  // コイン量産  lots of coins appear
+        // see LegacyBlock::onTick
+        block->type = 113;
+        block->hp = 999;
+        block->item = 0;
+    } else if (block->type == 114) {  // 隠し毒きのこ  hidden purple mushroom
+        if (block->xtype == 0) {
+            ot(oto[8]);
+            block->type = 3;
+            abrocktm[aco] = 16;
+            ayobi(block->x, block->y, 0, 0, 0, 102, 1);
+        } else if (block->xtype == 2) {
+            ot(oto[4]);
+            eyobi(block->x + 10, block->y,
+                  0, -800, 0, 40, blockWidth, blockHeight, 0, 16);
+            block->type = 115;
+            block->xtype = 0;
+        } else if (block->xtype == 10) {
+            if (stageonoff == 1) {
+                block->type = 130;
+                stageonoff = 0;
+                ot(oto[13]);
+                block->xtype = 2;
+                for (int i = 0; i < ENEMY_MAX; i++) {
+                    if (atype[i] == 87 || atype[i] == 88) {
+                        if (axtype[i] == 105)
+                            axtype[i] = 110;
+                    }
+                }
+            } else {
+                ot(oto[4]);
+                eyobi(block->x + 10, block->y, 0, -800, 0, 40, blockWidth, blockHeight, 0, 16);
+                block->type = 3;
+            }
+        }
+    } else if (block->type == 116) {  // Pスイッチ  p-button (p-switch) in question block
+        ot(oto[8]);
+        block->type = 3;
+        createBlock(block->x, block->y - 29 * 100, 400);
+    } else if (block->type == 124) {  // ファイアバー強化
+        ot(oto[13]);
+        for (int j = 0; j < ENEMY_MAX; j++) {
+            if (atype[j] == 87 || atype[j] == 88) {
+                if (axtype[j] == 101)
+                    axtype[j] = 120;
+            }
+        }
+        block->type = 3;
+    } else if (block->type == 130) {  // ONスイッチ  on-off switch
+        if (block->xtype != 1) {
+            stageonoff = 0;
+            ot(oto[13]);
+        }
+    } else if (block->type == 131) {  // ONスイッチ  on-off switch
+        if (block->xtype != 2) {
+            stageonoff = 1;
+            ot(oto[13]);
+            if (block->xtype == 1) {
+                for (int j = 0; j < ENEMY_MAX; j++) {
+                    if (atype[j] == 87 || atype[j] == 88) {
+                        if (axtype[j] == 105)
+                            axtype[j] = 110;
+                    }
+                }
+                ets[3]->xtype = 105;
+            }
+        }
+    } else if (block->type == 300) {  // ヒント  hint
+        ot(oto[15]);
+        if (block->xtype <= 100) {
+            tmsgtype = 1;
+            tmsgtm = 15;
+            tmsgy = 300 + (block->xtype - 1);
+            tmsg = (block->xtype);
+        } else if (block->xtype == 540) {
+            tmsgtype = 1;
+            tmsgtm = 15;
+            tmsgy = 400;
+            tmsg = 100;
+            block->xtype = 541;
+        }
+    } else if (block->type == 301) {  // fake hint (breakable)
+        ot(oto[3]);
+        eyobi(block->x + 1200, block->y + 1200, 300, -1000, 0, 160, 1000, 1000, 1, 120);
+        eyobi(block->x + 1200, block->y + 1200, -300, -1000, 0, 160, 1000, 1000, 1, 120);
+        eyobi(block->x + 1200, block->y + 1200, 240, -1400, 0, 160, 1000, 1000, 1, 120);
+        eyobi(block->x + 1200, block->y + 1200, -240, -1400, 0, 160, 1000, 1000, 1, 120);
+        blockBreak(*block);
+    }
 }
 
 bool LegacyBlock::onMarioHit(int& xx17) {  // TODO remove xx17
-    bool onTouchResult = onMarioTouch(this);
+    bool onTouchResult = this->needOnTouch ? (this->needOnTouch = onMarioTouch(this)) : false;
+    if (this->type == 800 || this->type == 140 || this->type == 141) return onTouchResult;
     if (this->type == 117) return onTouchResult;
 
     constexpr int xx0 = 200;
@@ -158,11 +386,13 @@ bool LegacyBlock::onMarioHit(int& xx17) {  // TODO remove xx17
         marioHP--;
     }
 
+    afterMarioHit(this, xx17);
     return true;
 }
 
 bool LegacyBlock::onMarioStand() {
-    bool onTouchResult = onMarioTouch(this);
+    bool onTouchResult = this->needOnTouch ? (this->needOnTouch = onMarioTouch(this)) : false;
+    if (this->type == 800 || this->type == 140 || this->type == 141) return onTouchResult;
     if (this->type == 7 || this->type == 110 || this->type == 114) return onTouchResult;
 
     const int screenY = this->y - fy;
@@ -211,7 +441,8 @@ bool LegacyBlock::onMarioStand() {
 }
 
 bool LegacyBlock::onMarioTouchLeft() {
-    bool onTouchResult = onMarioTouch(this);
+    bool onTouchResult = this->needOnTouch ? (this->needOnTouch = onMarioTouch(this)) : false;
+    if (this->type == 800 || this->type == 140 || this->type == 141) return onTouchResult;
     if (this->type == 7 || this->type == 110 || this->type == 114 || this->type == 117) return onTouchResult;
 
     const int screenX = this->x - fx;
@@ -223,7 +454,8 @@ bool LegacyBlock::onMarioTouchLeft() {
 }
 
 bool LegacyBlock::onMarioTouchRight() {
-    bool onTouchResult = onMarioTouch(this);
+    bool onTouchResult = this->needOnTouch ? (this->needOnTouch = onMarioTouch(this)) : false;
+    if (this->type == 800 || this->type == 140 || this->type == 141) return onTouchResult;
     if (this->type == 7 || this->type == 110 || this->type == 114 || this->type == 117) return onTouchResult;
 
     const int screenX = this->x - fx;
