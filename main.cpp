@@ -259,14 +259,14 @@ void paintSceneInGame() {
             if (screenX + xx2 * 100 >= -10 - xx14
                     && screenY <= fxmax + xx14
                     && screenY + xx[3] * 100 >= -10 && xx[3] <= fymax) {
+                Color fireBallColor(230, 120, 0);
                 for (int j = 0; j <= axtype[i] % 100; j++) {
                     xx[24] = (int) (j * 18 * cos(atm[i] * pai / 180 / 2));
                     xx[25] = (int) (j * 18 * sin(atm[i] * pai / 180 / 2));
 
-                    setColor(230, 120, 0);
-                    fillEllipse(screenX / 100 + xx[24], screenY / 100 + xx[25], 8, 8);
-                    setColor(0, 0, 0);
-                    drawEllipse(screenX / 100 + xx[24], screenY / 100 + xx[25], 8, 8);
+                    if (atype[i] != 87) xx[24] = -xx[24];
+                    fillCircle(fireBallColor, screenX / 100 + xx[24], screenY / 100 + xx[25], 8);
+                    drawCircle(colors::BLACK, screenX / 100 + xx[24], screenY / 100 + xx[25], 8);
                 }
             }
         }
