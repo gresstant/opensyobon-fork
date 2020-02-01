@@ -9,7 +9,7 @@ std::vector<std::unique_ptr<LegacyBlock>> blocks;
 //int blockX[BLOCK_MAX], blockY[BLOCK_MAX], blockType[BLOCK_MAX], blockXType[BLOCK_MAX];
 //int thp[BLOCK_MAX], titem[BLOCK_MAX];
 
-//ブロック出現
+// region ブロック出現
 
 void createBlock(int x, int y, int type, int xtype) {
     auto blockPtr = std::make_unique<LegacyBlock>();
@@ -19,6 +19,8 @@ void createBlock(int x, int y, int type, int xtype) {
     blockPtr->xtype = xtype;
     blocks.push_back(std::move(blockPtr));
 }
+
+// endregion
 
 //ブロック破壊
 

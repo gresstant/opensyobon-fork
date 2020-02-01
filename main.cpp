@@ -1127,7 +1127,6 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
                 marioSpeedX = 0;
                 marioSpeedY = 0;
                 t = 28;
-                printf("mtm = %d\n", mtm);
                 if (mtm <= 16) {
                     marioY += 240;
                     mzz = 100;
@@ -1190,7 +1189,6 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
                 }
 
             } else {
-                printf("mtm = %d, marioXType = %d\n", mtm, marioXType);
                 marioSpeedX = 0;
                 marioSpeedY = 0;
                 if (mtm <= 16 && marioXType != 3) {
@@ -1443,15 +1441,14 @@ if (mtm==250)end();
         if (screenX + xx1 >= -10 - xx3 && screenX <= fxmax + 12000 + xx3) {  // is block on screen
             if (marioType != MarioType::DYING && marioType != MarioType::HUGE && marioType != MarioType::AFTER_ORANGE_NOTE) {
                 if (block->type < 1000 && block->type != 800 && block->type != 140 && block->type != 141) {    // && block->type!=5){
-                    //if (!(mztm>=1 && mztype==1 && actaon[3]==1)){
-                    if (mztype != 1) {
+                    {
                         xx[16] = 0;
                         xx[17] = 0;
 
                         //上
                         if (block->type != 7 && block->type != 110 && block->type != 114) {
                             if (marioX + marioWidth > screenX + xx0 * 2 + 100 && marioX < screenX + xx1 - xx0 * 2 - 100 &&
-                                marioY + marioHeight > screenY && marioY + marioHeight < screenY + xx1 && marioSpeedY >= -100) {
+                                marioY + marioHeight > screenY && marioY + marioHeight < screenY + xx1 && marioSpeedY >= -100) {  // is mario standing on block
                                 if (block->type != 115 && block->type != 400 && block->type != 117 && block->type != 118 && block->type != 120) {
                                     marioY = screenY - marioHeight + 100;
                                     marioSpeedY = 0;
@@ -1498,7 +1495,7 @@ if (mtm==250)end();
 
                     //sstr=""+mjumptm;
                     //ブロック判定の入れ替え
-                    if (!(mztm >= 1 && mztype == 1)) {
+                    {
                         xx[21] = 0;
                         xx[22] = 1;    //xx[12]=0;
                         if (marioOnGround || mjumptm >= 10) {
@@ -1518,7 +1515,7 @@ if (mtm==250)end();
                                         marioSpeedY = -marioSpeedY * 2 / 3;
                                     }    //}
                                     //壊れる
-                                    if (block->type == 1 && !marioOnGround) {
+                                    if (block->type == 1) {
                                         ot(oto[3]);
                                         eyobi(block->x + 1200, block->y + 1200, 300, -1000, 0, 160, 1000, 1000, 1, 120);
                                         eyobi(block->x + 1200, block->y + 1200, -300, -1000, 0, 160, 1000, 1000, 1, 120);
@@ -1527,7 +1524,7 @@ if (mtm==250)end();
                                         blockBreak(*block);
                                     }
 //コイン
-                                    if (block->type == 2 && !marioOnGround) {
+                                    if (block->type == 2) {
                                         ot(oto[4]);
                                         eyobi(block->x + 10, block->y, 0, -800, 0, 40, 3000, 3000, 0, 16);
                                         block->type = 3;
@@ -2341,8 +2338,7 @@ break;
 //if (liftType[i]==1){sre[10]=300;sre[11]=300;}
 
 //乗ったとき
-            if (!(mztm >= 1 && mztype == 1 && actaon[3] == 1)
-                && marioHP >= 1) {
+            if (marioHP >= 1) {
                 if (marioX + marioWidth > xx[8] + xx[0]
                     && marioX < xx[8] + xx[12] - xx[0]
                     && marioY + marioHeight > xx[9]
@@ -3600,8 +3596,6 @@ if (atype[t]==103){
 //xx[24]=2400;
 eyobi(aa[t]-500,ab[t],0,-600,0,80,2500,1600,2,32);
 }
-if (atype[t]==104){mztm=120;mztype=1;}
-if (atype[t]==105){mztm=160;mztype=2;}
 
 if (atype[t]==120){marioType=3;marioWidth=3800;marioHeight=2300;}
 
@@ -3852,20 +3846,20 @@ void tekizimen() {
     }
 
     //ブロック
-    for (int i = 0; i < blocks.size(); i++) {
+    for (const auto& block : blocks) {
         xx[0] = 200;
         xx[1] = 3000;
         xx[2] = 1000;
-        xx[8] = blocks[i]->x - fx;
-        xx[9] = blocks[i]->y - fy;
-        if (blocks[i]->x - fx + xx[1] >= -12010 && blocks[i]->x - fx <= fxmax + 12000) {
-            if (atype[t] != 86 && atype[t] != 90 && blocks[i]->type != 140) {
+        xx[8] = block->x - fx;
+        xx[9] = block->y - fy;
+        if (block->x - fx + xx[1] >= -12010 && block->x - fx <= fxmax + 12000) {
+            if (atype[t] != 86 && atype[t] != 90 && block->type != 140) {
 
 //上
-                if (blocks[i]->type != 7) {
-//if (blocks[i]->type==117 && blocks[t]->xtype==1){ad[t]=-1500;}
-                    if (blocks[i]->type != 117) {
-//if (!(blocks[i]->type==120 && blocks[t]->xtype==0)){
+                if (block->type != 7) {
+//if (block->type==117 && blocks[t]->xtype==1){ad[t]=-1500;}
+                    if (block->type != 117) {
+//if (!(block->type==120 && blocks[t]->xtype==0)){
                         if (aa[t] + anobia[t] - fx > xx[8] + xx[0]
                             && aa[t] - fx <
                                xx[8] + xx[1] - xx[0] * 1
@@ -3876,7 +3870,7 @@ void tekizimen() {
                             ad[t] = 0;
                             axzimen[t] = 1;
 //ジャンプ台
-                            if (blocks[i]->type == 120) {
+                            if (block->type == 120) {
                                 ad[t] = -1600;
                                 azimentype[t] = 30;
                             }
@@ -3886,7 +3880,7 @@ void tekizimen() {
                     }
                 }
 //下
-                if (blocks[i]->type != 117) {
+                if (block->type != 117) {
                     if (aa[t] + anobia[t] - fx > xx[8] + xx[0] &&
                             aa[t] - fx < xx[8] + xx[1] - xx[0] * 1 &&
                             ab[t] - fy > xx[9] + xx[1] - xx[1] &&
@@ -3902,7 +3896,7 @@ void tekizimen() {
                 }
 //左右
                 xx[27] = 0;
-                if ((atype[t] >= 100 || blocks[i]->type != 7 || (blocks[i]->type == 7 && atype[t] == 2)) && blocks[i]->type != 117) {
+                if ((atype[t] >= 100 || block->type != 7 || (block->type == 7 && atype[t] == 2)) && block->type != 117) {
                     if (aa[t] + anobia[t] - fx > xx[8] &&
                             aa[t] - fx < xx[8] + xx[2] &&
                             ab[t] + anobib[t] - fy > xx[9] + xx[1] / 2 - xx[0] &&
@@ -3922,27 +3916,27 @@ void tekizimen() {
                         xx[27] = 1;
                     }
 //こうらブレイク
-                    if (xx[27] == 1 && (blocks[i]->type == 7 || blocks[i]->type == 1) && atype[t] == 2) {
-                        if (blocks[i]->type == 7) {
+                    if (xx[27] == 1 && (block->type == 7 || block->type == 1) && atype[t] == 2) {
+                        if (block->type == 7) {
                             ot(oto[4]);
-                            blocks[i]->type = 3;
-                            eyobi(blocks[i]->x + 10, blocks[i]->y, 0, -800,
+                            block->type = 3;
+                            eyobi(block->x + 10, block->y, 0, -800,
                                   0, 40, 3000, 3000, 0, 16);
-                        } else if (blocks[i]->type == 1) {
+                        } else if (block->type == 1) {
                             ot(oto[3]);
-                            eyobi(blocks[i]->x + 1200,
-                                  blocks[i]->y + 1200,
+                            eyobi(block->x + 1200,
+                                  block->y + 1200,
                                   300, -1000, 0, 160, 1000, 1000, 1, 120);
-                            eyobi(blocks[i]->x + 1200,
-                                  blocks[i]->y + 1200,
+                            eyobi(block->x + 1200,
+                                  block->y + 1200,
                                   -300, -1000, 0, 160, 1000, 1000, 1, 120);
-                            eyobi(blocks[i]->x + 1200,
-                                  blocks[i]->y + 1200,
+                            eyobi(block->x + 1200,
+                                  block->y + 1200,
                                   240, -1400, 0, 160, 1000, 1000, 1, 120);
-                            eyobi(blocks[i]->x + 1200,
-                                  blocks[i]->y + 1200,
+                            eyobi(block->x + 1200,
+                                  block->y + 1200,
                                   -240, -1400, 0, 160, 1000, 1000, 1, 120);
-                            blockBreak(i);
+                            blockBreak(*block);
                         }
 
                     }
@@ -3954,27 +3948,27 @@ void tekizimen() {
                         && ab[t] + anobib[t] - fy > xx[9]
                         && ab[t] - fy < xx[9] + xx[1]) {
                     ot(oto[3]);
-                    eyobi(blocks[i]->x + 1200, blocks[i]->y + 1200, 300,
+                    eyobi(block->x + 1200, block->y + 1200, 300,
                           -1000, 0, 160, 1000, 1000, 1, 120);
-                    eyobi(blocks[i]->x + 1200, blocks[i]->y + 1200,
+                    eyobi(block->x + 1200, block->y + 1200,
                           -300, -1000, 0, 160, 1000, 1000, 1, 120);
-                    eyobi(blocks[i]->x + 1200, blocks[i]->y + 1200, 240,
+                    eyobi(block->x + 1200, block->y + 1200, 240,
                           -1400, 0, 160, 1000, 1000, 1, 120);
-                    eyobi(blocks[i]->x + 1200, blocks[i]->y + 1200,
+                    eyobi(block->x + 1200, block->y + 1200,
                           -240, -1400, 0, 160, 1000, 1000, 1, 120);
-                    blockBreak(i);
+                    blockBreak(*block);
 
                 }
             }            //90
 
         }
 //剣とってクリア
-        if (blocks[i]->type == 140) {
+        if (block->type == 140) {
             if (ab[t] - fy > xx[9] - xx[0] * 2 - 2000
                     && ab[t] - fy < xx[9] + xx[1] - xx[0] * 2 + 2000
                     && aa[t] + anobia[t] - fx > xx[8] - 400
                     && aa[t] - fx < xx[8] + xx[1]) {
-                blocks[i]->x = -800000;    //ot(oto[4]);
+                block->x = -800000;    //ot(oto[4]);
                 liftActType[20] = 1;
                 sron[20] = 1;
             }

@@ -30,6 +30,8 @@ Syobon Action is also called "Shobon no Action," "Neko Mario," "Cat Mario," or "
 
 ## Bugs
 Please report any bugs at the GitHub issue tracker: https://github.com/gresstant/opensyobon-fork/issues
+### Known issues
+* Game may not launch without `-nosound`
 
 ## Command Line Arguments
 `-nosound` - Disables sound
