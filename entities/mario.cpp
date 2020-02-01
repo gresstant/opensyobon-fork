@@ -1,5 +1,6 @@
 #include "mario.h"
 #include "../utilities/draw.h"
+#include "../utilities/colors.h"
 
 int marioX, marioY, marioWidth, marioHeight, marioHP;
 int marioSpeedX, marioSpeedY, atktm, marioLife = 3, mactp, marioActImg;

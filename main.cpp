@@ -1432,66 +1432,22 @@ if (mtm==250)end();
     xx[15] = 0;
     for (const auto& block : blocks) {
         int xx0 = xx[0] = 200;
-        int xx1 = xx[1] = 3000;
+        int xx1 = xx[1] = 3000;  // block width?
         int xx2 = xx[2] = 1000;
-        int xx3 = xx[3] = 3000;    //xx[2]=1000
+        int xx3 = xx[3] = 3000;
         int screenX = block->x - fx;
         int screenY = block->y - fy;    //xx[15]=0;
+        
+        int xx17 = 0;
 
         if (screenX + xx1 >= -10 - xx3 && screenX <= fxmax + 12000 + xx3) {  // is block on screen
             if (marioType != MarioType::DYING && marioType != MarioType::HUGE && marioType != MarioType::AFTER_ORANGE_NOTE) {
                 if (block->type < 1000 && block->type != 800 && block->type != 140 && block->type != 141) {    // && block->type!=5){
-                    {
-                        xx[16] = 0;
-                        xx[17] = 0;
-
-                        //上
-                        if (block->type != 7 && block->type != 110 && block->type != 114) {
-                            if (marioX + marioWidth > screenX + xx0 * 2 + 100 && marioX < screenX + xx1 - xx0 * 2 - 100 &&
-                                marioY + marioHeight > screenY && marioY + marioHeight < screenY + xx1 && marioSpeedY >= -100) {  // is mario standing on block
-                                if (block->type != 115 && block->type != 400 && block->type != 117 && block->type != 118 && block->type != 120) {
-                                    marioY = screenY - marioHeight + 100;
-                                    marioSpeedY = 0;
-                                    marioOnGround = true;
-                                    xx[16] = 1;
-                                } else if (block->type == 115) {
-                                    ot(oto[3]);
-                                    eyobi(block->x + 1200, block->y + 1200, 300, -1000, 0, 160, 1000, 1000, 1, 120);
-                                    eyobi(block->x + 1200, block->y + 1200, -300, -1000, 0, 160, 1000, 1000, 1, 120);
-                                    eyobi(block->x + 1200, block->y + 1200, 240, -1400, 0, 160, 1000, 1000, 1, 120);
-                                    eyobi(block->x + 1200, block->y + 1200, -240, -1400, 0, 160, 1000, 1000, 1, 120);
-                                    blockBreak(*block);
-                                } else if (block->type == 400) {  // Pスイッチ
-                                    marioSpeedY = 0;
-                                    block->x = -8000000;
-                                    ot(oto[13]);
-                                    for (const auto& b : blocks) {
-                                        if (b->type != 7) {
-                                            b->type = 800;
-                                        }
-                                    }
-                                    Mix_HaltMusic();
-                                } else if (block->type == 117) {  // 音符+
-                                    ot(oto[14]);
-                                    marioSpeedY = -1500;
-                                    marioType = MarioType::AFTER_ORANGE_NOTE;
-                                    mtm = 0;
-                                    if (block->xtype >= 2 && marioType == MarioType::AFTER_ORANGE_NOTE) {
-                                        marioType = MarioType::NORMAL;
-                                        marioSpeedY = -1600;
-                                        block->xtype = 3;
-                                    }
-                                    if (block->xtype == 0)
-                                        block->xtype = 1;
-                                } else if (block->type == 120) {  // ジャンプ台
-                                    //block->xtype=0;
-                                    marioSpeedY = -2400;
-                                    marioType = MarioType::AFTER_SPRING;
-                                    mtm = 0;
-                                }
-                            }
-                        }
-                    }    //!
+                    // 上  mario standing on block
+                    if (marioX + marioWidth > screenX + xx0 * 2 + 100 && marioX < screenX + xx1 - xx0 * 2 - 100 &&
+                        marioY + marioHeight > screenY && marioY + marioHeight < screenY + xx1 && marioSpeedY >= -100) {
+                        block->onMarioStand();
+                    }
 
                     //sstr=""+mjumptm;
                     //ブロック判定の入れ替え
@@ -1503,83 +1459,32 @@ if (mtm==250)end();
                             xx[22] = 0;
                         }
                         for (int i = 0; i <= 1; i++) {
-
-                            //下
-                            if (i == xx[21] && marioType != MarioType::IN_PIPE && block->type != 117) {    // && xx[12]==0){
-                                if (marioX + marioWidth > screenX + xx0 * 2 + 800 && marioX < screenX + xx1 - xx0 * 2 - 800 &&
-                                    marioY > screenY - xx0 * 2 && marioY < screenY + xx1 - xx0 * 2 && marioSpeedY <= 0) {
-                                    xx[16] = 1;
-                                    xx[17] = 1;
-                                    marioY = screenY + xx1 + xx0;
-                                    if (marioSpeedY < 0) {
-                                        marioSpeedY = -marioSpeedY * 2 / 3;
-                                    }    //}
-                                    //壊れる
-                                    if (block->type == 1) {
-                                        ot(oto[3]);
-                                        eyobi(block->x + 1200, block->y + 1200, 300, -1000, 0, 160, 1000, 1000, 1, 120);
-                                        eyobi(block->x + 1200, block->y + 1200, -300, -1000, 0, 160, 1000, 1000, 1, 120);
-                                        eyobi(block->x + 1200, block->y + 1200, 240, -1400, 0, 160, 1000, 1000, 1, 120);
-                                        eyobi(block->x + 1200, block->y + 1200, -240, -1400, 0, 160, 1000, 1000, 1, 120);
-                                        blockBreak(*block);
-                                    }
-//コイン
-                                    if (block->type == 2) {
-                                        ot(oto[4]);
-                                        eyobi(block->x + 10, block->y, 0, -800, 0, 40, 3000, 3000, 0, 16);
-                                        block->type = 3;
-                                    }
-//隠し
-                                    if (block->type == 7) {
-                                        ot(oto[4]);
-                                        eyobi(block->x + 10, block->y, 0, -800, 0, 40, 3000, 3000, 0, 16);
-                                        marioY = screenY + xx1 + xx0;
-                                        block->type = 3;
-                                        if (marioSpeedY < 0) {
-                                            marioSpeedY = -marioSpeedY * 2 / 3;
-                                        }
-                                    }
-// トゲ
-                                    if (block->type == 10) {
-                                        mmsgtm = 30;
-                                        mmsgtype = 3;
-                                        marioHP--;
-                                    }
+                            // 下  mario hitting
+                            if (i == xx[21] && marioType != MarioType::IN_PIPE) {    // && xx[12]==0){
+                                if (marioX + marioWidth > screenX + xx0 * 2 + 800
+                                        && marioX < screenX + xx1 - xx0 * 2 - 800
+                                        && marioY > screenY - xx0 * 2
+                                        && marioY < screenY + xx1 - xx0 * 2
+                                        && marioSpeedY <= 0) {
+                                    block->onMarioHit(xx17);
                                 }
                             }
-//左右
-                            if (i == xx[22] && xx[15] == 0) {
-                                if (block->type != 7 && block->type != 110 && block->type != 117) {
-                                    if (block->type != 114) {    // && block->xtype==1)){
-                                        if (block->x >= -20000) {
-//if (marioX+marioWidth>screenX && marioX<screenX+xx2 && marioY+marioHeight>screenY+xx1/2-xx0 &&){
-                                            if (marioX + marioWidth > screenX
-                                                    && marioX < screenX + xx2
-                                                    && marioY + marioHeight > screenY + xx1 / 2 - xx0
-                                                    && marioY < screenY + xx2
-                                                    && marioSpeedX >= 0) {
-                                                marioX = screenX - marioWidth;
-                                                marioSpeedX = 0;
-                                                xx[16] = 1;
-//if (block->type!=4){marioX=screenX-marioWidth;marioSpeedX=0;xx[16]=1;}
-//if (block->type==4){marioX=screenX-marioWidth;marioSpeedX=-marioSpeedX*4/4;}
-                                            }
-                                            if (marioX + marioWidth > screenX + xx2
-                                                    && marioX < screenX + xx1
-                                                    && marioY + marioHeight > screenY + xx1 / 2 - xx0
-                                                    && marioY < screenY + xx2
-                                                    && marioSpeedX <= 0) {
-                                                marioX = screenX + xx1;
-                                                marioSpeedX = 0;
-                                                xx[16] = 1;    //end();
-//if (block->type!=4){marioX=screenX+xx1;marioSpeedX=0;xx[16]=1;}
-//if (block->type==4){marioX=screenX+xx1;marioSpeedX=-marioSpeedX*4/4;}
-                                            }
-                                        }
-                                    }
-                                }
+                            // 左右  mario touching
+                            if (i == xx[22] && block->x >= -20000) {
+                                if (marioX + marioWidth > screenX
+                                        && marioX < screenX + xx2
+                                        && marioY + marioHeight > screenY + xx1 / 2 - xx0
+                                        && marioY < screenY + xx2
+                                        && marioSpeedX >= 0) {
+                                    block->onMarioTouchLeft();
+                                } else if (marioX + marioWidth > screenX + xx2
+                                        && marioX < screenX + xx1
+                                        && marioY + marioHeight > screenY + xx1 / 2 - xx0
+                                        && marioY < screenY + xx2
+                                        && marioSpeedX <= 0) {
+                                    block->onMarioTouchRight();
+                                }  // i can't figure out how this works ...
                             }
-
                         }    //t3
                     }    //!
 
@@ -1587,10 +1492,10 @@ if (mtm==250)end();
 
                 if (block->type == 800) {
 //if (xx0+xx2>=-xx[14] && xx0<=fxmax+xx[14] && xx1+xx3>=-10-9000 && xx1<=fymax+10000){
-                    if (marioY > screenY - xx0 * 2 - 2000
-                            && marioY < screenY + xx1 - xx0 * 2 + 2000
-                            && marioX + marioWidth > screenX - 400
-                            && marioX < screenX + xx1) {
+                    if (marioY > screenY - xx0 * 2 - 2000               //   top > screenY - 2400
+                            && marioY < screenY + xx1 - xx0 * 2 + 2000  //   top < screenY + 4600
+                            && marioX + marioWidth > screenX - 400      // right > screenX - 400
+                            && marioX < screenX + xx1) {                //  left < screenX + 3000
                         block->x = -800000;
                         ot(oto[4]);
                     }
@@ -1623,7 +1528,7 @@ if (mtm==250)end();
                     }
 
                     if (block->xtype == 1) {
-                        if (xx[17] == 1) {
+                        if (xx17 == 1) {
                             if (marioX + marioWidth > screenX - 400 && marioX < screenX + xx1 / 2 - 1500) {
                                 block->x += 3000;
                             } else if (marioX + marioWidth >= screenX + xx1 / 2 - 1500  && marioX < screenX + xx1) {
@@ -1632,7 +1537,7 @@ if (mtm==250)end();
                         }
                     }
 
-                    if (xx[17] == 1 && block->xtype == 0) {
+                    if (xx17 == 1 && block->xtype == 0) {
                         ot(oto[4]);
                         eyobi(block->x + 10, block->y,
                               0, -800, 0, 40, 3000, 3000, 0, 16);
@@ -1642,7 +1547,7 @@ if (mtm==250)end();
 
 //敵出現
                 if (block->type == 101) {    //screenY+xx1+3000<marioY && // && marioY>screenY-xx0*2
-                    if (xx[17] == 1) {
+                    if (xx17 == 1) {
                         ot(oto[8]);
                         block->type = 3;
                         abrocktm[aco] = 16;
@@ -1663,7 +1568,7 @@ if (mtm==250)end();
 
 //おいしいきのこ出現
                 if (block->type == 102) {
-                    if (xx[17] == 1) {
+                    if (xx17 == 1) {
                         ot(oto[8]);
                         block->type = 3;
                         abrocktm[aco] = 16;
@@ -1678,7 +1583,7 @@ if (mtm==250)end();
 
 //まずいきのこ出現
                 if (block->type == 103) {
-                    if (xx[17] == 1) {
+                    if (xx17 == 1) {
                         ot(oto[8]);
                         block->type = 3;
                         abrocktm[aco] = 16;
@@ -1688,7 +1593,7 @@ if (mtm==250)end();
 
 //悪スター出し
                 if (block->type == 104) {
-                    if (xx[17] == 1) {
+                    if (xx17 == 1) {
                         ot(oto[8]);
                         block->type = 3;
                         abrocktm[aco] = 16;
@@ -1698,7 +1603,7 @@ if (mtm==250)end();
 
 //毒きのこ量産
                 if (block->type == 110) {
-                    if (xx[17] == 1) {
+                    if (xx17 == 1) {
                         block->type = 111;
                         block->hp = 999;
                     }
@@ -1714,7 +1619,7 @@ if (mtm==250)end();
                 }
 //コイン量産
                 if (block->type == 112) {
-                    if (xx[17] == 1) {
+                    if (xx17 == 1) {
                         block->type = 113;
                         block->hp = 999;
                         block->item = 0;
@@ -1733,7 +1638,7 @@ if (mtm==250)end();
                 }
 //隠し毒きのこ
                 if (block->type == 114) {
-                    if (xx[17] == 1) {
+                    if (xx17 == 1) {
                         if (block->xtype == 0) {
                             ot(oto[8]);
                             block->type = 3;
@@ -1770,14 +1675,9 @@ if (mtm==250)end();
                     }
                 }        //114
 
-//もろいブロック
-                if (block->type == 115) {
-
-                }        //115
-
 //Pスイッチ
                 if (block->type == 116) {
-                    if (xx[17] == 1) {
+                    if (xx17 == 1) {
                         ot(oto[8]);
 //ot(oto[13]);
                         block->type = 3;    //abrocktm[aco]=18;ayobi(block->x,block->y,0,0,0,104,1);
@@ -1787,7 +1687,7 @@ if (mtm==250)end();
 
 //ファイアバー強化
                 if (block->type == 124) {
-                    if (xx[17] == 1) {
+                    if (xx17 == 1) {
                         ot(oto[13]);
                         for (int j = 0; j < ENEMY_MAX; j++) {
                             if (atype[j] == 87 || atype[j] == 88) {
@@ -1801,14 +1701,14 @@ if (mtm==250)end();
                 }
 //ONスイッチ
                 if (block->type == 130) {
-                    if (xx[17] == 1) {
+                    if (xx17 == 1) {
                         if (block->xtype != 1) {
                             stageonoff = 0;
                             ot(oto[13]);
                         }
                     }
                 } else if (block->type == 131) {
-                    if (xx[17] == 1 && block->xtype != 2) {
+                    if (xx17 == 1 && block->xtype != 2) {
                         stageonoff = 1;
                         ot(oto[13]);
                         if (block->xtype == 1) {
@@ -1825,7 +1725,7 @@ if (mtm==250)end();
                 }
 //ヒント
                 if (block->type == 300) {
-                    if (xx[17] == 1) {
+                    if (xx17 == 1) {
                         ot(oto[15]);
                         if (block->xtype <= 100) {
                             tmsgtype = 1;
@@ -1844,7 +1744,7 @@ if (mtm==250)end();
                 }        //300
 
                 if (block->type == 301) {
-                    if (xx[17] == 1) {
+                    if (xx17 == 1) {
                         ot(oto[3]);
                         eyobi(block->x + 1200,
                               block->y + 1200, 300,

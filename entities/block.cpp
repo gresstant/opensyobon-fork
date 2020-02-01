@@ -1,13 +1,15 @@
 #include "block.h"
 #include "../utilities/draw.h"
+#include "mario.h"
 
 extern int fx, fy, fxmax, stagecolor;
+extern int mmsgtm, mmsgtype;
+extern Mix_Chunk *oto[19];
+void ot(Mix_Chunk * x);
+void eyobi(int x, int y, int xc, int xd, int xe, int xf, int width, int height, int gtype, int tm);
+void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype);
 
 std::vector<std::unique_ptr<LegacyBlock>> blocks;
-
-//int blockCounter;
-//int blockX[BLOCK_MAX], blockY[BLOCK_MAX], blockType[BLOCK_MAX], blockXType[BLOCK_MAX];
-//int thp[BLOCK_MAX], titem[BLOCK_MAX];
 
 // region ブロック出現
 
@@ -108,4 +110,141 @@ void paintSceneInGameBlock(const LegacyBlock& block) {
             drawImage(grap[0][2], screenX / 100 + 2, screenY / 100 + 1);
         }
     }
+}
+
+bool LegacyBlock::onTick() {
+    return false;
+}
+
+bool LegacyBlock::onMarioHit(int& xx17) {  // TODO remove xx17
+    if (this->type == 117) return false;
+
+    constexpr int xx0 = 200;
+    constexpr int xx1 = 3000;
+    const int screenY = this->y - fy;
+
+    xx17 = 1;
+    marioY = screenY + xx1 + xx0;
+    if (marioSpeedY < 0) {
+        marioSpeedY = -marioSpeedY * 2 / 3;
+    }    //}
+    //壊れる
+    if (this->type == 1) {
+        ot(oto[3]);
+        eyobi(this->x + 1200, this->y + 1200, 300, -1000, 0, 160, 1000, 1000, 1, 120);
+        eyobi(this->x + 1200, this->y + 1200, -300, -1000, 0, 160, 1000, 1000, 1, 120);
+        eyobi(this->x + 1200, this->y + 1200, 240, -1400, 0, 160, 1000, 1000, 1, 120);
+        eyobi(this->x + 1200, this->y + 1200, -240, -1400, 0, 160, 1000, 1000, 1, 120);
+        blockBreak(*this);
+    }
+    //コイン
+    if (this->type == 2) {
+        ot(oto[4]);
+        eyobi(this->x + 10, this->y, 0, -800, 0, 40, 3000, 3000, 0, 16);
+        this->type = 3;
+    }
+    //隠し
+    if (this->type == 7) {
+        ot(oto[4]);
+        eyobi(this->x + 10, this->y, 0, -800, 0, 40, 3000, 3000, 0, 16);
+        marioY = screenY + xx1 + xx0;
+        this->type = 3;
+        if (marioSpeedY < 0) {
+            marioSpeedY = -marioSpeedY * 2 / 3;
+        }
+    }
+    // トゲ
+    if (this->type == 10) {
+        mmsgtm = 30;
+        mmsgtype = 3;
+        marioHP--;
+    }
+
+    return true;
+}
+
+bool LegacyBlock::onMarioStand() {
+    if (this->type == 7 || this->type == 110 || this->type == 114) return false;
+
+    const int screenY = this->y - fy;
+
+    if (this->type != 115 && this->type != 400 && this->type != 117 && this->type != 118 && this->type != 120) {
+        marioY = screenY - marioHeight + 100;
+        marioSpeedY = 0;
+        marioOnGround = true;
+    } else if (this->type == 115) {
+        ot(oto[3]);
+        eyobi(this->x + 1200, this->y + 1200, 300, -1000, 0, 160, 1000, 1000, 1, 120);
+        eyobi(this->x + 1200, this->y + 1200, -300, -1000, 0, 160, 1000, 1000, 1, 120);
+        eyobi(this->x + 1200, this->y + 1200, 240, -1400, 0, 160, 1000, 1000, 1, 120);
+        eyobi(this->x + 1200, this->y + 1200, -240, -1400, 0, 160, 1000, 1000, 1, 120);
+        blockBreak(*this);
+    } else if (this->type == 400) {  // Pスイッチ
+        marioSpeedY = 0;
+        this->x = -8000000;
+        ot(oto[13]);
+        for (const auto& b : blocks) {
+            if (b->type != 7) {
+                b->type = 800;
+            }
+        }
+        Mix_HaltMusic();
+    } else if (this->type == 117) {  // 音符+
+        ot(oto[14]);
+        marioSpeedY = -1500;
+        marioType = MarioType::AFTER_ORANGE_NOTE;
+        mtm = 0;
+        if (this->xtype >= 2 && marioType == MarioType::AFTER_ORANGE_NOTE) {
+            marioType = MarioType::NORMAL;
+            marioSpeedY = -1600;
+            this->xtype = 3;
+        }
+        if (this->xtype == 0)
+            this->xtype = 1;
+    } else if (this->type == 120) {  // ジャンプ台
+        //this->xtype=0;
+        marioSpeedY = -2400;
+        marioType = MarioType::AFTER_SPRING;
+        mtm = 0;
+    }
+    
+    return true;
+}
+
+bool LegacyBlock::onMarioTouchLeft() {
+    if (this->type == 7 || this->type == 110 || this->type == 114 || this->type == 117) return false;
+
+    const int screenX = this->x - fx;
+
+    marioX = screenX - marioWidth;
+    marioSpeedX = 0;
+
+    return true;
+}
+
+bool LegacyBlock::onMarioTouchRight() {
+    if (this->type == 7 || this->type == 110 || this->type == 114 || this->type == 117) return false;
+
+    const int screenX = this->x - fx;
+
+    marioX = screenX + blockWidth;
+    marioSpeedX = 0;
+
+    return true;
+}
+
+bool LegacyBlock::onEnemyHit(int enemyId) {
+    return false;
+}
+
+bool LegacyBlock::onEnemyStand(int enemyId) {
+    return false;
+}
+
+bool LegacyBlock::onEnemyTouchLeft(int enemyId) {
+    return false;
+}
+
+bool LegacyBlock::onEnemyTouchRight(int enemyId) {
+    return false;
 }
