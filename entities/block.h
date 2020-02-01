@@ -34,7 +34,7 @@ void paintSceneInGameBlock(const LegacyBlock& block);
 extern std::vector<std::unique_ptr<LegacyBlock>> blocks;
 
 // move these two to class LegacyBlock later
-constexpr int blockWidth = 30;
-constexpr int blockHeight = 30;
+constexpr int blockWidth = 3000;
+constexpr int blockHeight = 3000;
 
 #endif //OSAFORK_BLOCK_H

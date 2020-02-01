@@ -116,45 +116,43 @@ bool LegacyBlock::onTick() {
     return false;
 }
 
+bool onMarioTouch(LegacyBlock* that) {
+    return false;
+}
+
 bool LegacyBlock::onMarioHit(int& xx17) {  // TODO remove xx17
-    if (this->type == 117) return false;
+    bool onTouchResult = onMarioTouch(this);
+    if (this->type == 117) return onTouchResult;
 
     constexpr int xx0 = 200;
-    constexpr int xx1 = 3000;
     const int screenY = this->y - fy;
 
     xx17 = 1;
-    marioY = screenY + xx1 + xx0;
+    marioY = screenY + blockHeight + xx0;
     if (marioSpeedY < 0) {
         marioSpeedY = -marioSpeedY * 2 / 3;
-    }    //}
-    //壊れる
-    if (this->type == 1) {
+    }
+
+    if (this->type == 1) {  // 壊れる
         ot(oto[3]);
         eyobi(this->x + 1200, this->y + 1200, 300, -1000, 0, 160, 1000, 1000, 1, 120);
         eyobi(this->x + 1200, this->y + 1200, -300, -1000, 0, 160, 1000, 1000, 1, 120);
         eyobi(this->x + 1200, this->y + 1200, 240, -1400, 0, 160, 1000, 1000, 1, 120);
         eyobi(this->x + 1200, this->y + 1200, -240, -1400, 0, 160, 1000, 1000, 1, 120);
         blockBreak(*this);
-    }
-    //コイン
-    if (this->type == 2) {
+    } else if (this->type == 2) {  // コイン
         ot(oto[4]);
         eyobi(this->x + 10, this->y, 0, -800, 0, 40, 3000, 3000, 0, 16);
         this->type = 3;
-    }
-    //隠し
-    if (this->type == 7) {
+    } else if (this->type == 7) {  // 隠し
         ot(oto[4]);
         eyobi(this->x + 10, this->y, 0, -800, 0, 40, 3000, 3000, 0, 16);
-        marioY = screenY + xx1 + xx0;
+        marioY = screenY + blockHeight + xx0;
         this->type = 3;
         if (marioSpeedY < 0) {
             marioSpeedY = -marioSpeedY * 2 / 3;
         }
-    }
-    // トゲ
-    if (this->type == 10) {
+    } else if (this->type == 10) {  // トゲ
         mmsgtm = 30;
         mmsgtype = 3;
         marioHP--;
@@ -164,7 +162,8 @@ bool LegacyBlock::onMarioHit(int& xx17) {  // TODO remove xx17
 }
 
 bool LegacyBlock::onMarioStand() {
-    if (this->type == 7 || this->type == 110 || this->type == 114) return false;
+    bool onTouchResult = onMarioTouch(this);
+    if (this->type == 7 || this->type == 110 || this->type == 114) return onTouchResult;
 
     const int screenY = this->y - fy;
 
@@ -212,7 +211,8 @@ bool LegacyBlock::onMarioStand() {
 }
 
 bool LegacyBlock::onMarioTouchLeft() {
-    if (this->type == 7 || this->type == 110 || this->type == 114 || this->type == 117) return false;
+    bool onTouchResult = onMarioTouch(this);
+    if (this->type == 7 || this->type == 110 || this->type == 114 || this->type == 117) return onTouchResult;
 
     const int screenX = this->x - fx;
 
@@ -223,7 +223,8 @@ bool LegacyBlock::onMarioTouchLeft() {
 }
 
 bool LegacyBlock::onMarioTouchRight() {
-    if (this->type == 7 || this->type == 110 || this->type == 114 || this->type == 117) return false;
+    bool onTouchResult = onMarioTouch(this);
+    if (this->type == 7 || this->type == 110 || this->type == 114 || this->type == 117) return onTouchResult;
 
     const int screenX = this->x - fx;
 
