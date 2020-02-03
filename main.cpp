@@ -3418,8 +3418,6 @@ void tekizimen() {
     for (const auto& block : blocks) {
         int xx0 = xx[0] = 200;
         int xx2 = xx[2] = 1000;
-//        int screenX = xx[8] = block->x - fx;
-//        int screenY = xx[9] = block->y - fy;
 
         int scrBlockTop = block->y - fy, scrBlockBottom = block->y - fy + blockHeight;
         int scrBlockLeft = block->x - fx, scrBlockRight = block->x - fx + blockWidth;
@@ -3428,118 +3426,35 @@ void tekizimen() {
         int scrEnemyLeft = aa[t] - fx, scrEnemyRight = aa[t] + anobia[t] - fx;
 
         if (scrBlockRight >= -12010 && scrBlockLeft <= fxmax + 12000) {
-            if (atype[t] != 86 && atype[t] != 90 && block->type != 140) {
-//上
-                if (block->type != 7) {
-                    if (block->type != 117) {
-                        if (scrEnemyRight > scrBlockLeft + xx0
-                                && scrEnemyLeft < scrBlockRight - xx0 * 1
-                                && scrEnemyBottom > scrBlockTop
-                                && scrEnemyBottom < scrBlockBottom
-                                && ad[t] >= -100) {
-                            ab[t] = scrBlockTop - anobib[t] + 100 + fy;
-                            ad[t] = 0;
-                            axzimen[t] = 1;
-//ジャンプ台
-                            if (block->type == 120) {
-                                ad[t] = -1600;
-                                azimentype[t] = 30;
-                            }
-                        }
-                    }
-                }
-//下
-                if (block->type != 117) {
-                    if (scrEnemyRight > scrBlockLeft + xx0 &&
-                            scrEnemyLeft < scrBlockRight - xx0 * 1 &&
-                            scrEnemyTop > scrBlockBottom - blockHeight &&  // What's this ???
-                            scrEnemyTop < scrBlockBottom + xx0) {
-                        ab[t] = scrBlockBottom + xx0 + fy;
-                        if (ad[t] < 0) {
-                            ad[t] = 0;
-                        }    //=-ad[t]*2/3;}
-//if (blocks[t]->type==7){
-//for (t2=0;t2<BLOCK_MAX;t2++){if (blocks[t2]->type==5){blocks[t2]->type=6;}else if (blocks[t2]->type==6){blocks[t2]->type=5;}}
-//}
-                    }
-                }
-//左右
-                xx[27] = 0;
-                if ((atype[t] >= 100 || block->type != 7 || (block->type == 7 && atype[t] == 2)) && block->type != 117) {
-                    if (scrEnemyRight > scrBlockLeft &&
-                            scrEnemyLeft < scrBlockLeft + xx2 &&
-                            scrEnemyBottom > scrBlockTop + blockHeight / 2 - xx0 &&
-                            scrEnemyTop < scrBlockTop + xx2) {
-                        aa[t] = scrBlockLeft - anobia[t] + fx;
-                        ac[t] = 0;
-                        amuki[t] = 0;
-                        xx[27] = 1;
-                    }
-                    if (scrEnemyRight > scrBlockRight - xx0 * 2 &&
-                            scrEnemyLeft < scrBlockRight &&
-                            scrEnemyBottom > scrBlockTop + blockHeight / 2 - xx0 &&
-                            scrEnemyTop < scrBlockTop + xx2) {
-                        aa[t] = scrBlockRight + fx;
-                        ac[t] = 0;
-                        amuki[t] = 1;
-                        xx[27] = 1;
-                    }
-//こうらブレイク
-                    if (xx[27] == 1 && (block->type == 7 || block->type == 1) && atype[t] == 2) {
-                        if (block->type == 7) {
-                            ot(oto[4]);
-                            block->type = 3;
-                            eyobi(block->x + 10, block->y, 0, -800,
-                                  0, 40, 3000, 3000, 0, 16);
-                        } else if (block->type == 1) {
-                            ot(oto[3]);
-                            eyobi(block->x + 1200,
-                                  block->y + 1200,
-                                  300, -1000, 0, 160, 1000, 1000, 1, 120);
-                            eyobi(block->x + 1200,
-                                  block->y + 1200,
-                                  -300, -1000, 0, 160, 1000, 1000, 1, 120);
-                            eyobi(block->x + 1200,
-                                  block->y + 1200,
-                                  240, -1400, 0, 160, 1000, 1000, 1, 120);
-                            eyobi(block->x + 1200,
-                                  block->y + 1200,
-                                  -240, -1400, 0, 160, 1000, 1000, 1, 120);
-                            blockBreak(*block);
-                        }
-
-                    }
-                }
+            //上
+            if (scrEnemyRight > scrBlockLeft + xx0
+                    && scrEnemyLeft < scrBlockRight - xx0 * 1
+                    && scrEnemyBottom > scrBlockTop
+                    && scrEnemyBottom < scrBlockBottom
+                    && ad[t] >= -100) {
+                block->onEnemyStand(t);
             }
-            if (atype[t] == 86 || atype[t] == 90) {
-                if (scrEnemyRight > scrBlockLeft
-                        && scrEnemyLeft < scrBlockRight
-                        && scrEnemyBottom > scrBlockTop
-                        && scrEnemyTop < scrBlockBottom) {
-                    ot(oto[3]);
-                    eyobi(block->x + 1200, block->y + 1200, 300,
-                          -1000, 0, 160, 1000, 1000, 1, 120);
-                    eyobi(block->x + 1200, block->y + 1200,
-                          -300, -1000, 0, 160, 1000, 1000, 1, 120);
-                    eyobi(block->x + 1200, block->y + 1200, 240,
-                          -1400, 0, 160, 1000, 1000, 1, 120);
-                    eyobi(block->x + 1200, block->y + 1200,
-                          -240, -1400, 0, 160, 1000, 1000, 1, 120);
-                    blockBreak(*block);
 
-                }
-            }            //90
+            //下
+            if (scrEnemyRight > scrBlockLeft + xx0 &&
+                    scrEnemyLeft < scrBlockRight - xx0 * 1 &&
+                    scrEnemyTop > scrBlockTop &&
+                    scrEnemyTop < scrBlockBottom + xx0) {
+                block->onEnemyHit(t);
+            }
 
-        }
-//剣とってクリア
-        if (block->type == 140) {
-            if (scrEnemyTop > scrBlockTop - xx0 * 2 - 2000
-                    && scrEnemyTop < scrBlockBottom - xx0 * 2 + 2000
-                    && scrEnemyRight > scrBlockLeft - 400
-                    && scrEnemyLeft < scrBlockRight) {
-                block->x = -800000;    //ot(oto[4]);
-                liftActType[20] = 1;
-                sron[20] = 1;
+            //左右
+            if (scrEnemyRight > scrBlockLeft &&
+                    scrEnemyLeft < scrBlockLeft + xx2 &&
+                    scrEnemyBottom > scrBlockTop + blockHeight / 2 - xx0 &&
+                    scrEnemyTop < scrBlockTop + xx2) {
+                block->onEnemyTouchLeft(t);
+            }
+            if (scrEnemyRight > scrBlockRight - xx0 * 2 &&
+                    scrEnemyLeft < scrBlockRight &&
+                    scrEnemyBottom > scrBlockTop + blockHeight / 2 - xx0 &&
+                    scrEnemyTop < scrBlockTop + xx2) {
+                block->onEnemyTouchRight(t);
             }
         }
     }                //tt

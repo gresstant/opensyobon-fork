@@ -2,13 +2,11 @@
 #include "../utilities/draw.h"
 #include "mario.h"
 #include "enemy_template.h"
+#include "enemy_instance.h"
 
 extern int fx, fy, fxmax, stagecolor;
 
-#define ENEMY_MAX 24
 extern int liftActType[21], sron[21];
-extern int abrocktm[24], aco;
-extern int atype[ENEMY_MAX], axtype[ENEMY_MAX];
 extern int stageonoff;
 
 extern int tmsgtm, tmsgtype, tmsgx, tmsgy, tmsgnobix, tmsgnobiy, tmsg;
@@ -466,18 +464,87 @@ bool LegacyBlock::onMarioTouchRight() {
     return true;
 }
 
+void onEnemyTouch(LegacyBlock* block, int enemyId) {
+    if (atype[enemyId] == 86 || atype[enemyId] == 90) {
+        ot(oto[3]);
+        eyobi(block->x + 1200, block->y + 1200, 300, -1000, 0, 160, 1000, 1000, 1, 120);
+        eyobi(block->x + 1200, block->y + 1200, -300, -1000, 0, 160, 1000, 1000, 1, 120);
+        eyobi(block->x + 1200, block->y + 1200, 240, -1400, 0, 160, 1000, 1000, 1, 120);
+        eyobi(block->x + 1200, block->y + 1200, -240, -1400, 0, 160, 1000, 1000, 1, 120);
+        blockBreak(*block);
+    }
+    if (block->type == 140) {  // 剣とってクリア
+        block->x = -800000;
+        liftActType[20] = 1;
+        sron[20] = 1;
+    }
+}
+
 bool LegacyBlock::onEnemyHit(int enemyId) {
-    return false;
+    if (atype[enemyId] == 86 || atype[enemyId] == 90 || this->type == 140) { onEnemyTouch(this, enemyId); return true; }
+    if (this->type == 117) return false;
+
+    constexpr int xx0 = 200;
+    
+    ab[enemyId] = this->y - fy + blockHeight + xx0 + fy;
+    if (ad[enemyId] < 0) {
+        ad[enemyId] = 0;
+    }
+
+    return true;
 }
 
 bool LegacyBlock::onEnemyStand(int enemyId) {
-    return false;
+    if (atype[enemyId] == 86 || atype[enemyId] == 90 || this->type == 140) { onEnemyTouch(this, enemyId); return true; }
+    if (this->type == 7 || this->type == 117) return false;
+
+    ab[enemyId] = this->y - fy - anobib[enemyId] + 100 + fy;
+    ad[enemyId] = 0;
+    axzimen[enemyId] = 1;
+
+    if (this->type == 120) {  // ジャンプ台  spring (jump platform)
+        ad[enemyId] = -1600;
+        azimentype[enemyId] = 30;
+    }
+
+    return true;
+}
+
+void onEnemyTouchEndCommon(LegacyBlock* block, int enemyId) {
+    if ((block->type == 7 || block->type == 1) && atype[enemyId] == 2) {  // こうらブレイク
+        if (block->type == 7) {
+            ot(oto[4]);
+            block->type = 3;
+            eyobi(block->x + 10, block->y, 0, -800, 0, 40, 3000, 3000, 0, 16);
+        } else if (block->type == 1) {
+            ot(oto[3]);
+            eyobi(block->x + 1200, block->y + 1200, 300, -1000, 0, 160, 1000, 1000, 1, 120);
+            eyobi(block->x + 1200, block->y + 1200, -300, -1000, 0, 160, 1000, 1000, 1, 120);
+            eyobi(block->x + 1200, block->y + 1200, 240, -1400, 0, 160, 1000, 1000, 1, 120);
+            eyobi(block->x + 1200, block->y + 1200, -240, -1400, 0, 160, 1000, 1000, 1, 120);
+            blockBreak(*block);
+        }
+    }
 }
 
 bool LegacyBlock::onEnemyTouchLeft(int enemyId) {
-    return false;
+    if (atype[enemyId] == 86 || atype[enemyId] == 90 || this->type == 140) { onEnemyTouch(this, enemyId); return true; }
+    if (!((atype[enemyId] >= 100 || this->type != 7 || (this->type == 7 && atype[enemyId] == 2)) && this->type != 117)) return false;
+
+    aa[enemyId] = this->x - fx - anobia[enemyId] + fx;
+    ac[enemyId] = 0;
+    amuki[enemyId] = 0;
+    onEnemyTouchEndCommon(this, enemyId);
+    return true;
 }
 
 bool LegacyBlock::onEnemyTouchRight(int enemyId) {
-    return false;
+    if (atype[enemyId] == 86 || atype[enemyId] == 90 || this->type == 140) { onEnemyTouch(this, enemyId); return true; }
+    if (!((atype[enemyId] >= 100 || this->type != 7 || (this->type == 7 && atype[enemyId] == 2)) && this->type != 117)) return false;
+
+    aa[enemyId] = this->x - fx + blockWidth + fx;
+    ac[enemyId] = 0;
+    amuki[enemyId] = 1;
+    onEnemyTouchEndCommon(this, enemyId);
+    return true;
 }
