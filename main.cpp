@@ -3416,26 +3416,28 @@ void tekizimen() {
 
     //ブロック
     for (const auto& block : blocks) {
-        xx[0] = 200;
-        xx[1] = 3000;
-        xx[2] = 1000;
-        xx[8] = block->x - fx;
-        xx[9] = block->y - fy;
-        if (block->x - fx + xx[1] >= -12010 && block->x - fx <= fxmax + 12000) {
-            if (atype[t] != 86 && atype[t] != 90 && block->type != 140) {
+        int xx0 = xx[0] = 200;
+        int xx2 = xx[2] = 1000;
+//        int screenX = xx[8] = block->x - fx;
+//        int screenY = xx[9] = block->y - fy;
 
+        int scrBlockTop = block->y - fy, scrBlockBottom = block->y - fy + blockHeight;
+        int scrBlockLeft = block->x - fx, scrBlockRight = block->x - fx + blockWidth;
+
+        int scrEnemyTop = ab[t] - fy, scrEnemyBottom = ab[t] + anobib[t] - fy;
+        int scrEnemyLeft = aa[t] - fx, scrEnemyRight = aa[t] + anobia[t] - fx;
+
+        if (scrBlockRight >= -12010 && scrBlockLeft <= fxmax + 12000) {
+            if (atype[t] != 86 && atype[t] != 90 && block->type != 140) {
 //上
                 if (block->type != 7) {
-//if (block->type==117 && blocks[t]->xtype==1){ad[t]=-1500;}
                     if (block->type != 117) {
-//if (!(block->type==120 && blocks[t]->xtype==0)){
-                        if (aa[t] + anobia[t] - fx > xx[8] + xx[0]
-                            && aa[t] - fx <
-                               xx[8] + xx[1] - xx[0] * 1
-                            && ab[t] + anobib[t] - fy > xx[9]
-                            && ab[t] + anobib[t] - fy < xx[9] + xx[1]
-                            && ad[t] >= -100) {
-                            ab[t] = xx[9] - anobib[t] + 100 + fy;
+                        if (scrEnemyRight > scrBlockLeft + xx0
+                                && scrEnemyLeft < scrBlockRight - xx0 * 1
+                                && scrEnemyBottom > scrBlockTop
+                                && scrEnemyBottom < scrBlockBottom
+                                && ad[t] >= -100) {
+                            ab[t] = scrBlockTop - anobib[t] + 100 + fy;
                             ad[t] = 0;
                             axzimen[t] = 1;
 //ジャンプ台
@@ -3443,18 +3445,16 @@ void tekizimen() {
                                 ad[t] = -1600;
                                 azimentype[t] = 30;
                             }
-//}
-
                         }
                     }
                 }
 //下
                 if (block->type != 117) {
-                    if (aa[t] + anobia[t] - fx > xx[8] + xx[0] &&
-                            aa[t] - fx < xx[8] + xx[1] - xx[0] * 1 &&
-                            ab[t] - fy > xx[9] + xx[1] - xx[1] &&
-                            ab[t] - fy < xx[9] + xx[1] + xx[0]) {
-                        ab[t] = xx[9] + xx[1] + xx[0] + fy;
+                    if (scrEnemyRight > scrBlockLeft + xx0 &&
+                            scrEnemyLeft < scrBlockRight - xx0 * 1 &&
+                            scrEnemyTop > scrBlockBottom - blockHeight &&  // What's this ???
+                            scrEnemyTop < scrBlockBottom + xx0) {
+                        ab[t] = scrBlockBottom + xx0 + fy;
                         if (ad[t] < 0) {
                             ad[t] = 0;
                         }    //=-ad[t]*2/3;}
@@ -3466,20 +3466,20 @@ void tekizimen() {
 //左右
                 xx[27] = 0;
                 if ((atype[t] >= 100 || block->type != 7 || (block->type == 7 && atype[t] == 2)) && block->type != 117) {
-                    if (aa[t] + anobia[t] - fx > xx[8] &&
-                            aa[t] - fx < xx[8] + xx[2] &&
-                            ab[t] + anobib[t] - fy > xx[9] + xx[1] / 2 - xx[0] &&
-                            ab[t] - fy < xx[9] + xx[2]) {
-                        aa[t] = xx[8] - anobia[t] + fx;
+                    if (scrEnemyRight > scrBlockLeft &&
+                            scrEnemyLeft < scrBlockLeft + xx2 &&
+                            scrEnemyBottom > scrBlockTop + blockHeight / 2 - xx0 &&
+                            scrEnemyTop < scrBlockTop + xx2) {
+                        aa[t] = scrBlockLeft - anobia[t] + fx;
                         ac[t] = 0;
                         amuki[t] = 0;
                         xx[27] = 1;
                     }
-                    if (aa[t] + anobia[t] - fx > xx[8] + xx[1] - xx[0] * 2 &&
-                            aa[t] - fx < xx[8] + xx[1] &&
-                            ab[t] + anobib[t] - fy > xx[9] + xx[1] / 2 - xx[0] &&
-                            ab[t] - fy < xx[9] + xx[2]) {
-                        aa[t] = xx[8] + xx[1] + fx;
+                    if (scrEnemyRight > scrBlockRight - xx0 * 2 &&
+                            scrEnemyLeft < scrBlockRight &&
+                            scrEnemyBottom > scrBlockTop + blockHeight / 2 - xx0 &&
+                            scrEnemyTop < scrBlockTop + xx2) {
+                        aa[t] = scrBlockRight + fx;
                         ac[t] = 0;
                         amuki[t] = 1;
                         xx[27] = 1;
@@ -3512,10 +3512,10 @@ void tekizimen() {
                 }
             }
             if (atype[t] == 86 || atype[t] == 90) {
-                if (aa[t] + anobia[t] - fx > xx[8]
-                        && aa[t] - fx < xx[8] + xx[1]
-                        && ab[t] + anobib[t] - fy > xx[9]
-                        && ab[t] - fy < xx[9] + xx[1]) {
+                if (scrEnemyRight > scrBlockLeft
+                        && scrEnemyLeft < scrBlockRight
+                        && scrEnemyBottom > scrBlockTop
+                        && scrEnemyTop < scrBlockBottom) {
                     ot(oto[3]);
                     eyobi(block->x + 1200, block->y + 1200, 300,
                           -1000, 0, 160, 1000, 1000, 1, 120);
@@ -3533,10 +3533,10 @@ void tekizimen() {
         }
 //剣とってクリア
         if (block->type == 140) {
-            if (ab[t] - fy > xx[9] - xx[0] * 2 - 2000
-                    && ab[t] - fy < xx[9] + xx[1] - xx[0] * 2 + 2000
-                    && aa[t] + anobia[t] - fx > xx[8] - 400
-                    && aa[t] - fx < xx[8] + xx[1]) {
+            if (scrEnemyTop > scrBlockTop - xx0 * 2 - 2000
+                    && scrEnemyTop < scrBlockBottom - xx0 * 2 + 2000
+                    && scrEnemyRight > scrBlockLeft - 400
+                    && scrEnemyLeft < scrBlockRight) {
                 block->x = -800000;    //ot(oto[4]);
                 liftActType[20] = 1;
                 sron[20] = 1;
