@@ -1760,16 +1760,12 @@ if (mtm==250)end();
 
                     if (groundType[t] == 103) {
                         if (groundXType[t] == 0) {
-                            eis[eiCounter]->msgTimer = 10;
-                            eis[eiCounter]->msgIndex = 50;
-                            ayobi(groundX[t] + 9000, groundY[t] + 2000, 0, 0, 0, 79, 0);
+                            ayobi(groundX[t] + 9000, groundY[t] + 2000, 0, 0, 0, 79, 0, 0, 10, 50);
                             groundX[t] = -800000000;
                         }
 
                         if (groundXType[t] == 1 && blocks[6]->type <= 6) {
-                            eis[eiCounter]->msgTimer = 10;
-                            eis[eiCounter]->msgIndex = 50;
-                            ayobi(groundX[t] - 12000, groundY[t] + 2000, 0, 0, 0, 79, 0);
+                            ayobi(groundX[t] - 12000, groundY[t] + 2000, 0, 0, 0, 79, 0, 0, 10, 50);
                             groundX[t] = -800000000;
                             blocks[9]->xtype = 500;    //blocks[9]->type=1;
                         }
@@ -2122,19 +2118,23 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
 
                 xx[0] = 0;
                 xx[1] = 0;
-                
+
+                bool forcedFD = false;
+                int faceDirection;
                 if (!et->available && et->btm < 0
                     && screenX >= fxmax + 2000
                     && screenX < fxmax + 2000 + marioSpeedX && i == 0) {
                     xx[0] = 1;
-                    eis[eiCounter]->faceDirection = 0;
+                    forcedFD = true;
+                    faceDirection = 0;
                 }        // && mmuki==1
                 if (!et->available && et->btm < 0
                     && screenX >= -400 - eiWidthStorage[et->type] + marioSpeedX
                     && screenX < -400 - eiWidthStorage[et->type] && i == 1) {
                     xx[0] = 1;
                     xx[1] = 1;
-                    eis[eiCounter]->faceDirection = 1;
+                    forcedFD = true;
+                    faceDirection = 1;
                 }        // && mmuki==0
                 if (et->available && screenX >= 0 - eiWidthStorage[et->type]
                     && screenX <= fxmax + 4000
@@ -2154,6 +2154,7 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                     }
 //10
                     ayobi(et->x, et->y, 0, 0, 0, et->type, et->xtype);
+                    if (forcedFD) eis.back()->faceDirection = faceDirection;
                 }
 
             }        //tt

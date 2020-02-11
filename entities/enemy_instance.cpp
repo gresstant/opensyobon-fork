@@ -14,11 +14,10 @@ void ot(Mix_Chunk * x);
 std::vector<std::unique_ptr<EnemyInstance>> eis;
 
 // 敵キャラ  Enemy Instances
-int eiCounter;
 int eiWidthStorage[160], eiHeightStorage[160];
 
 // 敵キャラ、アイテム作成
-void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype, int cfbt) {
+void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype, int cfbt, int msgTimer, int msgIndex) {
     auto eiPtr = std::make_unique<EnemyInstance>();
 
     int rz = 0;
@@ -56,6 +55,8 @@ void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype, int cfbt)
             eiPtr->height = eiHeightStorage[type];
 
             eiPtr->createFromBlockTimer = cfbt;
+            eiPtr->msgTimer = msgTimer;
+            eiPtr->msgIndex = msgIndex;
 
             //大砲音
             if (type == 7 && CheckSoundMem(oto[10]) == 0) {

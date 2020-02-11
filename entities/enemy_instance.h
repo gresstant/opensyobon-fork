@@ -32,11 +32,10 @@ public:
     int msgIndex;
 };
 
-void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype, int cfbt = 0);
+void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype, int cfbt = 0, int msgTimer = 0, int msgIndex = 0);
 void tekizimen(EnemyInstance& ei);
 
 #define ENEMY_MAX 24
-extern int eiCounter;
 extern int eiWidthStorage[160], eiHeightStorage[160];
 
 // I'm to use deque to make it possible to remove elements more quickly.
