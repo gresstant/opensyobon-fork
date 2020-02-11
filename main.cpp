@@ -2165,53 +2165,53 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
 
 //敵キャラ
     for (int index = 0; index < ENEMY_MAX; index++) {
-        int xx0 = eiX[index] - fx;
-        int xx1 = eiY[index] - fy;
-        int xx2 = eiWidth[index];
-        int xx3 = eiHeight[index];
+        int scrEnemyX = eiX[index] - fx;
+        int scrEnemyY = eiY[index] - fy;
+        int enemyWidth = eiWidth[index];
+        int enemyHeight = eiHeight[index];
         int xx14 = 12000 * 1;
 
         if (anotm[index] >= 0)
             anotm[index]--;
-        if (xx0 + xx2 >= -xx14 && xx0 <= fxmax + xx14
-                && xx1 + xx3 >= -10 - 9000 && xx1 <= fymax + 20000) {
-            aacta[index] = 0;
-            aactb[index] = 0;
+        if (scrEnemyX + enemyWidth >= -xx14 && scrEnemyX <= fxmax + xx14
+            && scrEnemyY + enemyHeight >= -10 - 9000 && scrEnemyY <= fymax + 20000) {
+            int moveX = 0;
+            int moveY = 0;
 
-            xx[10] = 0;
+            int absMoveX = 0;
 
             switch (eiType[index]) {
                 case 0:
-                    xx[10] = 100;
+                    absMoveX = 100;
                     break;
 
 //こうらの敵
                 case 1:
-                    xx[10] = 100;
+                    absMoveX = 100;
                     break;
 
 //こうら
                 case 2:
-                    xx[10] = 0;
+                    absMoveX = 0;
                     xx[17] = 800;
                     if (eiXType[index] >= 1)
-                        xx[10] = xx[17];
-//if (eiXType[index]==1)xx[10]=xx[17];
-//if (eiXType[index]==2)xx[10]=-xx[17];
+                        absMoveX = xx[17];
+//if (eiXType[index]==1)absMoveX=xx[17];
+//if (eiXType[index]==2)absMoveX=-xx[17];
 //他の敵を倒す
                     if (eiXType[index] >= 1) {
                         for (int i = 0; i < ENEMY_MAX; i++) {
-                            xx0 = 250;
+                            scrEnemyX = 250;
                             xx[5] = -800;
                             xx[12] = 0;
-                            xx1 = 1600;
+                            scrEnemyY = 1600;
                             xx[8] = eiX[i] - fx;
                             xx[9] = eiY[i] - fy;
                             if (index != i) {
-                                if (eiX[index] + eiWidth[index] - fx > xx[8] + xx0 * 2
-                                    && eiX[index] - fx < xx[8] + eiWidth[i] - xx0 * 2
+                                if (eiX[index] + eiWidth[index] - fx > xx[8] + scrEnemyX * 2
+                                    && eiX[index] - fx < xx[8] + eiWidth[i] - scrEnemyX * 2
                                     && eiY[index] + eiHeight[index] - fy > xx[9] + xx[5]
-                                    && eiY[index] + eiHeight[index] - fy < xx[9] + xx1 * 3 + xx[12] + 1500) {
+                                    && eiY[index] + eiHeight[index] - fy < xx[9] + scrEnemyY * 3 + xx[12] + 1500) {
                                     eiX[i] = -800000;
                                     ot(oto[6]);
                                 }
@@ -2230,19 +2230,19 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                     if (eiXType[index] == 1)
                         eiY[index] += 1200;
 
-//xx[10]=100;
+//absMoveX=100;
                     break;
 
 //スーパージエン
                 case 4:
-                    xx[10] = 120;
-                    xx0 = 250;
+                    absMoveX = 120;
+                    scrEnemyX = 250;
                     xx[8] = eiX[index] - fx;
                     xx[9] = eiY[index] - fy;
                     if (atm[index] >= 0)
                         atm[index]--;
-                    if (abs(marioX + marioWidth - xx[8] - xx0 * 2) < 9000
-                        && abs(marioX < xx[8] - eiWidth[index] + xx0 * 2) < 3000  // WTF
+                    if (abs(marioX + marioWidth - xx[8] - scrEnemyX * 2) < 9000
+                        && abs(marioX < xx[8] - eiWidth[index] + scrEnemyX * 2) < 3000  // WTF
                             && marioSpeedY <= -600 && atm[index] <= 0) {
                         if (eiXType[index] == 1 && !marioOnGround && axzimen[index] == 1) {
                             eiSpeedY[index] = -1600;
@@ -2254,7 +2254,7 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
 
 //クマー
                 case 5:
-                    xx[10] = 160;
+                    absMoveX = 160;
 //azimentype[index]=2;
                     break;
 
@@ -2265,21 +2265,21 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                         eiY[index] += eiSpeedY[index];
                     }
 
-                    xx[10] = 120;
+                    absMoveX = 120;
                     if (atm[index] >= 10) {
                         atm[index]++;
                         if (marioHP >= 1) {
                             if (atm[index] <= 19) {
-                                marioX = xx0;
-                                marioY = xx1 - 3000;
+                                marioX = scrEnemyX;
+                                marioY = scrEnemyY - 3000;
                                 marioType = MarioType::NORMAL;
                             }
-                            xx[10] = 0;
+                            absMoveX = 0;
                             if (atm[index] == 20) {
                                 marioSpeedX = 700;
                                 mkeytm = 24;
                                 marioSpeedY = -1200;
-                                marioY = xx1 - 1000 - 3000;
+                                marioY = scrEnemyY - 1000 - 3000;
                                 eiFaceDirection[index] = 1;
                                 if (eiXType[index] == 1) {
                                     marioSpeedX = 840;
@@ -2322,7 +2322,7 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                                   600, -1200, 0, 160, 1000, 10 * 3000 - 1200, 4, 240);
                             eiFaceDirection[index] = 1;
                         }
-//marioSpeedX=700;mkeytm=24;marioSpeedY=-1200;marioY=xx1-1000-3000;eiFaceDirection[index]=1;if (eiXType[index]==1){marioSpeedX=840;eiXType[index]=0;}}
+//marioSpeedX=700;mkeytm=24;marioSpeedY=-1200;marioY=scrEnemyY-1000-3000;eiFaceDirection[index]=1;if (eiXType[index]==1){marioSpeedX=840;eiXType[index]=0;}}
                         if (atm[index] == 140) {
                             eiFaceDirection[index] = 0;
                             atm[index] = 0;
@@ -2334,17 +2334,17 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                     }
 //他の敵を投げる
                     for (int i = 0; i < ENEMY_MAX; i++) {
-                        xx0 = 250;
+                        scrEnemyX = 250;
                         xx[5] = -800;
                         xx[12] = 0;
-                        xx1 = 1600;
+                        scrEnemyY = 1600;
                         xx[8] = eiX[i] - fx;
                         xx[9] = eiY[i] - fy;
                         if (index != i && eiType[i] >= 100) {
-                            if (eiX[index] + eiWidth[index] - fx > xx[8] + xx0 * 2
-                                && eiX[index] - fx < xx[8] + eiWidth[i] - xx0 * 2
+                            if (eiX[index] + eiWidth[index] - fx > xx[8] + scrEnemyX * 2
+                                && eiX[index] - fx < xx[8] + eiWidth[i] - scrEnemyX * 2
                                 && eiY[index] + eiHeight[index] - fy > xx[9] + xx[5]
-                                && eiY[index] + eiHeight[index] - fy < xx[9] + xx1 * 3 + xx[12] + 1500) {
+                                && eiY[index] + eiHeight[index] - fy < xx[9] + scrEnemyY * 3 + xx[12] + 1500) {
 //eiX[i]=-800000;
                                 eiFaceDirection[i] = 1;
                                 eiX[i] = eiX[index] + 300;
@@ -2361,12 +2361,12 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
 //ジエン大砲
                 case 7:
                     azimentype[index] = 0;
-                    xx[10] = 0;
+                    absMoveX = 0;
                     xx[11] = 400;
                     if (eiXType[index] == 0)
-                        xx[10] = xx[11];
+                        absMoveX = xx[11];
                     if (eiXType[index] == 1)
-                        xx[10] = -xx[11];
+                        absMoveX = -xx[11];
                     if (eiXType[index] == 2)
                         eiY[index] -= xx[11];
                     if (eiXType[index] == 3)
@@ -2418,12 +2418,12 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
 //ファイアー
                 case 10:
                     azimentype[index] = 0;
-                    xx[10] = 0;
+                    absMoveX = 0;
                     xx[11] = 400;
                     if (eiXType[index] == 0)
-                        xx[10] = xx[11];
+                        absMoveX = xx[11];
                     if (eiXType[index] == 1)
-                        xx[10] = -xx[11];
+                        absMoveX = -xx[11];
                     break;
 
 //モララー
@@ -2437,17 +2437,17 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                         }
 
                         for (int i = 0; i < ENEMY_MAX; i++) {
-                            xx0 = 250;
+                            scrEnemyX = 250;
                             xx[5] = -800;
                             xx[12] = 0;
-                            xx1 = 1600;
+                            scrEnemyY = 1600;
                             xx[8] = eiX[i] - fx;
                             xx[9] = eiY[i] - fy;
                             if (index != i && eiType[i] == 102) {
-                                if (eiX[index] + eiWidth[index] - fx > xx[8] + xx0 * 2
-                                    && eiX[index] - fx < xx[8] + eiWidth[i] - xx0 * 2
+                                if (eiX[index] + eiWidth[index] - fx > xx[8] + scrEnemyX * 2
+                                    && eiX[index] - fx < xx[8] + eiWidth[i] - scrEnemyX * 2
                                     && eiY[index] + eiHeight[index] - fy > xx[9] + xx[5]
-                                    && eiY[index] + eiHeight[index] - fy < xx[9] + xx1 * 3 + xx[12] + 1500) {
+                                    && eiY[index] + eiHeight[index] - fy < xx[9] + scrEnemyY * 3 + xx[12] + 1500) {
                                     eiX[i] = -800000;
                                     eiXType[index] = 1;
                                     eiSpeedY[index] = -1600;
@@ -2467,21 +2467,21 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
 //レーザー
                 case 79:
                     azimentype[index] = 0;
-                    xx[10] = 1600;
+                    absMoveX = 1600;
                     if (eiXType[index] == 1) {
-                        xx[10] = 1200;
+                        absMoveX = 1200;
                         eiY[index] -= 200;
                     }
                     if (eiXType[index] == 2) {
-                        xx[10] = 1200;
+                        absMoveX = 1200;
                         eiY[index] += 200;
                     }
                     if (eiXType[index] == 3) {
-                        xx[10] = 900;
+                        absMoveX = 900;
                         eiY[index] -= 600;
                     }
                     if (eiXType[index] == 4) {
-                        xx[10] = 900;
+                        absMoveX = 900;
                         eiY[index] += 600;
                     }
                     break;
@@ -2489,7 +2489,7 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
 //雲の敵
                 case 80:
                     azimentype[index] = 0;
-//xx[10]=100;
+//absMoveX=100;
                     break;
                 case 81:
                     azimentype[index] = 0;
@@ -2524,7 +2524,7 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                         eiFaceDirection[index] = 1;
                     }
                     if (eiXType[index] == 5)
-                        xx[10] = xx[23];
+                        absMoveX = xx[23];
                     break;
 
                 case 86:
@@ -2611,29 +2611,29 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                     break;
 
                 case 90:
-                    xx[10] = 160;
+                    absMoveX = 160;
 //azimentype[index]=0;
                     break;
 
 //おいしいキノコ
                 case 100:
                     azimentype[index] = 1;
-                    xx[10] = 100;
+                    absMoveX = 100;
 
 //ほかの敵を巨大化
                     if (eiXType[index] == 2) {
                         for (int i = 0; i < ENEMY_MAX; i++) {
-                            xx0 = 250;
+                            scrEnemyX = 250;
                             xx[5] = -800;
                             xx[12] = 0;
-                            xx1 = 1600;
+                            scrEnemyY = 1600;
                             xx[8] = eiX[i] - fx;
                             xx[9] = eiY[i] - fy;
                             if (index != i) {
-                                if (eiX[index] + eiWidth[index] - fx > xx[8] + xx0 * 2
-                                    && eiX[index] - fx < xx[8] + eiWidth[i] - xx0 * 2
+                                if (eiX[index] + eiWidth[index] - fx > xx[8] + scrEnemyX * 2
+                                    && eiX[index] - fx < xx[8] + eiWidth[i] - scrEnemyX * 2
                                     && eiY[index] + eiHeight[index] - fy > xx[9] + xx[5]
-                                    && eiY[index] + eiHeight[index] - fy < xx[9] + xx1 * 3 + xx[12]) {
+                                    && eiY[index] + eiHeight[index] - fy < xx[9] + scrEnemyY * 3 + xx[12]) {
                                     if (eiType[i] == 0 || eiType[i] == 4) {
                                         eiType[i] = 90;    //ot(oto[6]);
                                         eiWidth[i] = 6400;
@@ -2654,15 +2654,15 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
 //毒キノコ
                 case 102:
                     azimentype[index] = 1;
-                    xx[10] = 100;
+                    absMoveX = 100;
                     if (eiXType[index] == 1)
-                        xx[10] = 200;
+                        absMoveX = 200;
                     break;
 
 //悪スター
                 case 110:
                     azimentype[index] = 1;
-                    xx[10] = 200;
+                    absMoveX = 200;
                     if (axzimen[index] == 1) {
                         eiY[index] -= 1200;
                         eiSpeedY[index] = -1400;
@@ -2671,13 +2671,13 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
 
                 case 200:
                     azimentype[index] = 1;
-                    xx[10] = 100;
+                    absMoveX = 100;
                     break;
 
 /*
 case 1:
-xx[10]=180;
-if (eiXType[index]==2)xx[10]=0;
+absMoveX=180;
+if (eiXType[index]==2)absMoveX=0;
 if (axzimen[index]==1){
 eiY[index]-=1000;eiSpeedY[index]=-1200;
 if (eiXType[index]==1)eiSpeedY[index]=-1600;
@@ -2690,13 +2690,13 @@ if (atm[index]>=2){atm[index]=0;eiSpeedY[index]=-1600;}else{eiSpeedY[index]=-100
 break;
 
 case 2:
-xx[10]=160;
-if (eiXType[index]==1)azimentype[index]=2;xx[10]=100;
-if (eiXType[index]==2)xx[10]=0;
+absMoveX=160;
+if (eiXType[index]==1)azimentype[index]=2;absMoveX=100;
+if (eiXType[index]==2)absMoveX=0;
 break;
 
 case 3:
-xx[10]=180;
+absMoveX=180;
 if (ae[index]==0)eiSpeedY[index]+=10;
 if (ae[index]==1)eiSpeedY[index]-=10;
 if (eiSpeedY[index]>=100)ae[index]=1;
@@ -2706,7 +2706,7 @@ eiY[index]+=eiSpeedY[index];//eiSpeedY[index]+=
 if (eiXType[index]==1){
 if (eiY[index]<marioY){eiY[index]+=100;}
 }
-if (eiXType[index]==2)xx[10]=0;
+if (eiXType[index]==2)absMoveX=0;
 break;
 
 case 4:
@@ -2740,12 +2740,12 @@ if (atm[index]==2){eiY[index]+=xx[22];}
 break;
 
 case 5:
-xx[10]=120;atm[index]++;
-if (eiXType[index]==2){xx[10]=200;azimentype[index]=2;}
+absMoveX=120;atm[index]++;
+if (eiXType[index]==2){absMoveX=200;azimentype[index]=2;}
 if (marioX+marioWidth>=eiX[index]-fx && marioX<=eiX[index]+eiWidth[index]-fx && marioY+marioHeight+1000<eiY[index]-fy){
-xx[10]=300;
+absMoveX=300;
 if (eiXType[index]>=1){
-//xx[10]=240;
+//absMoveX=240;
 if (atm[index]>=16){eiFaceDirection[index]+=1;if (eiFaceDirection[index]>=2)eiFaceDirection[index]=0;atm[index]=0;
 //if (eiXType[index]==2){eiY[index]-=600;eiSpeedY[index]=-900;}
 }}
@@ -2753,9 +2753,9 @@ if (atm[index]>=16){eiFaceDirection[index]+=1;if (eiFaceDirection[index]>=2)eiFa
 break;
 
 case 6:
-atm[index]+=1;xx[10]=0;
+atm[index]+=1;absMoveX=0;
 if (eiXType[index]==1)atm[index]+=(rand(9)-4);
-if (eiXType[index]==2)xx[10]=100;
+if (eiXType[index]==2)absMoveX=100;
 if (atm[index]>=40){
 xx[22]=360;if (eiFaceDirection[index]==0)xx[22]=-xx[22];
 cyobi(eiX[index]+eiFaceDirection[index]*eiWidth[index],eiY[index]+1600,xx[22],0,0,0,0,60);
@@ -2768,13 +2768,13 @@ if (marioX+marioWidth/2<=eiX[index]+eiWidth[index]/2-fx){eiFaceDirection[index]=
 break;
 
 case 7:
-xx[10]=160;
-if (eiXType[index]==1)xx[10]=240;
-if (eiXType[index]==2)xx[10]=60;
+absMoveX=160;
+if (eiXType[index]==1)absMoveX=240;
+if (eiXType[index]==2)absMoveX=60;
 break;
 
 case 8:
-atm[index]+=1;xx[10]=0;
+atm[index]+=1;absMoveX=0;
 xx[15]=12;xx[17]=0;
 if (eiXType[index]==1)xx[15]=8;
 if (eiXType[index]==2){xx[15]=40;xx[17]=3;}
@@ -2797,24 +2797,25 @@ break;
             }        //sw
 
             if (eiCreateFromBlockTimer[index] >= 1)
-                xx[10] = 0;
+                absMoveX = 0;
 
             if (eiFaceDirection[index] == 0)
-                aacta[index] -= xx[10];
+                moveX -= absMoveX;
             if (eiFaceDirection[index] == 1)
-                aacta[index] += xx[10];
+                moveX += absMoveX;
 
 //最大値
-            xx0 = 850;
-            xx1 = 1200;
+            scrEnemyX = 850;
+            scrEnemyY = 1200;
 
-//if (marioSpeedX>xx0){marioSpeedX=xx0;}
-//if (marioSpeedX<-xx0){marioSpeedX=-xx0;}
-            if (eiSpeedY[index] > xx1 && azimentype[index] != 5) {
-                eiSpeedY[index] = xx1;
+//if (marioSpeedX>scrEnemyX){marioSpeedX=scrEnemyX;}
+//if (marioSpeedX<-scrEnemyX){marioSpeedX=-scrEnemyX;}
+            if (eiSpeedY[index] > scrEnemyY && azimentype[index] != 5) {
+                eiSpeedY[index] = scrEnemyY;
             }
 //行動
-            eiX[index] += aacta[index];    //eiY[index]+=aactb[index];
+            eiX[index] += moveX;
+            //eiY[index] += moveY;
 
             if ((azimentype[index] >= 1 || azimentype[index] == -1)
                 && eiCreateFromBlockTimer[index] <= 0) {
@@ -2828,11 +2829,11 @@ break;
                 }        //eiSpeedY[index]+=180;
 
                 if (axzimen[index] == 1) {
-                    xx0 = 100;
+                    scrEnemyX = 100;
                     if (eiSpeedX[index] >= 200) {
-                        eiSpeedX[index] -= xx0;
+                        eiSpeedX[index] -= scrEnemyX;
                     } else if (eiSpeedX[index] <= -200) {
-                        eiSpeedX[index] += xx0;
+                        eiSpeedX[index] += scrEnemyX;
                     } else {
                         eiSpeedX[index] = 0;
                     }
@@ -2864,9 +2865,9 @@ break;
             }        //eiCreateFromBlockTimer[index]>0
 
 //プレイヤーからの判定
-            xx0 = 250;
-            xx1 = 1600;
-            xx2 = 1000;
+            scrEnemyX = 250;
+            scrEnemyY = 1600;
+            enemyWidth = 1000;
             xx[4] = 500;
             xx[5] = -800;
 
@@ -2877,10 +2878,10 @@ break;
                 xx[12] = marioSpeedY;
             xx[25] = 0;
 
-            if (marioX + marioWidth > xx[8] + xx0 * 2
-                && marioX < xx[8] + eiWidth[index] - xx0 * 2
+            if (marioX + marioWidth > xx[8] + scrEnemyX * 2
+                && marioX < xx[8] + eiWidth[index] - scrEnemyX * 2
                 && marioY + marioHeight > xx[9] - xx[5]
-                && marioY + marioHeight < xx[9] + xx1 + xx[12]
+                && marioY + marioHeight < xx[9] + scrEnemyY + xx[12]
                 && (mmutekitm <= 0 || marioSpeedY >= 100)
                 && eiCreateFromBlockTimer[index] <= 0) {
                 if (eiType[index] != 4 && eiType[index] != 9 && eiType[index] != 10 && (eiType[index] <= 78 || eiType[index] == 85) &&
@@ -2908,7 +2909,7 @@ break;
                         if (eiXType[index] == 1 || eiXType[index] == 2) {
                             eiXType[index] = 0;
                         } else if (eiXType[index] == 0) {
-                            if (marioX + marioWidth > xx[8] + xx0 * 2 && marioX < xx[8] + eiWidth[index] / 2 - xx0 * 4) {
+                            if (marioX + marioWidth > xx[8] + scrEnemyX * 2 && marioX < xx[8] + eiWidth[index] / 2 - scrEnemyX * 4) {
                                 eiXType[index] = 1;
                                 eiFaceDirection[index] = 1;
                             } else {
@@ -2962,8 +2963,8 @@ break;
                 }
 //if (eiType[index]==200){marioY=xx[9]-900-eiHeight[index];marioSpeedY=-2400;}
             }
-//if (eiX[index]+eiWidth[index]-fx>xx[8]-xx0 && eiX[index]-fx<xx[8]){marioSpeedY=-1000;}//eiX[index]=-9000000;
-// && eiY[index]-fy<xx[9]+xx1/2 && eiY[index]+eiHeight[index]-fy>xx[9]+marioHeight-xx2
+//if (eiX[index]+eiWidth[index]-fx>xx[8]-scrEnemyX && eiX[index]-fx<xx[8]){marioSpeedY=-1000;}//eiX[index]=-9000000;
+// && eiY[index]-fy<xx[9]+scrEnemyY/2 && eiY[index]+eiHeight[index]-fy>xx[9]+marioHeight-enemyWidth
 
             xx[15] = -500;
 
@@ -2978,7 +2979,7 @@ break;
             if (marioX + marioWidth > xx[8] + xx[4]
                 && marioX < xx[8] + eiWidth[index] - xx[4]
                 && marioY < xx[9] + eiHeight[index] + xx[15]
-                && marioY + marioHeight > xx[9] + eiHeight[index] - xx0 + xx[16]
+                && marioY + marioHeight > xx[9] + eiHeight[index] - scrEnemyX + xx[16]
                 && anotm[index] <= 0 && eiCreateFromBlockTimer[index] <= 0) {
                 if (mmutekion == 1) {
                     eiX[index] = -9000000;
@@ -3079,7 +3080,7 @@ break;
                         if (eiType[index] == 2) {
 //if (eiXType[index]==1 || eiXType[index]==2){eiXType[index]=0;}
                             if (eiXType[index] == 0) {
-                                if (marioX + marioWidth > xx[8] + xx0 * 2 && marioX < xx[8] + eiWidth[index] / 2 - xx0 * 4) {
+                                if (marioX + marioWidth > xx[8] + scrEnemyX * 2 && marioX < xx[8] + eiWidth[index] / 2 - scrEnemyX * 4) {
                                     eiXType[index] = 1;
                                     eiFaceDirection[index] = 1;
                                     eiX[index] = marioX + marioWidth + fx + marioSpeedX;
