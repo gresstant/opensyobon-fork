@@ -277,37 +277,11 @@ void paintSceneInGame() {
     setColorToBlack();
     if (mmsgtm >= 1) {
         mmsgtm--;
-        string str = "";
+        string str = getMarioMsg(mmsgtype);
 
-        if (mmsgtype == 1)
-            str = "お、おいしい!!";
-        if (mmsgtype == 2)
-            str = "毒は無いが……";
-        if (mmsgtype == 3)
-            str = "刺さった!!";
-        if (mmsgtype == 10)
-            str = "食べるべきではなかった!!";
-        if (mmsgtype == 11)
-            str = "俺は燃える男だ!!";
-        if (mmsgtype == 50)
-            str = "体が……焼ける……";
-        if (mmsgtype == 51)
-            str = "たーまやー!!";
-        if (mmsgtype == 52)
-            str = "見事にオワタ";
-        if (mmsgtype == 53)
-            str = "足が、足がぁ!!";
-        if (mmsgtype == 54)
-            str = "流石は摂氏800度!!";
-        if (mmsgtype == 55)
-            str = "溶岩と合体したい……";
-
-        setColorToBlack();
-        drawString(str, (marioX + marioWidth + 300) / 100 - 1, marioY / 100 - 1);
-        drawString(str, (marioX + marioWidth + 300) / 100 + 1, marioY / 100 + 1);
-        setColorToWhite();
-        drawString(str, (marioX + marioWidth + 300) / 100, marioY / 100);
-
+        drawString(colors::BLACK, str.c_str(), (marioX + marioWidth + 300) / 100 - 1, marioY / 100 - 1);
+        drawString(colors::BLACK, str.c_str(), (marioX + marioWidth + 300) / 100 + 1, marioY / 100 + 1);
+        drawString(colors::WHITE, str.c_str(), (marioX + marioWidth + 300) / 100, marioY / 100);
     }            //mmsgtm
 
     //敵キャラのメッセージ
@@ -316,120 +290,14 @@ void paintSceneInGame() {
         if (ei->msgTimer >= 1) {
             ei->msgTimer--;    //end();
 
-            string str = "";
+            string str = getEnemyMsg(ei->msgIndex);
 
-            if (ei->msgIndex == 1001)
-                str = "ヤッフー!!";
-            if (ei->msgIndex == 1002)
-                str = "え?俺勝っちゃったの?";
-            if (ei->msgIndex == 1003)
-                str = "貴様の死に場所はここだ!";
-            if (ei->msgIndex == 1004)
-                str = "二度と会う事もないだろう";
-            if (ei->msgIndex == 1005)
-                str = "俺、最強!!";
-            if (ei->msgIndex == 1006)
-                str = "一昨日来やがれ!!";
-            if (ei->msgIndex == 1007)
-                str = "漢に後退の二文字は無い!!";
-            if (ei->msgIndex == 1008)
-                str = "ハッハァ!!";
-
-            if (ei->msgIndex == 1011)
-                str = "ヤッフー!!";
-            if (ei->msgIndex == 1012)
-                str = "え?俺勝っちゃったの?";
-            if (ei->msgIndex == 1013)
-                str = "貴様の死に場所はここだ!";
-            if (ei->msgIndex == 1014)
-                str = "身の程知らずが……";
-            if (ei->msgIndex == 1015)
-                str = "油断が死を招く";
-            if (ei->msgIndex == 1016)
-                str = "おめでたい奴だ";
-            if (ei->msgIndex == 1017)
-                str = "屑が!!";
-            if (ei->msgIndex == 1018)
-                str = "無謀な……";
-
-            if (ei->msgIndex == 1021)
-                str = "ヤッフー!!";
-            if (ei->msgIndex == 1022)
-                str = "え?俺勝っちゃったの?";
-            if (ei->msgIndex == 1023)
-                str = "二度と会う事もないだろう";
-            if (ei->msgIndex == 1024)
-                str = "身の程知らずが……";
-            if (ei->msgIndex == 1025)
-                str = "僕は……負けない!!";
-            if (ei->msgIndex == 1026)
-                str = "貴様に見切れる筋は無い";
-            if (ei->msgIndex == 1027)
-                str =
-                        "今死ね、すぐ死ね、骨まで砕けろ!!";
-            if (ei->msgIndex == 1028)
-                str = "任務完了!!";
-
-            if (ei->msgIndex == 1031)
-                str = "ヤッフー!!";
-            if (ei->msgIndex == 1032)
-                str = "え?俺勝っちゃったの?";
-            if (ei->msgIndex == 1033)
-                str = "貴様の死に場所はここだ!";
-            if (ei->msgIndex == 1034)
-                str = "身の程知らずが……";
-            if (ei->msgIndex == 1035)
-                str = "油断が死を招く";
-            if (ei->msgIndex == 1036)
-                str = "おめでたい奴だ";
-            if (ei->msgIndex == 1037)
-                str = "屑が!!";
-            if (ei->msgIndex == 1038)
-                str = "無謀な……";
-
-            if (ei->msgIndex == 15)
-                str = "鉄壁!!よって、無敵!!";
-            if (ei->msgIndex == 16)
-                str = "丸腰で勝てるとでも?";
-            if (ei->msgIndex == 17)
-                str = "パリイ!!";
-            if (ei->msgIndex == 18)
-                str = "自業自得だ";
-            if (ei->msgIndex == 20)
-                str = "Zzz";
-            if (ei->msgIndex == 21)
-                str = "ク、クマー";
-            if (ei->msgIndex == 24)
-                str = "?";
-            if (ei->msgIndex == 25)
-                str = "食べるべきではなかった!!";
-            if (ei->msgIndex == 30)
-                str = "うめぇ!!";
-            if (ei->msgIndex == 31)
-                str = "ブロックを侮ったな?";
-            if (ei->msgIndex == 32)
-                str = "シャキーン";
-
-            if (ei->msgIndex == 50)
-                str = "波動砲!!";
-            if (ei->msgIndex == 85)
-                str = "裏切られたとでも思ったか?";
-            if (ei->msgIndex == 86)
-                str = "ポールアターック!!";
-
-            if (ei->msgIndex != 31) {
-                xx[5] = (ei->x + ei->width + 300 - fx) / 100;
-                xx[6] = (ei->y - fy) / 100;
-            } else {
-                xx[5] = (ei->x + ei->width + 300 - fx) / 100;
-                xx[6] = (ei->y - fy - 800) / 100;
-            }
+            int x = (ei->x + ei->width + 300 - fx) / 100;
+            int y = (ei->msgIndex != 31 ? ei->y - fy : ei->y - fy - 800) / 100;
 
             ChangeFontType(DX_FONTTYPE_EDGE);
-            setColorToWhite();
-            drawString(str, xx[5], xx[6]);
+            drawString(colors::WHITE, str.c_str(), x, y);
             ChangeFontType(DX_FONTTYPE_NORMAL);
-
         }            //eiMsgTimer
     }            //eis.size()
 
