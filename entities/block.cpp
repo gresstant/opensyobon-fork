@@ -15,7 +15,6 @@ extern int mmsgtm, mmsgtype;
 extern Mix_Chunk *oto[19];
 void ot(Mix_Chunk * x);
 void eyobi(int x, int y, int xc, int xd, int xe, int xf, int width, int height, int gtype, int tm);
-void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype);
 
 std::vector<std::unique_ptr<LegacyBlock>> blocks;
 

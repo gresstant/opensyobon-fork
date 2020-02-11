@@ -2,12 +2,24 @@
 #include "enemy_instance.h"
 #include "mario.h"
 #include "../utilities/DxLib.h"
+#include "ground.h"
+#include "block.h"
 
-extern int fx, fy;
+extern int fx, fy, fxmax;
 extern Mix_Chunk *oto[19];
 
 int rand(int Rand);
 void ot(Mix_Chunk * x);
+
+// 敵キャラ  Enemy Instances
+int aco;
+int eiX[ENEMY_MAX], eiY[ENEMY_MAX], eiWidth[ENEMY_MAX], eiHeight[ENEMY_MAX], eiSpeedX[ENEMY_MAX], eiSpeedY[ENEMY_MAX];
+int ae[ENEMY_MAX], af[ENEMY_MAX], eiCreateFromBlockTimer[ENEMY_MAX];
+int aacta[ENEMY_MAX], aactb[ENEMY_MAX], azimentype[ENEMY_MAX], axzimen[ENEMY_MAX];
+int eiType[ENEMY_MAX], eiXType[ENEMY_MAX], eiFaceDirection[ENEMY_MAX];
+int anotm[ENEMY_MAX], anx[160], any[160];
+int atm[ENEMY_MAX], a2tm[ENEMY_MAX];
+int amsgtm[ENEMY_MAX], amsgtype[ENEMY_MAX];
 
 // 敵キャラ、アイテム作成
 void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype) {
@@ -98,3 +110,103 @@ void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype) {
     }                //rz
 
 }                //ayobi
+
+void tekizimen(int eiIndex) {
+    //壁
+    for (int i = 0; i < GROUND_MAX; i++) {
+        if (groundX[i] - fx + groundWidth[i] >= -12010 && groundX[i] - fx <= fxmax + 12100 && groundType[i] <= 99) {
+            int xx0 = 200;
+            int xx2 = 1000;
+            int xx1 = 2000;    //eiWidth[eiIndex]
+
+            int scrGroundTop = groundY[i] - fy, scrGroundBottom = groundY[i] + groundHeight[i] - fy;
+            int scrGroundLeft = groundX[i] - fx, scrGroundRight = groundX[i] + groundWidth[i] - fx;
+
+            int scrEnemyTop = eiY[eiIndex] - fy, scrEnemyBottom = eiY[eiIndex] + eiHeight[eiIndex] - fy;
+            int scrEnemyLeft = eiX[eiIndex] - fx, scrEnemyRight = eiX[eiIndex] + eiWidth[eiIndex] - fx;
+
+            if (scrEnemyRight > scrGroundLeft - xx0
+                && scrEnemyLeft < scrGroundLeft + xx2
+                && scrEnemyBottom > scrGroundTop + xx1 * 3 / 4
+                && scrEnemyTop < scrGroundBottom - xx2) {
+                eiX[eiIndex] = scrGroundLeft - xx0 - eiWidth[eiIndex] + fx;
+                eiFaceDirection[eiIndex] = 0;
+            }
+            if (scrEnemyRight > scrGroundRight - xx0
+                && scrEnemyLeft < scrGroundRight + xx0
+                && scrEnemyBottom > scrGroundTop + xx1 * 3 / 4
+                && scrEnemyTop < scrGroundBottom - xx2) {
+                eiX[eiIndex] = scrGroundRight + xx0 + fx;
+                eiFaceDirection[eiIndex] = 1;
+            }
+
+//if (eiX[eiIndex]+eiWidth[eiIndex]-fx>scrGroundLeft+xx0 && eiX[eiIndex]-fx<scrGroundLeft+groundWidth[i]-xx0 && eiY[eiIndex]+eiHeight[eiIndex]-fy>scrGroundTop && eiY[eiIndex]+eiHeight[eiIndex]-fy<scrGroundTop+xx1 && eiSpeedY[eiIndex]>=-100){eiY[eiIndex]=groundY[i]-fy-eiHeight[eiIndex]+100+fy;eiSpeedY[eiIndex]=0;}//marioOnGround=1;}
+            if (scrEnemyRight > scrGroundLeft + xx0
+                && scrEnemyLeft < scrGroundRight - xx0
+                && scrEnemyBottom > scrGroundTop
+                && scrEnemyBottom < scrGroundBottom - xx1
+                && eiSpeedY[eiIndex] >= -100) {
+                eiY[eiIndex] = groundY[i] - fy - eiHeight[eiIndex] + 100 + fy;
+                eiSpeedY[eiIndex] = 0;
+                axzimen[eiIndex] = 1;
+            }
+
+            if (scrEnemyRight > scrGroundLeft + xx0
+                && scrEnemyLeft < scrGroundRight - xx0
+                && scrEnemyTop > scrGroundBottom - xx1
+                && scrEnemyTop < scrGroundBottom + xx0) {
+                eiY[eiIndex] = scrGroundBottom + xx0 + fy;
+                if (eiSpeedY[eiIndex] < 0) {
+                    eiSpeedY[eiIndex] = -eiSpeedY[eiIndex] * 2 / 3;
+                }        //axzimen[eiIndex]=1;
+            }
+
+        }
+    }
+
+    //ブロック
+    for (const auto& block : blocks) {
+        int xx0 = 200;
+        int xx2 = 1000;
+
+        int scrBlockTop = block->y - fy, scrBlockBottom = block->y + blockHeight - fy;
+        int scrBlockLeft = block->x - fx, scrBlockRight = block->x + blockWidth - fx;
+
+        int scrEnemyTop = eiY[eiIndex] - fy, scrEnemyBottom = eiY[eiIndex] + eiHeight[eiIndex] - fy;
+        int scrEnemyLeft = eiX[eiIndex] - fx, scrEnemyRight = eiX[eiIndex] + eiWidth[eiIndex] - fx;
+
+        if (scrBlockRight >= -12010 && scrBlockLeft <= fxmax + 12000) {
+            //上
+            if (scrEnemyRight > scrBlockLeft + xx0
+                && scrEnemyLeft < scrBlockRight - xx0 * 1
+                && scrEnemyBottom > scrBlockTop
+                && scrEnemyBottom < scrBlockBottom
+                && eiSpeedY[eiIndex] >= -100) {
+                block->onEnemyStand(eiIndex);
+            }
+
+            //下
+            if (scrEnemyRight > scrBlockLeft + xx0 &&
+                scrEnemyLeft < scrBlockRight - xx0 * 1 &&
+                scrEnemyTop > scrBlockTop &&
+                scrEnemyTop < scrBlockBottom + xx0) {
+                block->onEnemyHit(eiIndex);
+            }
+
+            //左右
+            if (scrEnemyRight > scrBlockLeft &&
+                scrEnemyLeft < scrBlockLeft + xx2 &&
+                scrEnemyBottom > scrBlockTop + blockHeight / 2 - xx0 &&
+                scrEnemyTop < scrBlockTop + xx2) {
+                block->onEnemyTouchLeft(eiIndex);
+            }
+            if (scrEnemyRight > scrBlockRight - xx0 * 2 &&
+                scrEnemyLeft < scrBlockRight &&
+                scrEnemyBottom > scrBlockTop + blockHeight / 2 - xx0 &&
+                scrEnemyTop < scrBlockTop + xx2) {
+                block->onEnemyTouchRight(eiIndex);
+            }
+        }
+    }                //tt
+
+}                //tekizimen

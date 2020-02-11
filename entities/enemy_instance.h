@@ -2,8 +2,9 @@
 #define OSAFORK_ENEMY_INSTANCE_H
 
 //敵キャラ  Enemy Instances
-void ayobi(int x, int y, int c, int d, int xnotm, int type,
-           int xtype);
+void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype);
+void tekizimen(int eiIndex);
+
 #define ENEMY_MAX 24
 extern int aco;
 extern int eiX[ENEMY_MAX], eiY[ENEMY_MAX], eiWidth[ENEMY_MAX], eiHeight[ENEMY_MAX], eiSpeedX[ENEMY_MAX], eiSpeedY[ENEMY_MAX];

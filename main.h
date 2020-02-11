@@ -161,18 +161,7 @@ int egtype[EFFECT_MAX];
 
 
 //敵キャラ  Enemy Instances
-void ayobi(int x, int y, int c, int d, int xnotm, int type,
-           int xtype);
-void tekizimen();
-#define ENEMY_MAX 24
-int aco;
-int eiX[ENEMY_MAX], eiY[ENEMY_MAX], eiWidth[ENEMY_MAX], eiHeight[ENEMY_MAX], eiSpeedX[ENEMY_MAX], eiSpeedY[ENEMY_MAX];
-int ae[ENEMY_MAX], af[ENEMY_MAX], eiCreateFromBlockTimer[ENEMY_MAX];
-int aacta[ENEMY_MAX], aactb[ENEMY_MAX], azimentype[ENEMY_MAX], axzimen[ENEMY_MAX];
-int eiType[ENEMY_MAX], eiXType[ENEMY_MAX], eiFaceDirection[ENEMY_MAX], ahp[ENEMY_MAX];
-int anotm[ENEMY_MAX], anx[160], any[160];
-int atm[ENEMY_MAX], a2tm[ENEMY_MAX];
-int amsgtm[ENEMY_MAX], amsgtype[ENEMY_MAX];
+// moved to enemy_instance.h
 
 //敵出現  Enemy Templates
 // moved to enemy_template.h
