@@ -11,7 +11,7 @@ int x1;
 extern Mix_Music *otom[6];
 extern Mix_Chunk *oto[19];
 
-extern int anx[160], any[160];
+extern int eiWidthStorage[160], eiHeightStorage[160];
 
 void loadg(void) {
     for (t = 0; t < 51; t++) {
@@ -171,27 +171,27 @@ void loadg(void) {
     x1 = 3;
     for (t = 0; t <= 140; t++) {
         if (grap[t][x1]) {
-            anx[t] = grap[t][x1]->w;
-            any[t] = grap[t][x1]->h;
-    //GetGraphSize(grap[t][x1] ,&anx[t] ,&any[t]);
-            anx[t] *= 100;
-            any[t] *= 100;
+            eiWidthStorage[t] = grap[t][x1]->w;
+            eiHeightStorage[t] = grap[t][x1]->h;
+    //GetGraphSize(grap[t][x1] ,&eiWidthStorage[t] ,&eiHeightStorage[t]);
+            eiWidthStorage[t] *= 100;
+            eiHeightStorage[t] *= 100;
         } else {
-            anx[t] = 0;
-            any[t] = 0;
+            eiWidthStorage[t] = 0;
+            eiHeightStorage[t] = 0;
         }
     }
-    anx[79] = 120 * 100;
-    any[79] = 15 * 100;
-    anx[85] = 25 * 100;
-    any[85] = 30 * 10 * 100;
+    eiWidthStorage[79] = 120 * 100;
+    eiHeightStorage[79] = 15 * 100;
+    eiWidthStorage[85] = 25 * 100;
+    eiHeightStorage[85] = 30 * 10 * 100;
 
 
     /*
-    anx[0]=30;any[0]=30;
-    anx[1]=30;any[1]=43;
-    anx[2]=30;any[2]=30;
-    anx[3]=30;any[3]=44;
+    eiWidthStorage[0]=30;eiHeightStorage[0]=30;
+    eiWidthStorage[1]=30;eiHeightStorage[1]=43;
+    eiWidthStorage[2]=30;eiHeightStorage[2]=30;
+    eiWidthStorage[3]=30;eiHeightStorage[3]=44;
     */
 
 

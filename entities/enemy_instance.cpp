@@ -12,50 +12,50 @@ int rand(int Rand);
 void ot(Mix_Chunk * x);
 
 // 敵キャラ  Enemy Instances
-int aco;
+int eiCounter;
 int eiX[ENEMY_MAX], eiY[ENEMY_MAX], eiWidth[ENEMY_MAX], eiHeight[ENEMY_MAX], eiSpeedX[ENEMY_MAX], eiSpeedY[ENEMY_MAX];
 int ae[ENEMY_MAX], af[ENEMY_MAX], eiCreateFromBlockTimer[ENEMY_MAX];
-int azimentype[ENEMY_MAX], axzimen[ENEMY_MAX];
+int eiGroundType[ENEMY_MAX], eiXGroundType[ENEMY_MAX];
 int eiType[ENEMY_MAX], eiXType[ENEMY_MAX], eiFaceDirection[ENEMY_MAX];
-int anotm[ENEMY_MAX], anx[160], any[160];
-int atm[ENEMY_MAX], a2tm[ENEMY_MAX];
-int amsgtm[ENEMY_MAX], amsgtype[ENEMY_MAX];
+int eiSafeCountdown[ENEMY_MAX], eiWidthStorage[160], eiHeightStorage[160];
+int eiTimer[ENEMY_MAX];
+int eiMsgTimer[ENEMY_MAX], eiMsgIndex[ENEMY_MAX];
 
 // 敵キャラ、アイテム作成
 void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype) {
     int rz = 0;
     for (int i = 0; i <= 1; i++) {
         i = 2;
-        if (eiX[aco] >= -9000 && eiX[aco] <= 30000)
+        if (eiX[eiCounter] >= -9000 && eiX[eiCounter] <= 30000)
             i = 0;
         rz++;
 
         if (rz <= ENEMY_MAX) {
             i = 3;
 
-            eiX[aco] = x;
-            eiY[aco] = y;    //ag[aco]=0;ah[aco]=0;ai[aco]=ets[t]->y;//eiSpeedY[t]=0;aeon[t]=1;
-            eiSpeedX[aco] = c;
-            eiSpeedY[aco] = d;
+            eiX[eiCounter] = x;
+            eiY[eiCounter] = y;    //ag[eiCounter]=0;ah[eiCounter]=0;ai[eiCounter]=ets[t]->y;//eiSpeedY[t]=0;aeon[t]=1;
+            eiSpeedX[eiCounter] = c;
+            eiSpeedY[eiCounter] = d;
             if (xtype > 100)
-                eiSpeedX[aco] = xtype;
-            //ae[aco]=0;af[aco]=0;
-            eiType[aco] = type;
+                eiSpeedX[eiCounter] = xtype;
+            //ae[eiCounter]=0;af[eiCounter]=0;
+            eiType[eiCounter] = type;
             if (xtype >= 0 && xtype <= 99100)
-                eiXType[aco] = xtype;    //ahp[aco]=iz[ets[t]->xtype];aytm[aco]=0;
+                eiXType[eiCounter] = xtype;    //ahp[eiCounter]=iz[ets[t]->xtype];aytm[eiCounter]=0;
             //if (xtype==1)end();
-            anotm[aco] = xnotm;
-            if (eiX[aco] - fx <= marioX + marioWidth / 2)
-                eiFaceDirection[aco] = 1;  // "muki" means direction
-            if (eiX[aco] - fx > marioX + marioWidth / 2)
-                eiFaceDirection[aco] = 0;
-            if (eiCreateFromBlockTimer[aco] >= 1)
-                eiFaceDirection[aco] = 1;
-            if (eiCreateFromBlockTimer[aco] == 20)
-                eiFaceDirection[aco] = 0;
+            eiSafeCountdown[eiCounter] = xnotm;
+            if (eiX[eiCounter] - fx <= marioX + marioWidth / 2)
+                eiFaceDirection[eiCounter] = 1;  // "muki" means direction
+            if (eiX[eiCounter] - fx > marioX + marioWidth / 2)
+                eiFaceDirection[eiCounter] = 0;
+            if (eiCreateFromBlockTimer[eiCounter] >= 1)
+                eiFaceDirection[eiCounter] = 1;
+            if (eiCreateFromBlockTimer[eiCounter] == 20)
+                eiFaceDirection[eiCounter] = 0;
 
-            eiWidth[aco] = anx[type];
-            eiHeight[aco] = any[type];
+            eiWidth[eiCounter] = eiWidthStorage[type];
+            eiHeight[eiCounter] = eiHeightStorage[type];
 
             //大砲音
             if (type == 7 && CheckSoundMem(oto[10]) == 0) {
@@ -66,43 +66,43 @@ void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype) {
                 ot(oto[18]);
             }
 
-            azimentype[aco] = 1;
+            eiGroundType[eiCounter] = 1;
 
-            //if (eiType[aco]<=30 && eiType[aco]!=4)atm[aco]=20;
+            //if (eiType[eiCounter]<=30 && eiType[eiCounter]!=4)eiTimer[eiCounter]=20;
 
-            //azimentype[aco]=1;
+            //eiGroundType[eiCounter]=1;
 
-            switch (eiType[aco]) {
+            switch (eiType[eiCounter]) {
                 /*case 0:case 1:case 2:case 5:case 6:case 7:case 8:
-                    azimentype[aco]=2;
+                    eiGroundType[eiCounter]=2;
                     break;
                 case 3:case 4:
-                    azimentype[aco]=0;
+                    eiGroundType[eiCounter]=0;
                     break;
                 case 49:case 50://case 2:case 5:case 6:
-                    azimentype[aco]=4;
+                    eiGroundType[eiCounter]=4;
                     break;
                 case 80:case 81:case 82:case 83:case 84:case 85:
-                    azimentype[aco]=1;
+                    eiGroundType[eiCounter]=1;
                     break;
                 case 100:case 101:case 102:case 103:case 104:case 105:case 106:case 107:case 108:
-                    azimentype[aco]=1;
+                    eiGroundType[eiCounter]=1;
                     break;
                 case 120:case 121:case 122:
-                    azimentype[aco]=1;
+                    eiGroundType[eiCounter]=1;
                     break;
                 case 130:case 131:case 132:case 133:case 134:
-                    azimentype[aco]=1;
+                    eiGroundType[eiCounter]=1;
                     break;*/
             }
 
             if (type == 87) {
-                atm[aco] = rand(179) + (-90);
+                eiTimer[eiCounter] = rand(179) + (-90);
             }
 
-            aco += 1;
-            if (aco >= ENEMY_MAX - 1) {
-                aco = 0;
+            eiCounter += 1;
+            if (eiCounter >= ENEMY_MAX - 1) {
+                eiCounter = 0;
             }
         }            //i
 
@@ -148,7 +148,7 @@ void tekizimen(int eiIndex) {
                 && eiSpeedY[eiIndex] >= -100) {
                 eiY[eiIndex] = groundY[i] - fy - eiHeight[eiIndex] + 100 + fy;
                 eiSpeedY[eiIndex] = 0;
-                axzimen[eiIndex] = 1;
+                eiXGroundType[eiIndex] = 1;
             }
 
             if (scrEnemyRight > scrGroundLeft + xx0
@@ -158,7 +158,7 @@ void tekizimen(int eiIndex) {
                 eiY[eiIndex] = scrGroundBottom + xx0 + fy;
                 if (eiSpeedY[eiIndex] < 0) {
                     eiSpeedY[eiIndex] = -eiSpeedY[eiIndex] * 2 / 3;
-                }        //axzimen[eiIndex]=1;
+                }        //eiXGroundType[eiIndex]=1;
             }
 
         }

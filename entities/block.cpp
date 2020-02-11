@@ -139,7 +139,7 @@ bool LegacyBlock::onTick() {
         if (this->hp >= 16) {
             this->hp = 0;
             ot(oto[8]);
-            eiCreateFromBlockTimer[aco] = 16;
+            eiCreateFromBlockTimer[eiCounter] = 16;
             ayobi(this->x, this->y, 0, 0, 0, 102, 1);
         }
     } else if (this->type == 112) {
@@ -215,7 +215,7 @@ void afterMarioHit(LegacyBlock* block, int xx17) {
     } else if (block->type == 101) {  // 敵出現  enemy appears
         ot(oto[8]);
         block->type = 3;
-        eiCreateFromBlockTimer[aco] = 16;
+        eiCreateFromBlockTimer[eiCounter] = 16;
         if (block->xtype == 0) {
             ayobi(block->x, block->y, 0, 0, 0, 0, 0);
         } else if (block->xtype == 1) {
@@ -223,7 +223,7 @@ void afterMarioHit(LegacyBlock* block, int xx17) {
         } else if (block->xtype == 3) {
             ayobi(block->x, block->y, 0, 0, 0, 101, 0);
         } else if (block->xtype == 4) {
-            eiCreateFromBlockTimer[aco] = 20;
+            eiCreateFromBlockTimer[eiCounter] = 20;
             ayobi(block->x - 400, block->y - 1600, 0, 0, 0, 6, 0);
         } else if (block->xtype == 10) {
             ayobi(block->x, block->y, 0, 0, 0, 101, 0);
@@ -231,7 +231,7 @@ void afterMarioHit(LegacyBlock* block, int xx17) {
     } else if (block->type == 102) {  // おいしいきのこ出現  fine mushroom appears
         ot(oto[8]);
         block->type = 3;
-        eiCreateFromBlockTimer[aco] = 16;
+        eiCreateFromBlockTimer[eiCounter] = 16;
         if (block->xtype == 0) {
             ayobi(block->x, block->y, 0, 0, 0, 100, 0);
         } else if (block->xtype == 2) {
@@ -242,12 +242,12 @@ void afterMarioHit(LegacyBlock* block, int xx17) {
     } else if (block->type == 103) {  // まずいきのこ出現  bad mushroom appears
         ot(oto[8]);
         block->type = 3;
-        eiCreateFromBlockTimer[aco] = 16;
+        eiCreateFromBlockTimer[eiCounter] = 16;
         ayobi(block->x, block->y, 0, 0, 0, 100, 1);
     } else if (block->type == 104) {  // 悪スター出し  bad star appears
         ot(oto[8]);
         block->type = 3;
-        eiCreateFromBlockTimer[aco] = 16;
+        eiCreateFromBlockTimer[eiCounter] = 16;
         ayobi(block->x, block->y, 0, 0, 0, 110, 0);
     } else if (block->type == 110) {  // 毒きのこ量産  lots of purple mushrooms appear
         // see LegacyBlock::onTick
@@ -262,7 +262,7 @@ void afterMarioHit(LegacyBlock* block, int xx17) {
         if (block->xtype == 0) {
             ot(oto[8]);
             block->type = 3;
-            eiCreateFromBlockTimer[aco] = 16;
+            eiCreateFromBlockTimer[eiCounter] = 16;
             ayobi(block->x, block->y, 0, 0, 0, 102, 1);
         } else if (block->xtype == 2) {
             ot(oto[4]);
@@ -499,11 +499,11 @@ bool LegacyBlock::onEnemyStand(int enemyId) {
 
     eiY[enemyId] = this->y - fy - eiHeight[enemyId] + 100 + fy;
     eiSpeedY[enemyId] = 0;
-    axzimen[enemyId] = 1;
+    eiXGroundType[enemyId] = 1;
 
     if (this->type == 120) {  // ジャンプ台  spring (jump platform)
         eiSpeedY[enemyId] = -1600;
-        azimentype[enemyId] = 30;
+        eiGroundType[enemyId] = 30;
     }
 
     return true;
