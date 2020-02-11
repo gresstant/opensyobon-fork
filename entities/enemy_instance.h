@@ -6,12 +6,16 @@ void ayobi(int x, int y, int c, int d, int xnotm, int type,
            int xtype);
 #define ENEMY_MAX 24
 extern int aco;
-extern int aa[ENEMY_MAX], ab[ENEMY_MAX], anobia[ENEMY_MAX], anobib[ENEMY_MAX], ac[ENEMY_MAX], ad[ENEMY_MAX];
-extern int ae[ENEMY_MAX], af[ENEMY_MAX], abrocktm[ENEMY_MAX];
+extern int eiX[ENEMY_MAX], eiY[ENEMY_MAX], eiWidth[ENEMY_MAX], eiHeight[ENEMY_MAX], eiSpeedX[ENEMY_MAX], eiSpeedY[ENEMY_MAX];
+extern int ae[ENEMY_MAX], af[ENEMY_MAX], eiCreateFromBlockTimer[ENEMY_MAX];
 extern int aacta[ENEMY_MAX], aactb[ENEMY_MAX], azimentype[ENEMY_MAX], axzimen[ENEMY_MAX];
-extern int atype[ENEMY_MAX], axtype[ENEMY_MAX], amuki[ENEMY_MAX], ahp[ENEMY_MAX];
+extern int eiType[ENEMY_MAX], eiXType[ENEMY_MAX], eiFaceDirection[ENEMY_MAX];
 extern int anotm[ENEMY_MAX], anx[160], any[160];
 extern int atm[ENEMY_MAX], a2tm[ENEMY_MAX];
 extern int amsgtm[ENEMY_MAX], amsgtype[ENEMY_MAX];
+
+//       ac --> eiSpeedX (improper)
+//       ad --> eiSpeedY (improper)
+//    amuki --> eiFaceDirection. 0 = LEFT, 1 = RIGHT
 
 #endif //OSAFORK_ENEMY_INSTANCE_H

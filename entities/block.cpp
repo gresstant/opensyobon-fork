@@ -140,7 +140,7 @@ bool LegacyBlock::onTick() {
         if (this->hp >= 16) {
             this->hp = 0;
             ot(oto[8]);
-            abrocktm[aco] = 16;
+            eiCreateFromBlockTimer[aco] = 16;
             ayobi(this->x, this->y, 0, 0, 0, 102, 1);
         }
     } else if (this->type == 112) {
@@ -216,7 +216,7 @@ void afterMarioHit(LegacyBlock* block, int xx17) {
     } else if (block->type == 101) {  // 敵出現  enemy appears
         ot(oto[8]);
         block->type = 3;
-        abrocktm[aco] = 16;
+        eiCreateFromBlockTimer[aco] = 16;
         if (block->xtype == 0) {
             ayobi(block->x, block->y, 0, 0, 0, 0, 0);
         } else if (block->xtype == 1) {
@@ -224,7 +224,7 @@ void afterMarioHit(LegacyBlock* block, int xx17) {
         } else if (block->xtype == 3) {
             ayobi(block->x, block->y, 0, 0, 0, 101, 0);
         } else if (block->xtype == 4) {
-            abrocktm[aco] = 20;
+            eiCreateFromBlockTimer[aco] = 20;
             ayobi(block->x - 400, block->y - 1600, 0, 0, 0, 6, 0);
         } else if (block->xtype == 10) {
             ayobi(block->x, block->y, 0, 0, 0, 101, 0);
@@ -232,7 +232,7 @@ void afterMarioHit(LegacyBlock* block, int xx17) {
     } else if (block->type == 102) {  // おいしいきのこ出現  fine mushroom appears
         ot(oto[8]);
         block->type = 3;
-        abrocktm[aco] = 16;
+        eiCreateFromBlockTimer[aco] = 16;
         if (block->xtype == 0) {
             ayobi(block->x, block->y, 0, 0, 0, 100, 0);
         } else if (block->xtype == 2) {
@@ -243,12 +243,12 @@ void afterMarioHit(LegacyBlock* block, int xx17) {
     } else if (block->type == 103) {  // まずいきのこ出現  bad mushroom appears
         ot(oto[8]);
         block->type = 3;
-        abrocktm[aco] = 16;
+        eiCreateFromBlockTimer[aco] = 16;
         ayobi(block->x, block->y, 0, 0, 0, 100, 1);
     } else if (block->type == 104) {  // 悪スター出し  bad star appears
         ot(oto[8]);
         block->type = 3;
-        abrocktm[aco] = 16;
+        eiCreateFromBlockTimer[aco] = 16;
         ayobi(block->x, block->y, 0, 0, 0, 110, 0);
     } else if (block->type == 110) {  // 毒きのこ量産  lots of purple mushrooms appear
         // see LegacyBlock::onTick
@@ -263,7 +263,7 @@ void afterMarioHit(LegacyBlock* block, int xx17) {
         if (block->xtype == 0) {
             ot(oto[8]);
             block->type = 3;
-            abrocktm[aco] = 16;
+            eiCreateFromBlockTimer[aco] = 16;
             ayobi(block->x, block->y, 0, 0, 0, 102, 1);
         } else if (block->xtype == 2) {
             ot(oto[4]);
@@ -278,9 +278,9 @@ void afterMarioHit(LegacyBlock* block, int xx17) {
                 ot(oto[13]);
                 block->xtype = 2;
                 for (int i = 0; i < ENEMY_MAX; i++) {
-                    if (atype[i] == 87 || atype[i] == 88) {
-                        if (axtype[i] == 105)
-                            axtype[i] = 110;
+                    if (eiType[i] == 87 || eiType[i] == 88) {
+                        if (eiXType[i] == 105)
+                            eiXType[i] = 110;
                     }
                 }
             } else {
@@ -296,9 +296,9 @@ void afterMarioHit(LegacyBlock* block, int xx17) {
     } else if (block->type == 124) {  // ファイアバー強化
         ot(oto[13]);
         for (int j = 0; j < ENEMY_MAX; j++) {
-            if (atype[j] == 87 || atype[j] == 88) {
-                if (axtype[j] == 101)
-                    axtype[j] = 120;
+            if (eiType[j] == 87 || eiType[j] == 88) {
+                if (eiXType[j] == 101)
+                    eiXType[j] = 120;
             }
         }
         block->type = 3;
@@ -313,9 +313,9 @@ void afterMarioHit(LegacyBlock* block, int xx17) {
             ot(oto[13]);
             if (block->xtype == 1) {
                 for (int j = 0; j < ENEMY_MAX; j++) {
-                    if (atype[j] == 87 || atype[j] == 88) {
-                        if (axtype[j] == 105)
-                            axtype[j] = 110;
+                    if (eiType[j] == 87 || eiType[j] == 88) {
+                        if (eiXType[j] == 105)
+                            eiXType[j] = 110;
                     }
                 }
                 ets[3]->xtype = 105;
@@ -465,7 +465,7 @@ bool LegacyBlock::onMarioTouchRight() {
 }
 
 void onEnemyTouch(LegacyBlock* block, int enemyId) {
-    if (atype[enemyId] == 86 || atype[enemyId] == 90) {
+    if (eiType[enemyId] == 86 || eiType[enemyId] == 90) {
         ot(oto[3]);
         eyobi(block->x + 1200, block->y + 1200, 300, -1000, 0, 160, 1000, 1000, 1, 120);
         eyobi(block->x + 1200, block->y + 1200, -300, -1000, 0, 160, 1000, 1000, 1, 120);
@@ -481,29 +481,29 @@ void onEnemyTouch(LegacyBlock* block, int enemyId) {
 }
 
 bool LegacyBlock::onEnemyHit(int enemyId) {
-    if (atype[enemyId] == 86 || atype[enemyId] == 90 || this->type == 140) { onEnemyTouch(this, enemyId); return true; }
+    if (eiType[enemyId] == 86 || eiType[enemyId] == 90 || this->type == 140) { onEnemyTouch(this, enemyId); return true; }
     if (this->type == 117) return false;
 
     constexpr int xx0 = 200;
-    
-    ab[enemyId] = this->y - fy + blockHeight + xx0 + fy;
-    if (ad[enemyId] < 0) {
-        ad[enemyId] = 0;
+
+    eiY[enemyId] = this->y - fy + blockHeight + xx0 + fy;
+    if (eiSpeedY[enemyId] < 0) {
+        eiSpeedY[enemyId] = 0;
     }
 
     return true;
 }
 
 bool LegacyBlock::onEnemyStand(int enemyId) {
-    if (atype[enemyId] == 86 || atype[enemyId] == 90 || this->type == 140) { onEnemyTouch(this, enemyId); return true; }
+    if (eiType[enemyId] == 86 || eiType[enemyId] == 90 || this->type == 140) { onEnemyTouch(this, enemyId); return true; }
     if (this->type == 7 || this->type == 117) return false;
 
-    ab[enemyId] = this->y - fy - anobib[enemyId] + 100 + fy;
-    ad[enemyId] = 0;
+    eiY[enemyId] = this->y - fy - eiHeight[enemyId] + 100 + fy;
+    eiSpeedY[enemyId] = 0;
     axzimen[enemyId] = 1;
 
     if (this->type == 120) {  // ジャンプ台  spring (jump platform)
-        ad[enemyId] = -1600;
+        eiSpeedY[enemyId] = -1600;
         azimentype[enemyId] = 30;
     }
 
@@ -511,7 +511,7 @@ bool LegacyBlock::onEnemyStand(int enemyId) {
 }
 
 void onEnemyTouchEndCommon(LegacyBlock* block, int enemyId) {
-    if ((block->type == 7 || block->type == 1) && atype[enemyId] == 2) {  // こうらブレイク
+    if ((block->type == 7 || block->type == 1) && eiType[enemyId] == 2) {  // こうらブレイク
         if (block->type == 7) {
             ot(oto[4]);
             block->type = 3;
@@ -528,23 +528,23 @@ void onEnemyTouchEndCommon(LegacyBlock* block, int enemyId) {
 }
 
 bool LegacyBlock::onEnemyTouchLeft(int enemyId) {
-    if (atype[enemyId] == 86 || atype[enemyId] == 90 || this->type == 140) { onEnemyTouch(this, enemyId); return true; }
-    if (!((atype[enemyId] >= 100 || this->type != 7 || (this->type == 7 && atype[enemyId] == 2)) && this->type != 117)) return false;
+    if (eiType[enemyId] == 86 || eiType[enemyId] == 90 || this->type == 140) { onEnemyTouch(this, enemyId); return true; }
+    if (!((eiType[enemyId] >= 100 || this->type != 7 || (this->type == 7 && eiType[enemyId] == 2)) && this->type != 117)) return false;
 
-    aa[enemyId] = this->x - fx - anobia[enemyId] + fx;
-    ac[enemyId] = 0;
-    amuki[enemyId] = 0;
+    eiX[enemyId] = this->x - fx - eiWidth[enemyId] + fx;
+    eiSpeedX[enemyId] = 0;
+    eiFaceDirection[enemyId] = 0;
     onEnemyTouchEndCommon(this, enemyId);
     return true;
 }
 
 bool LegacyBlock::onEnemyTouchRight(int enemyId) {
-    if (atype[enemyId] == 86 || atype[enemyId] == 90 || this->type == 140) { onEnemyTouch(this, enemyId); return true; }
-    if (!((atype[enemyId] >= 100 || this->type != 7 || (this->type == 7 && atype[enemyId] == 2)) && this->type != 117)) return false;
+    if (eiType[enemyId] == 86 || eiType[enemyId] == 90 || this->type == 140) { onEnemyTouch(this, enemyId); return true; }
+    if (!((eiType[enemyId] >= 100 || this->type != 7 || (this->type == 7 && eiType[enemyId] == 2)) && this->type != 117)) return false;
 
-    aa[enemyId] = this->x - fx + blockWidth + fx;
-    ac[enemyId] = 0;
-    amuki[enemyId] = 1;
+    eiX[enemyId] = this->x - fx + blockWidth + fx;
+    eiSpeedX[enemyId] = 0;
+    eiFaceDirection[enemyId] = 1;
     onEnemyTouchEndCommon(this, enemyId);
     return true;
 }
