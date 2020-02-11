@@ -4,8 +4,10 @@
 #include "../utilities/DxLib.h"
 #include "ground.h"
 #include "block.h"
+#include "../utilities/draw.h"
 
-extern int fx, fy, fxmax;
+extern int fx, fy, fxmax, fymax, stagecolor;
+extern int xx[91];
 extern Mix_Chunk *oto[19];
 
 int rand(int Rand);
@@ -188,3 +190,132 @@ void tekizimen(EnemyInstance& ei) {
     }                //tt
 
 }                //tekizimen
+
+// 敵キャラとファイアバー
+void paintSceneInGameEnemy(const EnemyInstance& enemy) {
+    int screenX = enemy.x - fx;
+    int screenY = enemy.y - fy;
+    int width = enemy.width / 100;
+    int height = enemy.height / 100;
+
+    xx[14] = 3000;
+    xx[16] = 0;  // WTF?
+
+    if (screenX + width * 100 >= -10 - xx[14] && screenY <= fxmax + xx[14]
+        && screenY + height * 100 >= -10 && height <= fymax) {
+
+        if (enemy.faceDirection == 1) {
+            mirror = enemy.type < 100;
+        }
+
+        if (enemy.type == 3 && enemy.xtype == 1) {
+            DrawVertTurnGraph(screenX / 100 + 13, screenY / 100 + 15, grap[enemy.type][3]);
+            xx[16] = 1;
+        } else if (enemy.type == 9 && enemy.speedY >= 1) {
+            DrawVertTurnGraph(screenX / 100 + 13, screenY / 100 + 15, grap[enemy.type][3]);
+            xx[16] = 1;
+        }
+
+        // メイン
+        if (enemy.type < 200 && xx[16] == 0 && enemy.type != 6 && enemy.type != 79
+            && enemy.type != 86 && enemy.type != 30) {
+            if (!((enemy.type == 80 || enemy.type == 81) && enemy.xtype == 1)) {
+                drawImage(grap[enemy.type][3], screenX / 100, screenY / 100);
+            }
+        }
+
+        if (enemy.type == 6) {  // デフラグさん
+            if ((enemy.timer >= 10 && enemy.timer <= 19) || (enemy.timer >= 100 && enemy.timer <= 119) || enemy.timer >= 200) {
+                drawImage(grap[150][3], screenX / 100, screenY / 100);
+            } else {
+                drawImage(grap[6][3], screenX / 100, screenY / 100);
+            }
+        }
+
+
+        if (enemy.type == 30) {  // モララー
+            if (enemy.xtype == 0) {
+                drawImage(grap[30][3], screenX / 100, screenY / 100);
+            } else if (enemy.xtype == 1) {
+                drawImage(grap[155][3], screenX / 100, screenY / 100);
+            }
+        } else if ((enemy.type == 81) && enemy.xtype == 1) {  // ステルス雲
+            drawImage(grap[130][3], screenX / 100, screenY / 100);
+        } else if (enemy.type == 79) {
+            setColor(250, 250, 0);
+            fillRect(screenX / 100, screenY / 100, width, height);
+            setColorToBlack();
+            drawRect(screenX / 100, screenY / 100, width, height);
+        } else if (enemy.type == 82) {
+            if (enemy.xtype == 0) {
+                xx[9] = 0;  // WTF?
+                if (stagecolor == 2) {
+                    xx[9] = 30;
+                } else if (stagecolor == 4) {
+                    xx[9] = 60;
+                } else if (stagecolor == 5) {
+                    xx[9] = 90;
+                }
+                xx[6] = 5 + xx[9];
+                drawImage(grap[xx[6]][1], screenX / 100, screenY / 100);
+            } else if (enemy.xtype == 1) {
+                xx[9] = 0;
+                if (stagecolor == 2) {
+                    xx[9] = 30;
+                } else if (stagecolor == 4) {
+                    xx[9] = 60;
+                } else if (stagecolor == 5) {
+                    xx[9] = 90;
+                }
+                xx[6] = 4 + xx[9];
+                drawImage(grap[xx[6]][1], screenX / 100, screenY / 100);
+            } else if (enemy.xtype == 2) {
+                drawImage(grap[1][5], screenX / 100, screenY / 100);
+            }
+        } else if (enemy.type == 83) {
+            if (enemy.xtype == 0) {
+                xx[9] = 0;
+                if (stagecolor == 2) {
+                    xx[9] = 30;
+                } else if (stagecolor == 4) {
+                    xx[9] = 60;
+                } else if (stagecolor == 5) {
+                    xx[9] = 90;
+                }
+                xx[6] = 5 + xx[9];
+                drawImage(grap[xx[6]][1], screenX / 100 + 10, screenY / 100 + 9);
+            } else if (enemy.xtype == 1) {
+                xx[9] = 0;
+                if (stagecolor == 2) {
+                    xx[9] = 30;
+                } else if (stagecolor == 4) {
+                    xx[9] = 60;
+                } else if (stagecolor == 5) {
+                    xx[9] = 90;
+                }
+                xx[6] = 4 + xx[9];
+                drawImage(grap[xx[6]][1], screenX / 100 + 10, screenY / 100 + 9);
+            }
+        } else if (enemy.type == 85) {  // 偽ポール
+            setColorToWhite();
+            fillRect((screenX) / 100 + 10, (screenY) / 100, 10, height);
+            setColorToBlack();
+            drawRect((screenX) / 100 + 10, (screenY) / 100, 10, height);
+            setColor(0, 250, 200);
+            fillEllipse((screenX) / 100 + 15 - 1, (screenY) / 100, 10, 10);
+            setColorToBlack();
+            drawEllipse((screenX) / 100 + 15 - 1, (screenY) / 100, 10, 10);
+        } else if (enemy.type == 86) {  // ニャッスン
+            if (marioX >= enemy.x - fx - marioWidth - 4000
+                && marioX <= enemy.x - fx + enemy.width + 4000) {
+                drawImage(grap[152][3], screenX / 100, screenY / 100);
+            } else {
+                drawImage(grap[86][3], screenX / 100, screenY / 100);
+            }
+        } else if (enemy.type == 200) {
+            drawImage(grap[0][3], screenX / 100, screenY / 100);
+        }
+
+        mirror = false;
+    }
+}

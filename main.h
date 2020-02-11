@@ -69,7 +69,6 @@ void paint();
 void paintSceneInGame();
 void paintSceneInGameEffectItem(int index);
 void paintSceneInGameLift(int index);
-void paintSceneInGameEnemy(int index);
 void paintSceneAllStageClear();
 void paintSceneLifeSplash();
 void paintSceneTitle();

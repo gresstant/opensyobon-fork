@@ -34,6 +34,7 @@ public:
 
 void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype, int cfbt = 0, int msgTimer = 0, int msgIndex = 0);
 void tekizimen(EnemyInstance& ei);
+void paintSceneInGameEnemy(const EnemyInstance& enemy);
 
 #define ENEMY_MAX 24
 extern int eiWidthStorage[160], eiHeightStorage[160];
