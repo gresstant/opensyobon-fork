@@ -4,6 +4,8 @@
 #include <memory>
 #include <vector>
 
+class EnemyInstance;
+
 class LegacyBlock {
 public:
     int x;
@@ -18,10 +20,10 @@ public:
     virtual bool onMarioStand();
     virtual bool onMarioTouchLeft();
     virtual bool onMarioTouchRight();
-    virtual bool onEnemyHit(int enemyId);
-    virtual bool onEnemyStand(int enemyId);
-    virtual bool onEnemyTouchLeft(int enemyId);
-    virtual bool onEnemyTouchRight(int enemyId);
+    virtual bool onEnemyHit(EnemyInstance&);
+    virtual bool onEnemyStand(EnemyInstance&);
+    virtual bool onEnemyTouchLeft(EnemyInstance&);
+    virtual bool onEnemyTouchRight(EnemyInstance&);
 private:
     bool needOnTouch = true;
 };
