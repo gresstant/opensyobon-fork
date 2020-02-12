@@ -2,8 +2,7 @@
 #define OSAFORK_ENEMY_INSTANCE_H
 
 #include <memory>
-//#include <deque>
-#include <vector>
+#include <deque>
 
 //敵キャラ  Enemy Instances
 
@@ -40,7 +39,7 @@ void paintSceneInGameEnemy(const EnemyInstance& enemy);
 extern int eiWidthStorage[160], eiHeightStorage[160];
 
 // I'm to use deque to make it possible to remove elements more quickly.
-extern std::vector<std::unique_ptr<EnemyInstance>> eis;
+extern std::deque<std::unique_ptr<EnemyInstance>> eis;
 
 //       ac --> EnemyInstance::speedX (improper)
 //       ad --> EnemyInstance::speedY (improper)

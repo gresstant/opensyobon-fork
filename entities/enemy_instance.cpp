@@ -13,7 +13,7 @@ extern Mix_Chunk *oto[19];
 int rand(int Rand);
 void ot(Mix_Chunk * x);
 
-std::vector<std::unique_ptr<EnemyInstance>> eis;
+std::deque<std::unique_ptr<EnemyInstance>> eis;
 
 // 敵キャラ  Enemy Instances
 int eiWidthStorage[160], eiHeightStorage[160];
@@ -81,7 +81,7 @@ void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype, int cfbt,
 //            }
 
             if (eis.size() > ENEMY_MAX * 2)
-                eis.clear();  // TODO
+                eis.pop_front();
 
             eis.push_back(std::move(eiPtr));
             eiPtr = std::make_unique<EnemyInstance>();

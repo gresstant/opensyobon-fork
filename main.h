@@ -61,6 +61,8 @@ int stageonoff = 0;
 //メインプログラム
 void mainProgram();
 void processSceneInGame();
+class EnemyInstance;
+void processSceneInGameEnemyInstance(EnemyInstance* enemy);
 void processSceneAllStageClear();
 void processSceneLifeSplash();
 void processSceneTitle();
