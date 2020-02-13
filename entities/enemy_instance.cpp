@@ -20,79 +20,53 @@ std::deque<std::unique_ptr<EnemyInstance>> eis;
 int eiWidthStorage[160], eiHeightStorage[160];
 
 // 敵キャラ、アイテム作成
-void ayobiCommon(int x, int y, int c, int d, int xnotm, int type, int xtype, int cfbt, int msgTimer, int msgIndex,
-                 std::function<void()> popFirst, std::function<void(std::unique_ptr<EnemyInstance>&)> pushBack) {
+void ayobiCommon(int x, int y, int speedX, int speedY, int safeCountdown, int type, int xtype, int cfbt, int msgTimer, int msgIndex,
+                 const std::function<void()>& popFirst, const std::function<void(std::unique_ptr<EnemyInstance>&)>& pushBack) {
     auto eiPtr = std::make_unique<EnemyInstance>();
 
-    int rz = 0;
-    for (int i = 0; i <= 1; i++) {
-        i = 2;
-        if (eiPtr->x >= -9000 && eiPtr->x <= 30000)
-            i = 0;
-        rz++;
+    eiPtr->x = x;
+    eiPtr->y = y;
+    eiPtr->speedX = speedX;
+    eiPtr->speedY = speedY;
+    if (xtype > 100)
+        eiPtr->speedX = xtype;
+    eiPtr->type = type;
+    if (xtype >= 0 && xtype <= 99100)
+        eiPtr->xtype = xtype;
+    eiPtr->safeCountdown = safeCountdown;
+    if (eiPtr->x - fx <= marioX + marioWidth / 2)
+        eiPtr->faceDirection = 1;
+    if (eiPtr->x - fx > marioX + marioWidth / 2)
+        eiPtr->faceDirection = 0;
 
-        if (rz <= ENEMY_MAX) {
-            i = 3;
+    eiPtr->width = eiWidthStorage[type];
+    eiPtr->height = eiHeightStorage[type];
 
-            eiPtr->x = x;
-            eiPtr->y = y;    //ag[eiCounter]=0;ah[eiCounter]=0;ai[eiCounter]=ets[t]->y;//eiSpeedY[t]=0;aeon[t]=1;
-            eiPtr->speedX = c;
-            eiPtr->speedY = d;
-            if (xtype > 100)
-                eiPtr->speedX = xtype;
-            //ae[eiCounter]=0;af[eiCounter]=0;
-            eiPtr->type = type;
-            if (xtype >= 0 && xtype <= 99100)
-                eiPtr->xtype = xtype;    //ahp[eiCounter]=iz[ets[t]->xtype];aytm[eiCounter]=0;
-            //if (xtype==1)end();
-            eiPtr->safeCountdown = xnotm;
-            if (eiPtr->x - fx <= marioX + marioWidth / 2)
-                eiPtr->faceDirection = 1;
-            if (eiPtr->x - fx > marioX + marioWidth / 2)
-                eiPtr->faceDirection = 0;
-            if (eiPtr->createFromBlockTimer >= 1)
-                eiPtr->faceDirection = 1;
-            if (eiPtr->createFromBlockTimer == 20)
-                eiPtr->faceDirection = 0;
+    eiPtr->createFromBlockTimer = cfbt;
+    eiPtr->msgTimer = msgTimer;
+    eiPtr->msgIndex = msgIndex;
 
-            eiPtr->width = eiWidthStorage[type];
-            eiPtr->height = eiHeightStorage[type];
+    if (eiPtr->createFromBlockTimer >= 1)
+        eiPtr->faceDirection = 1;
+    if (eiPtr->createFromBlockTimer == 20)
+        eiPtr->faceDirection = 0;
 
-            eiPtr->createFromBlockTimer = cfbt;
-            eiPtr->msgTimer = msgTimer;
-            eiPtr->msgIndex = msgIndex;
-
-            //大砲音
-            if (type == 7 && CheckSoundMem(oto[10]) == 0) {
-                ot(oto[10]);
-            }
-            //ファイア音
-            if (type == 10 && CheckSoundMem(oto[18]) == 0) {
-                ot(oto[18]);
-            }
-
-            eiPtr->groundType = 1;
-
-            if (type == 87) {
-                eiPtr->timer = rand(179) + (-90);
-            }
-
-//            eiCounter += 1;
-//            if (eiCounter >= ENEMY_MAX - 1) {
-//                eiCounter = 0;
-//            }
-
-            while (eis.size() > ENEMY_MAX)
-                popFirst();
-//                eis.pop_front();
-
-//            eis.push_back(std::move(eiPtr));
-            pushBack(eiPtr);
-            eiPtr = std::make_unique<EnemyInstance>();
-        }            //i
-
-        //if (ets[t]->available==1){ets[t]->available=0;}
+    if (type == 7 && CheckSoundMem(oto[10]) == 0) {  // 大砲音
+        ot(oto[10]);
+    } else if (type == 10 && CheckSoundMem(oto[18]) == 0) {  // ファイア音
+        ot(oto[18]);
     }
+
+    eiPtr->groundType = 1;
+
+    if (type == 87) {
+        eiPtr->timer = rand(179) + (-90);
+    }
+
+    while (eis.size() >= ENEMY_MAX)
+        popFirst();
+
+    pushBack(eiPtr);
 }
 
 void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype, int cfbt, int msgTimer, int msgIndex) {
