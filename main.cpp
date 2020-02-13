@@ -279,9 +279,9 @@ void paintSceneInGame() {
         mmsgtm--;
         string str = getMarioMsg(mmsgtype);
 
-        drawString(colors::BLACK, str.c_str(), (marioX + marioWidth + 300) / 100 - 1, marioY / 100 - 1);
-        drawString(colors::BLACK, str.c_str(), (marioX + marioWidth + 300) / 100 + 1, marioY / 100 + 1);
-        drawString(colors::WHITE, str.c_str(), (marioX + marioWidth + 300) / 100, marioY / 100);
+        drawString(colors::BLACK, str.c_str(), (player.position.x + player.size.width + 300) / 100 - 1, player.position.y / 100 - 1);
+        drawString(colors::BLACK, str.c_str(), (player.position.x + player.size.width + 300) / 100 + 1, player.position.y / 100 + 1);
+        drawString(colors::WHITE, str.c_str(), (player.position.x + player.size.width + 300) / 100, player.position.y / 100);
     }            //mmsgtm
 
     //敵キャラのメッセージ
@@ -480,7 +480,7 @@ void paintSceneLifeSplash() {
     SetFontThickness(4);
 
     drawImage(grap[0][0], 190, 190);
-    DrawFormatString(230, 200, GetColor(255, 255, 255), " × %d", marioLife);
+    DrawFormatString(230, 200, GetColor(255, 255, 255), " × %d", player.life);
 }
 
 void paintSceneTitle() {
@@ -542,16 +542,16 @@ void processSceneInGame() {
         owataZone = 0;
 
         stagecolor = 1;
-        marioX = 5600;
-        marioY = 32000;
-        mmuki = 1;
-        marioHP = 1;
-        marioSpeedX = 0;
-        marioSpeedY = 0;
-        marioWidth = 3000;
-        marioHeight = 3600;
+        player.position.x = 5600;
+        player.position.y = 32000;
+        player.faceDirection = FaceDirection::RIGHT;
+        player.hp = 1;
+        player.speed.x = 0;
+        player.speed.y = 0;
+        player.size.width = 3000;
+        player.size.height = 3600;
 
-        marioType = MarioType::NORMAL;
+        player.type = MarioType::NORMAL;
 
         fx = 0;
         fy = 0;
@@ -595,7 +595,7 @@ void processSceneInGame() {
 
             liftCounter = 0;
             t = liftCounter;
-            liftX[t] = marioX + fx;
+            liftX[t] = player.position.x + fx;
             liftY[t] = (13 * 29 - 12) * 100;
             liftWidth[t] = 30 * 100;
             liftType[t] = 0;
@@ -615,15 +615,15 @@ void processSceneInGame() {
     xx[0] = 0;
     actaon[2] = 0;
     actaon[3] = 0;
-    if (mkeytm <= 0) {
+    if (player.mkeytm <= 0) {
         if (CheckHitKey(KEY_INPUT_LEFT) && keytm <= 0) {
             actaon[0] = -1;
-            mmuki = 0;
+            player.faceDirection = FaceDirection::LEFT;
             actaon[4] = -1;
         }
         if (CheckHitKey(KEY_INPUT_RIGHT) && keytm <= 0) {
             actaon[0] = 1;
-            mmuki = 1;
+            player.faceDirection = FaceDirection::RIGHT;
             actaon[4] = 1;
         }
         if (CheckHitKey(KEY_INPUT_DOWN)) {
@@ -634,17 +634,17 @@ void processSceneInGame() {
     if (CheckHitKey(KEY_INPUT_F1) == 1) {
         gameScene = GameScene::TITLE;
     }
-    //if (CheckHitKey(KEY_INPUT_Q)==1){mkeytm=0;}
+    //if (CheckHitKey(KEY_INPUT_Q)==1){player.mkeytm=0;}
     if (CheckHitKey(KEY_INPUT_O) == 1) {
-        if (marioHP >= 1)
-            marioHP = 0;
+        if (player.hp >= 1)
+            player.hp = 0;
         if (stc >= 5) {
             stc = 0;
             stagepoint = 0;
         }
     }
 
-    if (mkeytm <= 0) {
+    if (player.mkeytm <= 0) {
         if (CheckHitKey(KEY_INPUT_Z) == 1 || CheckHitKey(KEY_INPUT_UP) == 1
                 || SDL_JoystickGetButton(joystick, JOYSTICK_JUMP)) {
             if (actaon[1] == 10) {
@@ -657,29 +657,29 @@ void processSceneInGame() {
 
     if (CheckHitKey(KEY_INPUT_Z) == 1 || CheckHitKey(KEY_INPUT_UP) == 1
         || SDL_JoystickGetButton(joystick, JOYSTICK_JUMP)) {
-        if (mjumptm == 8 && marioSpeedY >= -900) {
-            marioSpeedY = -1300;
+        if (player.mjumptm == 8 && player.speed.y >= -900) {
+            player.speed.y = -1300;
             //ダッシュ中
             xx[22] = 200;
-            if (marioSpeedX >= xx[22] || marioSpeedX <= -xx[22]) {
-                marioSpeedY = -1400;
+            if (player.speed.x >= xx[22] || player.speed.x <= -xx[22]) {
+                player.speed.y = -1400;
             }
             xx[22] = 600;
-            if (marioSpeedX >= xx[22] || marioSpeedX <= -xx[22]) {
-                marioSpeedY = -1500;
+            if (player.speed.x >= xx[22] || player.speed.x <= -xx[22]) {
+                player.speed.y = -1500;
             }
         }
-// && xx[0]==0 && marioSpeedY<=-10
+// && xx[0]==0 && player.speed.y<=-10
 
-//if (mjumptm==7 && marioSpeedY>=-900){}
+//if (player.mjumptm==7 && player.speed.y>=-900){}
         if (xx[0] == 0)
             actaon[1] = 10;
     }
-//if (( key & PAD_INPUT_UP) && keytm<=0){actaon[0]=-1;mmuki=0;}
+//if (( key & PAD_INPUT_UP) && keytm<=0){actaon[0]=-1;player.faceDirection=0;}
 
 //xx[0]=200;
-//if (actaon[0]==-1){marioX-=xx[0];}
-//if (actaon[0]==1){marioX+=xx[0];}
+//if (actaon[0]==-1){player.position.x-=xx[0];}
+//if (actaon[0]==1){player.position.x+=xx[0];}
 
 //加速による移動
     xx[0] = 40;
@@ -695,75 +695,75 @@ void processSceneInGame() {
         xx[12] = 9;
         xx[13] = 10;
     }
-//if (marioOnGround==0){xx[0]-=15;}
+//if (player.onGround==0){xx[0]-=15;}
     if (actaon[0] == -1) {
-        if (!(!marioOnGround && marioSpeedX < -xx[8])) {
-            if (marioSpeedX >= -xx[9]) {
-                marioSpeedX -= xx[0];
-                if (marioSpeedX < -xx[9]) {
-                    marioSpeedX = -xx[9] - 1;
+        if (!(!player.onGround && player.speed.x < -xx[8])) {
+            if (player.speed.x >= -xx[9]) {
+                player.speed.x -= xx[0];
+                if (player.speed.x < -xx[9]) {
+                    player.speed.x = -xx[9] - 1;
                 }
             }
-            if (marioSpeedX < -xx[9] && atktm <= 0)
-                marioSpeedX -= xx[0] / 10;
+            if (player.speed.x < -xx[9] && player.atktm <= 0)
+                player.speed.x -= xx[0] / 10;
         }
         if (level9ground != 1) {
-            if (marioSpeedX > 100 && !marioOnGround) {
-                marioSpeedX -= xx[0] * 2 / 3;
+            if (player.speed.x > 100 && !player.onGround) {
+                player.speed.x -= xx[0] * 2 / 3;
             }
-            if (marioSpeedX > 100 && marioOnGround) {
-                marioSpeedX -= xx[0];
-                if (marioOnGround) {
-                    marioSpeedX -= xx[0] * 1 / 2;
+            if (player.speed.x > 100 && player.onGround) {
+                player.speed.x -= xx[0];
+                if (player.onGround) {
+                    player.speed.x -= xx[0] * 1 / 2;
                 }
             }
             actaon[0] = 3;
-            mkasok += 1;
+            player.mkasok += 1;
         }
     }
 
     if (actaon[0] == 1) {
-        if (!(!marioOnGround && marioSpeedX > xx[8])) {
-            if (marioSpeedX <= xx[9]) {
-                marioSpeedX += xx[0];
-                if (marioSpeedX > xx[9]) {
-                    marioSpeedX = xx[9] + 1;
+        if (!(!player.onGround && player.speed.x > xx[8])) {
+            if (player.speed.x <= xx[9]) {
+                player.speed.x += xx[0];
+                if (player.speed.x > xx[9]) {
+                    player.speed.x = xx[9] + 1;
                 }
             }
-            if (marioSpeedX > xx[9] && atktm <= 0)
-                marioSpeedX += xx[0] / 10;
+            if (player.speed.x > xx[9] && player.atktm <= 0)
+                player.speed.x += xx[0] / 10;
         }
         if (level9ground != 1) {
-            if (marioSpeedX < -100 && !marioOnGround) {
-                marioSpeedX += xx[0] * 2 / 3;
+            if (player.speed.x < -100 && !player.onGround) {
+                player.speed.x += xx[0] * 2 / 3;
             }
-            if (marioSpeedX < -100 && marioOnGround) {
-                marioSpeedX += xx[0];
-                if (marioOnGround) {
-                    marioSpeedX += xx[0] * 1 / 2;
+            if (player.speed.x < -100 && player.onGround) {
+                player.speed.x += xx[0];
+                if (player.onGround) {
+                    player.speed.x += xx[0] * 1 / 2;
                 }
             }
             actaon[0] = 3;
-            mkasok += 1;
+            player.mkasok += 1;
         }
     }
-    if (actaon[0] == 0 && mkasok > 0) {
-        mkasok -= 2;
+    if (actaon[0] == 0 && player.mkasok > 0) {
+        player.mkasok -= 2;
     }
-    if (mkasok > 8) {
-        mkasok = 8;
+    if (player.mkasok > 8) {
+        player.mkasok = 8;
     }
 //すべり補正初期化
-    if (!marioOnGround)
+    if (!player.onGround)
         level9ground = 0;
 
 //ジャンプ
-    if (mjumptm >= 0)
-        mjumptm--;
-    if (actaon[1] == 1 && marioOnGround) {
-        marioY -= 400;
-        marioSpeedY = -1200;
-        mjumptm = 10;
+    if (player.mjumptm >= 0)
+        player.mjumptm--;
+    if (actaon[1] == 1 && player.onGround) {
+        player.position.y -= 400;
+        player.speed.y = -1200;
+        player.mjumptm = 10;
 
 //PlaySound( "jump.mp3" , DX_PLAYTYPE_NORMAL ) ;
 
@@ -775,16 +775,16 @@ void processSceneInGame() {
         ot(oto[1]);
 
 /*
-marioSpeedY=-1040;
-xx[1]=600;if (marioSpeedX>xx[1] || marioSpeedX<=-xx[1]){marioSpeedY=-1400;}
+player.speed.y=-1040;
+xx[1]=600;if (player.speed.x>xx[1] || player.speed.x<=-xx[1]){player.speed.y=-1400;}
 xx[1]=7;xx[2]=400;
-if (mkasok>xx[1] && (marioSpeedX>xx[2] || marioSpeedX<=-xx[2])){
-marioSpeedY=-1600;
-if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
+if (player.mkasok>xx[1] && (player.speed.x>xx[2] || player.speed.x<=-xx[2])){
+player.speed.y=-1600;
+if (player.speed.x>=800 || player.speed.x<=-800){player.speed.y=-1800;}
 }
 */
 
-        marioOnGround = false;
+        player.onGround = false;
 
     }
     if (actaon[1] <= 9)
@@ -794,170 +794,170 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
 
 //}//陸地
 
-    if (mmutekitm >= -1)
-        mmutekitm--;
+    if (player.mmutekitm >= -1)
+        player.mmutekitm--;
 
 //HPがなくなったとき
-    if (marioHP <= 0 && marioHP >= -9) {
-        mkeytm = 12;
-        marioHP = -20;
-        marioType = MarioType::DYING;
-        mtm = 0;
+    if (player.hp <= 0 && player.hp >= -9) {
+        player.mkeytm = 12;
+        player.hp = -20;
+        player.type = MarioType::DYING;
+        player.mtm = 0;
         Mix_HaltChannel(-1);
         Mix_HaltMusic();
         ot(oto[12]);StopSoundMem(oto[16]);
-    }            //marioHP
-//if (marioHP<=-10){
-    if (marioType == MarioType::DYING) {
-        if (mtm <= 11) {
-            marioSpeedX = 0;
-            marioSpeedY = 0;
+    }            //player.hp
+//if (player.hp<=-10){
+    if (player.type == MarioType::DYING) {
+        if (player.mtm <= 11) {
+            player.speed.x = 0;
+            player.speed.y = 0;
         }
-        if (mtm == 12) {
-            marioSpeedY = -1200;
+        if (player.mtm == 12) {
+            player.speed.y = -1200;
         }
-        if (mtm >= 12) {
-            marioSpeedX = 0;
+        if (player.mtm >= 12) {
+            player.speed.x = 0;
         }
-        if (mtm >= 100 || fast == 1) {
+        if (player.mtm >= 100 || fast == 1) {
             initialized = false;
             gameScene = GameScene::LIFE_SPLASH;
-            mtm = 0;
-            mkeytm = 0;
-            marioLife--;
+            player.mtm = 0;
+            player.mkeytm = 0;
+            player.life--;
             if (fast == 1)
-                marioType = MarioType::NORMAL;
-        }            //mtm>=100
-    }            //marioType==200
+                player.type = MarioType::NORMAL;
+        }            //player.mtm>=100
+    }            //player.type==200
 
 //音符によるワープ
-    if (marioType == MarioType::AFTER_ORANGE_NOTE) {
-        mtm++;
+    if (player.type == MarioType::AFTER_ORANGE_NOTE) {
+        player.mtm++;
 
-        mkeytm = 2;
-        marioSpeedY = -1500;
-        if (marioY <= -6000) {
+        player.mkeytm = 2;
+        player.speed.y = -1500;
+        if (player.position.y <= -6000) {
             blackx = 1;
             blacktm = 20;
             stc += 5;
             stagerr = 0;
             Mix_HaltMusic();
-            mtm = 0;
-            marioType = MarioType::NORMAL;
-            mkeytm = -1;
+            player.mtm = 0;
+            player.type = MarioType::NORMAL;
+            player.mkeytm = -1;
         }
     }            //2
 
 //ジャンプ台アウト
-    if (marioType == MarioType::AFTER_SPRING) {
-        marioSpeedY = -2400;
-        if (marioY <= -6000) {
-            marioY = -80000000;
-            marioHP = 0;
+    if (player.type == MarioType::AFTER_SPRING) {
+        player.speed.y = -2400;
+        if (player.position.y <= -6000) {
+            player.position.y = -80000000;
+            player.hp = 0;
         }
     }
 //mtypeによる特殊的な移動
-    if (int(marioType) >= 100) {
-        mtm++;
+    if (int(player.type) >= 100) {
+        player.mtm++;
 
 //普通の土管
-        if (marioType == MarioType::IN_PIPE) {
-            if (marioXType == 0) {
-                marioSpeedX = 0;
-                marioSpeedY = 0;
+        if (player.type == MarioType::IN_PIPE) {
+            if (player.xtype == 0) {
+                player.speed.x = 0;
+                player.speed.y = 0;
                 t = 28;
-                if (mtm <= 16) {
-                    marioY += 240;
-                    mzz = 100;
+                if (player.mtm <= 16) {
+                    player.position.y += 240;
+                    player.mzz = 100;
                 }
-                if (mtm == 17) {
-                    marioY = -80000000;
+                if (player.mtm == 17) {
+                    player.position.y = -80000000;
                 }
-                if (mtm == 23) {
+                if (player.mtm == 23) {
                     groundX[t] -= 100;
                 }
-                if (mtm >= 44 && mtm <= 60) {
-                    if (mtm % 2 == 0)
+                if (player.mtm >= 44 && player.mtm <= 60) {
+                    if (player.mtm % 2 == 0)
                         groundX[t] += 200;
-                    if (mtm % 2 == 1)
+                    if (player.mtm % 2 == 1)
                         groundX[t] -= 200;
                 }
-                if (mtm >= 61 && mtm <= 77) {
-                    if (mtm % 2 == 0)
+                if (player.mtm >= 61 && player.mtm <= 77) {
+                    if (player.mtm % 2 == 0)
                         groundX[t] += 400;
-                    if (mtm % 2 == 1)
+                    if (player.mtm % 2 == 1)
                         groundX[t] -= 400;
                 }
-                if (mtm >= 78 && mtm <= 78 + 16) {
-                    if (mtm % 2 == 0)
+                if (player.mtm >= 78 && player.mtm <= 78 + 16) {
+                    if (player.mtm % 2 == 0)
                         groundX[t] += 600;
-                    if (mtm % 2 == 1)
+                    if (player.mtm % 2 == 1)
                         groundX[t] -= 600;
                 }
-                if (mtm >= 110) {
-                    groundY[t] -= mzz;
-                    mzz += 80;
-                    if (mzz > 1600)
-                        mzz = 1600;
+                if (player.mtm >= 110) {
+                    groundY[t] -= player.mzz;
+                    player.mzz += 80;
+                    if (player.mzz > 1600)
+                        player.mzz = 1600;
                 }
-                if (mtm == 160) {
-                    marioType = MarioType::NORMAL;
-                    marioHP--;
+                if (player.mtm == 160) {
+                    player.type = MarioType::NORMAL;
+                    player.hp--;
                 }
 
             }
 //ふっとばし
-            else if (marioXType == 10) {
-                marioSpeedX = 0;
-                marioSpeedY = 0;
-                if (mtm <= 16) {
-                    marioX += 240;
-                }        //mzz=100;}
-                if (mtm == 16)
-                    marioY -= 1100;
-                if (mtm == 20)
+            else if (player.xtype == 10) {
+                player.speed.x = 0;
+                player.speed.y = 0;
+                if (player.mtm <= 16) {
+                    player.position.x += 240;
+                }        //player.mzz=100;}
+                if (player.mtm == 16)
+                    player.position.y -= 1100;
+                if (player.mtm == 20)
                     ot(oto[10]);
 
-                if (mtm >= 24) {
-                    marioX -= 2000;
-                    mmuki = 0;
+                if (player.mtm >= 24) {
+                    player.position.x -= 2000;
+                    player.faceDirection = FaceDirection::LEFT;
                 }
-                if (mtm >= 48) {
-                    marioType = MarioType::NORMAL;
-                    marioHP--;
+                if (player.mtm >= 48) {
+                    player.type = MarioType::NORMAL;
+                    player.hp--;
                 }
 
             } else {
-                marioSpeedX = 0;
-                marioSpeedY = 0;
-                if (mtm <= 16 && marioXType != 3) {
-                    marioY += 240;
-                }        //mzz=100;}
-                if (mtm <= 16 && marioXType == 3) {
-                    marioX += 240;
+                player.speed.x = 0;
+                player.speed.y = 0;
+                if (player.mtm <= 16 && player.xtype != 3) {
+                    player.position.y += 240;
+                }        //player.mzz=100;}
+                if (player.mtm <= 16 && player.xtype == 3) {
+                    player.position.x += 240;
                 }
-                if (mtm == 19 && marioXType == 2) {
-                    marioHP = 0;
-                    marioType = MarioType::_2000;
-                    mtm = 0;
+                if (player.mtm == 19 && player.xtype == 2) {
+                    player.hp = 0;
+                    player.type = MarioType::_2000;
+                    player.mtm = 0;
                     mmsgtm = 30;
                     mmsgtype = 51;
                 }
-                if (mtm == 19 && marioXType == 5) {
-                    marioHP = 0;
-                    marioType = MarioType::_2000;
-                    mtm = 0;
+                if (player.mtm == 19 && player.xtype == 5) {
+                    player.hp = 0;
+                    player.type = MarioType::_2000;
+                    player.mtm = 0;
                     mmsgtm = 30;
                     mmsgtype = 52;
                 }
-                if (mtm == 20) {
-                    if (marioXType == 6) {
+                if (player.mtm == 20) {
+                    if (player.xtype == 6) {
                         stc += 10;
                     } else {
                         stc++;
                     }
-                    marioY = -80000000;
-                    marioXType = 0;  // seems no effect ...
+                    player.position.y = -80000000;
+                    player.xtype = 0;  // seems no effect ...
                     blackx = 1;
                     blacktm = 20;
                     stagerr = 0;
@@ -966,24 +966,24 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
             }
         }            //00
 
-        if (marioType == MarioType::_300) {
-            mkeytm = 3;
-            if (mtm <= 1) {
-                marioSpeedX = 0;
-                marioSpeedY = 0;
+        if (player.type == MarioType::_300) {
+            player.mkeytm = 3;
+            if (player.mtm <= 1) {
+                player.speed.x = 0;
+                player.speed.y = 0;
             }
-            if (mtm >= 2 && mtm <= 42) {
-                marioSpeedY = 600;
-                mmuki = 1;
+            if (player.mtm >= 2 && player.mtm <= 42) {
+                player.speed.y = 600;
+                player.faceDirection = FaceDirection::RIGHT;
             }
-            if (mtm > 43 && mtm <= 108) {
-                marioSpeedX = 300;
+            if (player.mtm > 43 && player.mtm <= 108) {
+                player.speed.x = 300;
             }
-            if (mtm == 110) {
-                marioY = -80000000;
-                marioSpeedX = 0;
+            if (player.mtm == 110) {
+                player.position.y = -80000000;
+                player.speed.x = 0;
             }
-            if (mtm == 250) {
+            if (player.mtm == 250) {
                 stb++;
                 stc = 0;
                 initialized = false;
@@ -991,34 +991,34 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
                 gameScene = GameScene::LIFE_SPLASH;
                 gameSceneTimer = 0;
             }
-        }            //marioType==300
+        }            //player.type==300
 
-        if (marioType == MarioType::WIN_SWORD || marioType == MarioType::WIN_AUTO) {
-            mkeytm = 3;
+        if (player.type == MarioType::WIN_SWORD || player.type == MarioType::WIN_AUTO) {
+            player.mkeytm = 3;
 
-            if (mtm <= 1) {
-                marioSpeedX = 0;
-                marioSpeedY = 0;
+            if (player.mtm <= 1) {
+                player.speed.x = 0;
+                player.speed.y = 0;
             }
 
-            if (mtm >= 2
-                && (marioType == MarioType::WIN_SWORD && mtm <= 102
-                    || marioType == MarioType::WIN_AUTO && mtm <= 60)) {
+            if (player.mtm >= 2
+                && (player.type == MarioType::WIN_SWORD && player.mtm <= 102
+                    || player.type == MarioType::WIN_AUTO && player.mtm <= 60)) {
                 xx[5] = 500;
-                marioX -= xx[5];
+                player.position.x -= xx[5];
                 fx += xx[5];
                 fzx += xx[5];
             }
 
-            if ((marioType == MarioType::WIN_SWORD || marioType == MarioType::WIN_AUTO) && mtm >= 2
-                && mtm <= 100) {
-                marioSpeedX = 250;
-                mmuki = 1;
+            if ((player.type == MarioType::WIN_SWORD || player.type == MarioType::WIN_AUTO) && player.mtm >= 2
+                && player.mtm <= 100) {
+                player.speed.x = 250;
+                player.faceDirection = FaceDirection::RIGHT;
             }
 
-            if (mtm == 200) {
+            if (player.mtm == 200) {
                 ot(oto[17]);
-                if (marioType == MarioType::WIN_SWORD) {
+                if (player.type == MarioType::WIN_SWORD) {
                     nyobi(117 * 29 * 100 - 1100, 4 * 29 * 100, 101);
                     nyobi(115 * 29 * 100 - 1100, 6 * 29 * 100, 102);
                 } else {
@@ -1028,8 +1028,8 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
             }
 //スタッフロールへ
 
-            if (mtm == 440) {
-                if (marioType == MarioType::WIN_SWORD) {
+            if (player.mtm == 440) {
+                if (player.type == MarioType::WIN_SWORD) {
                     ending = 1;
                 } else {
                     sta++;
@@ -1043,108 +1043,108 @@ if (marioSpeedX>=800 || marioSpeedX<=-800){marioSpeedY=-1800;}
             }
 
 /*
-if (mtm<=1){marioSpeedX=0;marioSpeedY=0;}
-if (mtm>=2 && mtm<=42){marioSpeedY=600;mmuki=1;}
-if (mtm>43 && mtm<=108){marioSpeedX=300;}
-if (mtm==110){marioY=-80000000;marioSpeedX=0;}
-if (mtm==250)end();
+if (player.mtm<=1){player.speed.x=0;player.speed.y=0;}
+if (player.mtm>=2 && player.mtm<=42){player.speed.y=600;player.faceDirection=1;}
+if (player.mtm>43 && player.mtm<=108){player.speed.x=300;}
+if (player.mtm==110){player.position.y=-80000000;player.speed.x=0;}
+if (player.mtm==250)end();
 */
-        }            //marioType==301
+        }            //player.type==301
 
-    }            //marioType>=100
+    }            //player.type>=100
 
 //移動
-    if (mkeytm >= 1) {
-        mkeytm--;
-    }            //marioSpeedX=0;}
-    marioX += marioSpeedX;
-    marioY += marioSpeedY;
-    if (marioSpeedX < 0)
-        mactp += (-marioSpeedX);
-    if (marioSpeedX >= 0)
-        mactp += marioSpeedX;
+    if (player.mkeytm >= 1) {
+        player.mkeytm--;
+    }            //player.speed.x=0;}
+    player.position.x += player.speed.x;
+    player.position.y += player.speed.y;
+    if (player.speed.x < 0)
+        player.mactp += (-player.speed.x);
+    if (player.speed.x >= 0)
+        player.mactp += player.speed.x;
 
-    if (int(marioType) <= 9 || marioType == MarioType::DYING || marioType == MarioType::_300 || marioType == MarioType::WIN_SWORD
-        || marioType == MarioType::WIN_AUTO)
-        marioSpeedY += 100;
+    if (int(player.type) <= 9 || player.type == MarioType::DYING || player.type == MarioType::_300 || player.type == MarioType::WIN_SWORD
+        || player.type == MarioType::WIN_AUTO)
+        player.speed.y += 100;
 
 //走る際の最大値
-    if (marioType == MarioType::NORMAL) {
+    if (player.type == MarioType::NORMAL) {
         xx[0] = 800;
         xx[1] = 1600;
-        if (marioSpeedX > xx[0] && marioSpeedX < xx[0] + 200) {
-            marioSpeedX = xx[0];
+        if (player.speed.x > xx[0] && player.speed.x < xx[0] + 200) {
+            player.speed.x = xx[0];
         }
-        if (marioSpeedX > xx[0] + 200) {
-            marioSpeedX -= 200;
+        if (player.speed.x > xx[0] + 200) {
+            player.speed.x -= 200;
         }
-        if (marioSpeedX < -xx[0] && marioSpeedX > -xx[0] - 200) {
-            marioSpeedX = -xx[0];
+        if (player.speed.x < -xx[0] && player.speed.x > -xx[0] - 200) {
+            player.speed.x = -xx[0];
         }
-        if (marioSpeedX < -xx[0] - 200) {
-            marioSpeedX += 200;
+        if (player.speed.x < -xx[0] - 200) {
+            player.speed.x += 200;
         }
-        if (marioSpeedY > xx[1]) {
-            marioSpeedY = xx[1];
+        if (player.speed.y > xx[1]) {
+            player.speed.y = xx[1];
         }
     }
 //プレイヤー
 //地面の摩擦
-    if (marioOnGround && actaon[0] != 3) {
-        if ((int(marioType) <= 9) || marioType == MarioType::_300 || marioType == MarioType::WIN_SWORD
-            || marioType == MarioType::WIN_AUTO) {
+    if (player.onGround && actaon[0] != 3) {
+        if ((int(player.type) <= 9) || player.type == MarioType::_300 || player.type == MarioType::WIN_SWORD
+            || player.type == MarioType::WIN_AUTO) {
             if (level9ground == 0) {
                 xx[2] = 30;
                 xx[1] = 60;
                 xx[3] = 30;
-                if (marioSpeedX >= -xx[3] && marioSpeedX <= xx[3]) {
-                    marioSpeedX = 0;
+                if (player.speed.x >= -xx[3] && player.speed.x <= xx[3]) {
+                    player.speed.x = 0;
                 }
-                if (marioSpeedX >= xx[2]) {
-                    marioSpeedX -= xx[1];
+                if (player.speed.x >= xx[2]) {
+                    player.speed.x -= xx[1];
                 }
-                if (marioSpeedX <= -xx[2]) {
-                    marioSpeedX += xx[1];
+                if (player.speed.x <= -xx[2]) {
+                    player.speed.x += xx[1];
                 }
             }
             if (level9ground == 1) {
                 xx[2] = 5;
                 xx[1] = 10;
                 xx[3] = 5;
-                if (marioSpeedX >= -xx[3] && marioSpeedX <= xx[3]) {
-                    marioSpeedX = 0;
+                if (player.speed.x >= -xx[3] && player.speed.x <= xx[3]) {
+                    player.speed.x = 0;
                 }
-                if (marioSpeedX >= xx[2]) {
-                    marioSpeedX -= xx[1];
+                if (player.speed.x >= xx[2]) {
+                    player.speed.x -= xx[1];
                 }
-                if (marioSpeedX <= -xx[2]) {
-                    marioSpeedX += xx[1];
+                if (player.speed.x <= -xx[2]) {
+                    player.speed.x += xx[1];
                 }
             }
         }
     }
 //地面判定初期化
-    marioOnGround = false;
+    player.onGround = false;
 
 //場外
-    if (int(marioType) <= 9 && marioHP >= 1) {
-        if (marioX < 100) {
-            marioX = 100;
-            marioSpeedX = 0;
+    if (int(player.type) <= 9 && player.hp >= 1) {
+        if (player.position.x < 100) {
+            player.position.x = 100;
+            player.speed.x = 0;
         }
-        if (marioX + marioWidth > fxmax) {
-            marioX = fxmax - marioWidth;
-            marioSpeedX = 0;
+        if (player.position.x + player.size.width > fxmax) {
+            player.position.x = fxmax - player.size.width;
+            player.speed.x = 0;
         }
     }
-//if (marioY>=42000){marioY=42000;marioOnGround=1;}
-    if (marioY >= 38000 && marioHP >= 0 && stagecolor == 4) {
-        marioHP = -2;
+//if (player.position.y>=42000){player.position.y=42000;player.onGround=1;}
+    if (player.position.y >= 38000 && player.hp >= 0 && stagecolor == 4) {
+        player.hp = -2;
         mmsgtm = 30;
         mmsgtype = 55;
     }
-    if (marioY >= 52000 && marioHP >= 0) {
-        marioHP = -2;
+    if (player.position.y >= 52000 && player.hp >= 0) {
+        player.hp = -2;
     }
     // endregion player
 
@@ -1163,46 +1163,46 @@ if (mtm==250)end();
         int xx17 = 0;
 
         if (screenX + blockWidth >= -10 - xx3 && screenX <= fxmax + 12000 + xx3) {  // is block on screen
-            if (marioType != MarioType::DYING && marioType != MarioType::HUGE && marioType != MarioType::AFTER_ORANGE_NOTE) {
+            if (player.type != MarioType::DYING && player.type != MarioType::HUGE && player.type != MarioType::AFTER_ORANGE_NOTE) {
                 // 上  mario standing on block
-                if (marioX + marioWidth > screenX + xx0 * 2 + 100 && marioX < screenX + blockWidth - xx0 * 2 - 100 &&
-                    marioY + marioHeight > screenY && marioY + marioHeight < screenY + blockHeight && marioSpeedY >= -100) {
+                if (player.position.x + player.size.width > screenX + xx0 * 2 + 100 && player.position.x < screenX + blockWidth - xx0 * 2 - 100 &&
+                    player.position.y + player.size.height > screenY && player.position.y + player.size.height < screenY + blockHeight && player.speed.y >= -100) {
                     block->onMarioStand();
                 }
 
                 //ブロック判定の入れ替え
 
                 // 下  mario hitting
-                if (!(marioOnGround || mjumptm >= 10) && marioType != MarioType::IN_PIPE) {    // && xx[12]==0){
-                    if (marioX + marioWidth > screenX + xx0 * 2 + 800
-                            && marioX < screenX + blockWidth - xx0 * 2 - 800
-                            && marioY > screenY - xx0 * 2
-                            && marioY < screenY + blockHeight - xx0 * 2
-                            && marioSpeedY <= 0) {
+                if (!(player.onGround || player.mjumptm >= 10) && player.type != MarioType::IN_PIPE) {    // && xx[12]==0){
+                    if (player.position.x + player.size.width > screenX + xx0 * 2 + 800
+                            && player.position.x < screenX + blockWidth - xx0 * 2 - 800
+                            && player.position.y > screenY - xx0 * 2
+                            && player.position.y < screenY + blockHeight - xx0 * 2
+                            && player.speed.y <= 0) {
                         block->onMarioHit(xx17);
                     }
                 }
                 // 左右  mario touching
                 if (block->x >= -20000) {
-                    if (marioX + marioWidth > screenX
-                            && marioX < screenX + xx2
-                            && marioY + marioHeight > screenY + blockHeight / 2 - xx0
-                            && marioY < screenY + xx2
-                            && marioSpeedX >= 0) {
+                    if (player.position.x + player.size.width > screenX
+                            && player.position.x < screenX + xx2
+                            && player.position.y + player.size.height > screenY + blockHeight / 2 - xx0
+                            && player.position.y < screenY + xx2
+                            && player.speed.x >= 0) {
                         block->onMarioTouchLeft();
-                    } else if (marioX + marioWidth > screenX + xx2
-                            && marioX < screenX + blockWidth
-                            && marioY + marioHeight > screenY + blockHeight / 2 - xx0
-                            && marioY < screenY + xx2
-                            && marioSpeedX <= 0) {
+                    } else if (player.position.x + player.size.width > screenX + xx2
+                            && player.position.x < screenX + blockWidth
+                            && player.position.y + player.size.height > screenY + blockHeight / 2 - xx0
+                            && player.position.y < screenY + xx2
+                            && player.speed.x <= 0) {
                         block->onMarioTouchRight();
                     }
                 }
-            } else if (marioType == MarioType::HUGE) {
-                if (marioX + marioWidth > screenX
-                        && marioX < screenX + blockWidth
-                        && marioY + marioHeight > screenY
-                        && marioY < screenY + blockHeight) {
+            } else if (player.type == MarioType::HUGE) {
+                if (player.position.x + player.size.width > screenX
+                        && player.position.x < screenX + blockWidth
+                        && player.position.y + player.size.height > screenY
+                        && player.position.y < screenY + blockHeight) {
                     ot(oto[3]);
                     eyobi(block->x + 1200, block->y + 1200, 300, -1000, 0, 160, 1000, 1000, 1, 120);
                     eyobi(block->x + 1200, block->y + 1200, -300, -1000, 0, 160, 1000, 1000, 1, 120);
@@ -1226,21 +1226,21 @@ if (mtm==250)end();
             int screenY = groundY[t] - fy;
 
             if ((groundType[t] <= 99 || groundType[t] == 200)
-                && int(marioType) < 10) {
+                && int(player.type) < 10) {
 
 //おちるブロック  Falling Blocks
                 if (groundType[t] == 51) {
-                    if (marioX + marioWidth > screenX + xx[0] + 3000
-                            && marioX < screenX + groundWidth[t] - xx[0]
-                            && marioY + marioHeight > screenY + 3000 && groundGType[t] == 0) {
+                    if (player.position.x + player.size.width > screenX + xx[0] + 3000
+                            && player.position.x < screenX + groundWidth[t] - xx[0]
+                            && player.position.y + player.size.height > screenY + 3000 && groundGType[t] == 0) {
                         if (groundXType[t] == 0) {
                             groundGType[t] = 1;
                             sr[t] = 0;
                         }
                     }
-                    if (marioX + marioWidth > screenX + xx[0] + 1000
-                            && marioX < screenX + groundWidth[t] - xx[0]
-                            && marioY + marioHeight > screenY + 3000 && groundGType[t] == 0) {
+                    if (player.position.x + player.size.width > screenX + xx[0] + 1000
+                            && player.position.x < screenX + groundWidth[t] - xx[0]
+                            && player.position.y + player.size.height > screenY + 3000 && groundGType[t] == 0) {
                         if ((groundXType[t] == 10)
                             && groundGType[t] == 0) {
                             groundGType[t] = 1;
@@ -1250,23 +1250,23 @@ if (mtm==250)end();
 
                     if ((groundXType[t] == 1)
                             && groundY[27] >= 25000
-                            && groundX[27] > marioX + marioWidth
+                            && groundX[27] > player.position.x + player.size.width
                             && t != 27 && groundGType[t] == 0) {
                         groundGType[t] = 1;
                         sr[t] = 0;
                     }
                     if (groundXType[t] == 2
                             && groundY[28] >= 48000
-                            && t != 28 && groundGType[t] == 0 && marioHP >= 1) {
+                            && t != 28 && groundGType[t] == 0 && player.hp >= 1) {
                         groundGType[t] = 1;
                         sr[t] = 0;
                     }
-                    if ((groundXType[t] == 3 && marioY >= 30000
-                             || groundXType[t] == 4 && marioY >= 25000)
+                    if ((groundXType[t] == 3 && player.position.y >= 30000
+                             || groundXType[t] == 4 && player.position.y >= 25000)
                             && groundGType[t] == 0
-                            && marioHP >= 1
-                            && marioX + marioWidth > screenX + xx[0] + 3000 - 300
-                            && marioX < screenX + groundWidth[t] - xx[0]) {
+                            && player.hp >= 1
+                            && player.position.x + player.size.width > screenX + xx[0] + 3000 - 300
+                            && player.position.x < screenX + groundWidth[t] - xx[0]) {
                         groundGType[t] = 1;
                         sr[t] = 0;
                         if (groundXType[t] == 4)
@@ -1279,11 +1279,11 @@ if (mtm==250)end();
                             sr[t] = 1600;
                         }
                         groundY[t] += sr[t];
-                        if (marioX + marioWidth > screenX + xx[0]
-                                && marioX < screenX + groundWidth[t] - xx[0]
-                                && marioY + marioHeight > screenY
-                                && marioY < screenY + groundHeight[t] + xx[0]) {
-                            marioHP--;
+                        if (player.position.x + player.size.width > screenX + xx[0]
+                                && player.position.x < screenX + groundWidth[t] - xx[0]
+                                && player.position.y + player.size.height > screenY
+                                && player.position.y < screenY + groundHeight[t] + xx[0]) {
+                            player.hp--;
                             xx[7] = 1;
                         }
                     }
@@ -1291,9 +1291,9 @@ if (mtm==250)end();
 //おちるブロック2
                 if (groundType[t] == 52) {
                     if (groundGType[t] == 0
-                            && marioX + marioWidth > screenX + xx[0] + 2000
-                            && marioX < screenX + groundWidth[t] - xx[0] - 2500
-                            && marioY + marioHeight > screenY - 3000) {
+                            && player.position.x + player.size.width > screenX + xx[0] + 2000
+                            && player.position.x < screenX + groundWidth[t] - xx[0] - 2500
+                            && player.position.y + player.size.height > screenY - 3000) {
                         groundGType[t] = 1;
                         sr[t] = 0;
                     }
@@ -1307,121 +1307,121 @@ if (mtm==250)end();
                 }
 //通常地面
                 if (xx[7] == 0) {
-                    if (marioX + marioWidth > screenX + xx[0]
-                            && marioX < screenX + groundWidth[t] - xx[0]
-                            && marioY + marioHeight > screenY
-                            && marioY + marioHeight < screenY + xx[1]
-                            && marioSpeedY >= -100) {
-                        marioY = groundY[t] - fy - marioHeight + 100;
-                        marioSpeedY = 0;
-                        marioOnGround = true;
+                    if (player.position.x + player.size.width > screenX + xx[0]
+                            && player.position.x < screenX + groundWidth[t] - xx[0]
+                            && player.position.y + player.size.height > screenY
+                            && player.position.y + player.size.height < screenY + xx[1]
+                            && player.speed.y >= -100) {
+                        player.position.y = groundY[t] - fy - player.size.height + 100;
+                        player.speed.y = 0;
+                        player.onGround = true;
                     }
-                    if (marioX + marioWidth > screenX - xx[0]
-                            && marioX < screenX + xx[2]
-                            && marioY + marioHeight > screenY + xx[1] * 3 / 4
-                            && marioY < screenY + groundHeight[t] - xx[2]) {
-                        marioX = screenX - xx[0] - marioWidth;
-                        marioSpeedX = 0;
+                    if (player.position.x + player.size.width > screenX - xx[0]
+                            && player.position.x < screenX + xx[2]
+                            && player.position.y + player.size.height > screenY + xx[1] * 3 / 4
+                            && player.position.y < screenY + groundHeight[t] - xx[2]) {
+                        player.position.x = screenX - xx[0] - player.size.width;
+                        player.speed.x = 0;
                     }
-                    if (marioX + marioWidth > screenX + groundWidth[t] - xx[0]
-                            && marioX < screenX + groundWidth[t] + xx[0]
-                            && marioY + marioHeight > screenY + xx[1] * 3 / 4
-                            && marioY < screenY + groundHeight[t] - xx[2]) {
-                        marioX = screenX + groundWidth[t] + xx[0];
-                        marioSpeedX = 0;
+                    if (player.position.x + player.size.width > screenX + groundWidth[t] - xx[0]
+                            && player.position.x < screenX + groundWidth[t] + xx[0]
+                            && player.position.y + player.size.height > screenY + xx[1] * 3 / 4
+                            && player.position.y < screenY + groundHeight[t] - xx[2]) {
+                        player.position.x = screenX + groundWidth[t] + xx[0];
+                        player.speed.x = 0;
                     }
-                    if (marioX + marioWidth > screenX + xx[0] * 2
-                            && marioX < screenX + groundWidth[t] - xx[0] * 2
-                            && marioY > screenY + groundHeight[t] - xx[1]
-                            && marioY < screenY + groundHeight[t] + xx[0]) {
-                        marioY = screenY + groundHeight[t] + xx[0];
-                        if (marioSpeedY < 0) {
-                            marioSpeedY = -marioSpeedY * 2 / 3;
+                    if (player.position.x + player.size.width > screenX + xx[0] * 2
+                            && player.position.x < screenX + groundWidth[t] - xx[0] * 2
+                            && player.position.y > screenY + groundHeight[t] - xx[1]
+                            && player.position.y < screenY + groundHeight[t] + xx[0]) {
+                        player.position.y = screenY + groundHeight[t] + xx[0];
+                        if (player.speed.y < 0) {
+                            player.speed.y = -player.speed.y * 2 / 3;
                         }
                     }
                 }        //xx[7]
 
 //入る土管
                 if (groundType[t] == 50) {
-                    if (marioX + marioWidth > screenX + 2800
-                            && marioX < screenX + groundWidth[t] - 3000
-                            && marioY + marioHeight > screenY - 1000
-                            && marioY + marioHeight < screenY + xx[1] + 3000
-                            && marioOnGround
-                            && actaon[3] == 1 && marioType == MarioType::NORMAL) {
+                    if (player.position.x + player.size.width > screenX + 2800
+                            && player.position.x < screenX + groundWidth[t] - 3000
+                            && player.position.y + player.size.height > screenY - 1000
+                            && player.position.y + player.size.height < screenY + xx[1] + 3000
+                            && player.onGround
+                            && actaon[3] == 1 && player.type == MarioType::NORMAL) {
 //飛び出し
                         if (groundXType[t] == 0) {
-                            marioType = MarioType::IN_PIPE;
-                            mtm = 0;
+                            player.type = MarioType::IN_PIPE;
+                            player.mtm = 0;
                             ot(oto[7]);
-                            marioXType = 0;
+                            player.xtype = 0;
                         }
 //普通
                         if (groundXType[t] == 1) {
-                            marioType = MarioType::IN_PIPE;
-                            mtm = 0;
+                            player.type = MarioType::IN_PIPE;
+                            player.mtm = 0;
                             ot(oto[7]);
-                            marioXType = 1;
+                            player.xtype = 1;
                         }
 //普通
                         if (groundXType[t] == 2) {
-                            marioType = MarioType::IN_PIPE;
-                            mtm = 0;
+                            player.type = MarioType::IN_PIPE;
+                            player.mtm = 0;
                             ot(oto[7]);
-                            marioXType = 2;
+                            player.xtype = 2;
                         }
                         if (groundXType[t] == 5) {
-                            marioType = MarioType::IN_PIPE;
-                            mtm = 0;
+                            player.type = MarioType::IN_PIPE;
+                            player.mtm = 0;
                             ot(oto[7]);
-                            marioXType = 5;
+                            player.xtype = 5;
                         }
 // ループ
                         if (groundXType[t] == 6) {
-                            marioType = MarioType::IN_PIPE;
-                            mtm = 0;
+                            player.type = MarioType::IN_PIPE;
+                            player.mtm = 0;
                             ot(oto[7]);
-                            marioXType = 6;
+                            player.xtype = 6;
                         }
                     }
                 }        //50
 
 //入る土管(左から)
                 if (groundType[t] == 40) {
-                    if (marioX + marioWidth > screenX - 300 && marioX < screenX + groundWidth[t] - 1000 && marioY > screenY + 1000 &&
-                            marioY + marioHeight < screenY + xx[1] + 4000 && marioOnGround && actaon[4] == 1 &&
-                            marioType == MarioType::NORMAL) {    //end();
+                    if (player.position.x + player.size.width > screenX - 300 && player.position.x < screenX + groundWidth[t] - 1000 && player.position.y > screenY + 1000 &&
+                            player.position.y + player.size.height < screenY + xx[1] + 4000 && player.onGround && actaon[4] == 1 &&
+                            player.type == MarioType::NORMAL) {    //end();
 //飛び出し
                         if (groundXType[t] == 0) {
-                            marioType = MarioType::_500;
-                            mtm = 0;
-                            ot(oto[7]);    //marioXType=1;
-                            marioType = MarioType::IN_PIPE;
-                            marioXType = 10;
+                            player.type = MarioType::_500;
+                            player.mtm = 0;
+                            ot(oto[7]);    //player.xtype=1;
+                            player.type = MarioType::IN_PIPE;
+                            player.xtype = 10;
                         }
 
                         if (groundXType[t] == 2) {
-                            marioXType = 3;
-                            mtm = 0;
-                            ot(oto[7]);    //marioXType=1;
-                            marioType = MarioType::IN_PIPE;
+                            player.xtype = 3;
+                            player.mtm = 0;
+                            ot(oto[7]);    //player.xtype=1;
+                            player.type = MarioType::IN_PIPE;
                         }
 // ループ
                         if (groundXType[t] == 6) {
-                            marioType = MarioType::AFTER_SPRING;
-                            mtm = 0;
+                            player.type = MarioType::AFTER_SPRING;
+                            player.mtm = 0;
                             ot(oto[7]);
-                            marioXType = 6;
+                            player.xtype = 6;
                         }
                     }
                 }        //40
 
             }        //groundType
             else {
-                if (marioX + marioWidth > screenX + xx[0]
-                        && marioX < screenX + groundWidth[t] - xx[0]
-                        && marioY + marioHeight > screenY
-                        && marioY < screenY + groundHeight[t] + xx[0]) {
+                if (player.position.x + player.size.width > screenX + xx[0]
+                        && player.position.x < screenX + groundWidth[t] - xx[0]
+                        && player.position.y + player.size.height > screenY
+                        && player.position.y < screenY + groundHeight[t] + xx[0]) {
                     if (groundType[t] == 100) {
                         if (groundXType[t] == 0
                             || groundXType[t] == 1 && blocks[1]->type != 3) {
@@ -1441,7 +1441,7 @@ if (mtm==250)end();
                                 ayobi(groundX[t] + t3 * 3000, -3000, 0, 0, 0, 0, 0);
                             }
                         }
-                        if (groundXType[t] == 1 && marioY >= 16000) {
+                        if (groundXType[t] == 1 && player.position.y >= 16000) {
                             ayobi(groundX[t] + 1500, 44000, 0, -2000, 0, 4, 0);
                         } else if (groundXType[t] == 2) {
                             ayobi(groundX[t] + 4500, 30000, 0, -1600, 0, 5, 0);
@@ -1483,10 +1483,10 @@ if (mtm==250)end();
 //クリア
                         if (groundXType[t] == 30) {
                             groundX[t] = -80000000;
-                            marioSpeedY = 0;
+                            player.speed.y = 0;
                             Mix_HaltMusic();
-                            marioType = MarioType::WIN_AUTO;
-                            mtm = 0;
+                            player.type = MarioType::WIN_AUTO;
+                            player.mtm = 0;
                             ot(oto[16]);
                         }
 
@@ -1520,7 +1520,7 @@ if (mtm==250)end();
                         }
                     }
 
-                    if (groundType[t] == 105 && !marioOnGround && marioSpeedY >= 0) {
+                    if (groundType[t] == 105 && !player.onGround && player.speed.y >= 0) {
                         blocks[1]->x -= 1000;
                         blocks[2]->x += 1000;
                         groundXType[t]++;
@@ -1528,16 +1528,16 @@ if (mtm==250)end();
                             groundX[t] = -8000000;
                     }
 
-                    if (groundType[t] == 300 && marioType == MarioType::NORMAL
-                        && marioY < screenY + groundHeight[t] + xx[0] - 3000 && marioHP >= 1) {
+                    if (groundType[t] == 300 && player.type == MarioType::NORMAL
+                        && player.position.y < screenY + groundHeight[t] + xx[0] - 3000 && player.hp >= 1) {
                         Mix_HaltMusic();
-                        marioType = MarioType::_300;
-                        mtm = 0;
-                        marioX = groundX[t] - fx - 2000;
+                        player.type = MarioType::_300;
+                        player.mtm = 0;
+                        player.position.x = groundX[t] - fx - 2000;
                         ot(oto[11]);
                     }
 //中間ゲート
-                    if (groundType[t] == 500 && marioType == MarioType::NORMAL && marioHP >= 1) {
+                    if (groundType[t] == 500 && player.type == MarioType::NORMAL && player.hp >= 1) {
                         checkpoint += 1;
                         groundX[t] = -80000000;
                     }
@@ -1573,12 +1573,12 @@ if (mtm==250)end();
             xx[1] = 1200;
             xx[2] = 1000;
             xx[7] = 2000;
-            if (marioSpeedY >= 100) {
-                xx[1] = 900 + marioSpeedY;
+            if (player.speed.y >= 100) {
+                xx[1] = 900 + player.speed.y;
             }
 //if (liftType[i]==1){xx[0]=600;}
-            if (marioSpeedY > xx[1])
-                xx[1] = marioSpeedY + 100;
+            if (player.speed.y > xx[1])
+                xx[1] = player.speed.y + 100;
 //xx[18]=0;
 
             liftY[i] += sre[i];
@@ -1642,14 +1642,14 @@ break;
 //if (liftType[i]==1){sre[10]=300;sre[11]=300;}
 
 //乗ったとき
-            if (marioHP >= 1) {
-                if (marioX + marioWidth > xx[8] + xx[0]
-                    && marioX < xx[8] + xx[12] - xx[0]
-                    && marioY + marioHeight > xx[9]
-                    && marioY + marioHeight < xx[9] + xx[1]
-                    && marioSpeedY >= -100) {
-                    marioY = xx[9] - marioHeight + 100;
-//if (liftActType[i]!=7)marioOnGround=1;
+            if (player.hp >= 1) {
+                if (player.position.x + player.size.width > xx[8] + xx[0]
+                    && player.position.x < xx[8] + xx[12] - xx[0]
+                    && player.position.y + player.size.height > xx[9]
+                    && player.position.y + player.size.height < xx[9] + xx[1]
+                    && player.speed.y >= -100) {
+                    player.position.y = xx[9] - player.size.height + 100;
+//if (liftActType[i]!=7)player.onGround=1;
 
                     if (liftType[i] == 1) {
                         sre[10] = 900;
@@ -1657,21 +1657,21 @@ break;
                     }
 
                     if (srsp[i] != 12) {
-                        marioOnGround = true;
-                        marioSpeedY = 0;
+                        player.onGround = true;
+                        player.speed.y = 0;
                     } else {
 //すべり
-//marioSpeedY=0;level9ground=1;marioOnGround=1;
-                        marioSpeedY = -800;
+//player.speed.y=0;level9ground=1;player.onGround=1;
+                        player.speed.y = -800;
                     }
 
 /*
-marioSpeedY=0;
-if ((liftActType[i]==1 || liftActType[i]==6) && sron[i]==1)marioY+=sre[i];
+player.speed.y=0;
+if ((liftActType[i]==1 || liftActType[i]==6) && sron[i]==1)player.position.y+=sre[i];
 
 if (liftActType[i]==2 || liftActType[i]==4){
-if (srmuki[i]==0)marioX-=srsok[i];
-if (srmuki[i]==1)marioX+=srsok[i];
+if (srmuki[i]==0)player.position.x-=srsok[i];
+if (srmuki[i]==1)player.position.x+=srsok[i];
 }
 */
 
@@ -1683,23 +1683,23 @@ if (srmuki[i]==1)marioX+=srsok[i];
                     if (liftActType[i] == 1
                         && sron[i] == 1
                         || liftActType[i] == 3 || liftActType[i] == 5) {
-                        marioY += sre[i];
+                        player.position.y += sre[i];
 //if (srmuki[i]==0)
 //if (srf[i]<0)
 //if (srmuki[i]==1)
 //if (srf[i]>0)
-//marioY+=srsok[i];
+//player.position.y+=srsok[i];
                     }
 
                     if (liftActType[i] == 7) {
                         if (actaon[2] != 1) {
-                            marioSpeedY = -600;
-                            marioY -= 810;
+                            player.speed.y = -600;
+                            player.position.y -= 810;
                         }
                         if (actaon[2] == 1) {
-                            marioY -= 400;
-                            marioSpeedY = -1400;
-                            mjumptm = 10;
+                            player.position.y -= 400;
+                            player.speed.y = -1400;
+                            player.mjumptm = 10;
                         }
                     }
 //特殊
@@ -1716,10 +1716,10 @@ if (srmuki[i]==1)marioX+=srsok[i];
                     }
 
                     if (srsp[i] == 2) {
-                        marioSpeedX = -2400;
+                        player.speed.x = -2400;
                         srmove[i] += 1;
                         if (srmove[i] >= 100) {
-                            marioHP = 0;
+                            player.hp = 0;
                             mmsgtype = 53;
                             mmsgtm = 30;
                             srmove[i] = -5000;
@@ -1727,55 +1727,55 @@ if (srmuki[i]==1)marioX+=srsok[i];
                     }
 
                     if (srsp[i] == 3) {
-                        marioSpeedX = 2400;
+                        player.speed.x = 2400;
                         srmove[i] += 1;
                         if (srmove[i] >= 100) {
-                            marioHP = 0;
+                            player.hp = 0;
                             mmsgtype = 53;
                             mmsgtm = 30;
                             srmove[i] = -5000;
                         }
                     }
-//if (liftType[i]==1){marioSpeedY=-600;marioY-=610;marioHP-=1;if (mmutekion!=1)mmutekitm=40;}
+//if (liftType[i]==1){player.speed.y=-600;player.position.y-=610;player.hp-=1;if (player.mmutekion!=1)player.mmutekitm=40;}
                 }        //判定内
 
 //疲れ初期化
                 if ((srsp[i] == 2 || srsp[i] == 3)
-                    && marioSpeedX != -2400 && srmove[i] > 0) {
+                    && player.speed.x != -2400 && srmove[i] > 0) {
                     srmove[i]--;
                 }
 
                 if (srsp[i] == 11) {
-                    if (marioX + marioWidth >
+                    if (player.position.x + player.size.width >
                         xx[8] + xx[0] - 2000
-                        && marioX < xx[8] + xx[12] - xx[0]) {
+                        && player.position.x < xx[8] + xx[12] - xx[0]) {
                         sron[i] = 1;
-                    }    // && marioY+marioHeight>xx[9]-1000 && marioY+marioHeight<xx[9]+xx[1]+2000)
+                    }    // && player.position.y+player.size.height>xx[9]-1000 && player.position.y+player.size.height<xx[9]+xx[1]+2000)
                     if (sron[i] == 1) {
                         srf[i] = 60;
                         liftY[i] += sre[i];
                     }
                 }
 //トゲ(下)
-                if (marioX + marioWidth > xx[8] + xx[0]
-                    && marioX < xx[8] + xx[12] - xx[0]
-                    && marioY > xx[9] - xx[1] / 2
-                    && marioY < xx[9] + xx[1] / 2) {
+                if (player.position.x + player.size.width > xx[8] + xx[0]
+                    && player.position.x < xx[8] + xx[12] - xx[0]
+                    && player.position.y > xx[9] - xx[1] / 2
+                    && player.position.y < xx[9] + xx[1] / 2) {
                     if (liftType[i] == 2) {
-                        if (marioSpeedY < 0) {
-                            marioSpeedY = -marioSpeedY;
+                        if (player.speed.y < 0) {
+                            player.speed.y = -player.speed.y;
                         }
-                        marioY += 110;
-                        if (mmutekitm <= 0)
-                            marioHP -= 1;
-                        if (mmutekion != 1)
-                            mmutekitm = 40;
+                        player.position.y += 110;
+                        if (player.mmutekitm <= 0)
+                            player.hp -= 1;
+                        if (player.mmutekion != 1)
+                            player.mmutekitm = 40;
                     }
                 }
 //落下
                 if (liftActType[i] == 6) {
-                    if (marioX + marioWidth > xx[8] + xx[0]
-                        && marioX < xx[8] + xx[12] - xx[0]) {
+                    if (player.position.x + player.size.width > xx[8] + xx[0]
+                        && player.position.x < xx[8] + xx[12] - xx[0]) {
                         sron[i] = 1;
                     }
                 }
@@ -1785,9 +1785,9 @@ if (srmuki[i]==1)marioX+=srsok[i];
 /*
 //ジャンプ台
 if (liftActType[i]==7){
-if (marioX+marioWidth>xx[8]+xx[0] && marioX<xx[8]+xx[12]-xx[0] && marioY+marioHeight>xx[9]+xx[1]/2 && marioY+marioHeight<xx[9]+xx[1]*3/2 && marioSpeedY>=-100){
-if (actaon[2]!=1){marioSpeedY=-600;marioY-=810;}
-if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
+if (player.position.x+player.size.width>xx[8]+xx[0] && player.position.x<xx[8]+xx[12]-xx[0] && player.position.y+player.size.height>xx[9]+xx[1]/2 && player.position.y+player.size.height<xx[9]+xx[1]*3/2 && player.speed.y>=-100){
+if (actaon[2]!=1){player.speed.y=-600;player.position.y-=810;}
+if (actaon[2]==1){player.position.y-=400;player.speed.y=-1400;player.mjumptm=10;}
 }}
 */
 
@@ -1861,19 +1861,19 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
                 int faceDirection;
                 if (!et->available && et->btm < 0
                     && screenX >= fxmax + 2000
-                    && screenX < fxmax + 2000 + marioSpeedX && i == 0) {
+                    && screenX < fxmax + 2000 + player.speed.x && i == 0) {
                     xx[0] = 1;
                     forcedFD = true;
                     faceDirection = 0;
-                }        // && mmuki==1
+                }        // && player.faceDirection==1
                 if (!et->available && et->btm < 0
-                    && screenX >= -400 - eiWidthStorage[et->type] + marioSpeedX
+                    && screenX >= -400 - eiWidthStorage[et->type] + player.speed.x
                     && screenX < -400 - eiWidthStorage[et->type] && i == 1) {
                     xx[0] = 1;
                     xx[1] = 1;
                     forcedFD = true;
                     faceDirection = 1;
-                }        // && mmuki==0
+                }        // && player.faceDirection==0
                 if (et->available && screenX >= 0 - eiWidthStorage[et->type]
                     && screenX <= fxmax + 4000
                     && screenY >= -9000
@@ -1980,16 +1980,16 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
         xx[2] = mascrollmax;
         xx[3] = 0;
         xx[1] = xx[2];
-        if (marioX > xx[1] && fzx < scrollx) {
-            xx[5] = marioX - xx[1];
-            marioX = xx[1];
+        if (player.position.x > xx[1] && fzx < scrollx) {
+            xx[5] = player.position.x - xx[1];
+            player.position.x = xx[1];
             fx += xx[5];
             fzx += xx[5];
             if (xx[1] <= 5000)
                 xx[3] = 1;
         }
 //if (kscroll!=5){//戻りなし
-//xx[1]=xx[2]-500;if (marioX<xx[1] && fzx>700){xx[5]=xx[1]-marioX;marioX=xx[1];fx-=xx[5];fzx-=xx[5];}
+//xx[1]=xx[2]-500;if (player.position.x<xx[1] && fzx>700){xx[5]=xx[1]-player.position.x;player.position.x=xx[1];fx-=xx[5];fzx-=xx[5];}
 //}
 //if (xx[3]==1){if (checkpoint==1)checkpoint=1;}
     }            //kscroll
@@ -2073,10 +2073,10 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                 scrEnemyY = enemy.y - fy;
                 if (enemy.timer >= 0)
                     enemy.timer--;
-                if (abs(marioX + marioWidth - scrEnemyX - xx0 * 2) < 9000
-                    && abs(marioX < scrEnemyX - enemy.width + xx0 * 2) < 3000  // WTF
-                    && marioSpeedY <= -600 && enemy.timer <= 0) {
-                    if (enemy.xtype == 1 && !marioOnGround && enemy.xGroundType == 1) {
+                if (abs(player.position.x + player.size.width - scrEnemyX - xx0 * 2) < 9000
+                    && abs(player.position.x < scrEnemyX - enemy.width + xx0 * 2) < 3000  // WTF
+                    && player.speed.y <= -600 && enemy.timer <= 0) {
+                    if (enemy.xtype == 1 && !player.onGround && enemy.xGroundType == 1) {
                         enemy.speedY = -1600;
                         enemy.timer = 40;
                         enemy.y -= 1000;
@@ -2100,21 +2100,21 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                 absMoveX = 120;
                 if (enemy.timer >= 10) {
                     enemy.timer++;
-                    if (marioHP >= 1) {
+                    if (player.hp >= 1) {
                         if (enemy.timer <= 19) {
-                            marioX = scrEnemyX;
-                            marioY = scrEnemyY - 3000;
-                            marioType = MarioType::NORMAL;
+                            player.position.x = scrEnemyX;
+                            player.position.y = scrEnemyY - 3000;
+                            player.type = MarioType::NORMAL;
                         }
                         absMoveX = 0;
                         if (enemy.timer == 20) {
-                            marioSpeedX = 700;
-                            mkeytm = 24;
-                            marioSpeedY = -1200;
-                            marioY = scrEnemyY - 1000 - 3000;
+                            player.speed.x = 700;
+                            player.mkeytm = 24;
+                            player.speed.y = -1200;
+                            player.position.y = scrEnemyY - 1000 - 3000;
                             enemy.faceDirection = 1;
                             if (enemy.xtype == 1) {
-                                marioSpeedX = 840;
+                                player.speed.x = 840;
                                 enemy.xtype = 0;
                             }
                         }
@@ -2140,8 +2140,8 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                     if (enemy.timer == 100) {
                         eyobi(enemy.x + 1200 - 1200, enemy.y + 3000 - 10 * 3000 - 1500,
                               0, 0, 0, 0, 1000, 10 * 3000 - 1200, 4, 20);
-                        if (marioType == MarioType::_300) {
-                            marioType = MarioType::NORMAL;StopSoundMem(oto[11]);
+                        if (player.type == MarioType::_300) {
+                            player.type = MarioType::NORMAL;StopSoundMem(oto[11]);
                             bgmchange(otom[1]);
                         }
                         for (int i = 0; i < GROUND_MAX; i++) {
@@ -2154,7 +2154,7 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                               600, -1200, 0, 160, 1000, 10 * 3000 - 1200, 4, 240);
                         enemy.faceDirection = 1;
                     }
-                    //marioSpeedX=700;mkeytm=24;marioSpeedY=-1200;marioY=xx1-1000-3000;enemy.faceDirection=1;if (enemy.xtype==1){marioSpeedX=840;enemy.xtype=0;}}
+                    //player.speed.x=700;player.mkeytm=24;player.speed.y=-1200;player.position.y=xx1-1000-3000;enemy.faceDirection=1;if (enemy.xtype==1){player.speed.x=840;enemy.xtype=0;}}
                     if (enemy.timer == 140) {
                         enemy.faceDirection = 0;
                         enemy.timer = 0;
@@ -2264,7 +2264,7 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
             case 30: {  //モララー
                 enemy.timer += 1;
                 if (enemy.xtype == 0) {
-                    if (enemy.timer == 50 && marioY >= 6000) {
+                    if (enemy.timer == 50 && player.position.y >= 6000) {
                         enemy.speedX = 300;
                         enemy.speedY -= 1600;
                         enemy.y -= 1000;
@@ -2353,15 +2353,15 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                     enemy.xtype = 1;
                     enemy.faceDirection = 1;
                 }
-                if (marioY >= 30000
-                    && marioX >= enemy.x - 3000 * 5 - fx
-                    && marioX <= enemy.x - fx && enemy.xtype == 1) {
+                if (player.position.y >= 30000
+                    && player.position.x >= enemy.x - 3000 * 5 - fx
+                    && player.position.x <= enemy.x - fx && enemy.xtype == 1) {
                     enemy.xtype = 5;
                     enemy.faceDirection = 0;
                 }
-                if (marioY >= 24000
-                    && marioX <= enemy.x + 3000 * 8 - fx
-                    && marioX >= enemy.x - fx && enemy.xtype == 1) {
+                if (player.position.y >= 24000
+                    && player.position.x <= enemy.x + 3000 * 8 - fx
+                    && player.position.x >= enemy.x - fx && enemy.xtype == 1) {
                     enemy.xtype = 5;
                     enemy.faceDirection = 1;
                 }
@@ -2373,8 +2373,8 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
             case 86: {
                 enemy.groundType = 4;
                 xx[23] = 1000;
-                if (marioX >= enemy.x - fx - marioWidth - xx[26]
-                    && marioX <= enemy.x - fx + enemy.width + xx[26]) {
+                if (player.position.x >= enemy.x - fx - player.size.width - xx[26]
+                    && player.position.x <= enemy.x - fx + enemy.width + xx[26]) {
                     enemy.timer = 1;
                 }
                 if (enemy.timer == 1) {
@@ -2406,11 +2406,11 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                     xx[8] = enemy.x - fx + int(xd[4]) * 100 - xx[4] / 2;
                     xx[9] = enemy.y - fy + int(xd[5]) * 100 - xx[4] / 2;
 
-                    if (marioX + marioWidth > xx[8] + xx[5]
-                        && marioX < xx[8] + xx[4] - xx[5]
-                        && marioY + marioHeight > xx[9] + xx[5]
-                        && marioY < xx[9] + xx[4] - xx[5]) {
-                        marioHP -= 1;
+                    if (player.position.x + player.size.width > xx[8] + xx[5]
+                        && player.position.x < xx[8] + xx[4] - xx[5]
+                        && player.position.y + player.size.height > xx[9] + xx[5]
+                        && player.position.y < xx[9] + xx[4] - xx[5]) {
+                        player.hp -= 1;
                         mmsgtype = 51;
                         mmsgtm = 30;
                     }
@@ -2442,11 +2442,11 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                     xx[8] = enemy.x - fx + int(xd[4]) * 100 - xx[4] / 2;
                     xx[9] = enemy.y - fy + int(xd[5]) * 100 - xx[4] / 2;
 
-                    if (marioX + marioWidth > xx[8] + xx[5]
-                        && marioX < xx[8] + xx[4] - xx[5]
-                        && marioY + marioHeight > xx[9] + xx[5]
-                        && marioY < xx[9] + xx[4] - xx[5]) {
-                        marioHP -= 1;
+                    if (player.position.x + player.size.width > xx[8] + xx[5]
+                        && player.position.x < xx[8] + xx[4] - xx[5]
+                        && player.position.y + player.size.height > xx[9] + xx[5]
+                        && player.position.y < xx[9] + xx[4] - xx[5]) {
+                        player.hp -= 1;
                         mmsgtype = 51;
                         mmsgtm = 30;
                     }
@@ -2534,8 +2534,8 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
         int xx0 = 850;
         int xx1 = 1200;
 
-//if (marioSpeedX>xx0){marioSpeedX=xx0;}
-//if (marioSpeedX<-xx0){marioSpeedX=-xx0;}
+//if (player.speed.x>xx0){player.speed.x=xx0;}
+//if (player.speed.x<-xx0){player.speed.x=-xx0;}
         if (enemy.speedY > xx1 && enemy.groundType != 5) {
             enemy.speedY = xx1;
         }
@@ -2599,25 +2599,25 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
 
         scrEnemyX = enemy.x - fx;  // update value
         scrEnemyY = enemy.y - fy;  // update value
-        int xx12 = marioSpeedY < 100 ? 0 : marioSpeedY;
+        int xx12 = player.speed.y < 100 ? 0 : player.speed.y;
         int xx25 = 0;
 
-        if (marioX + marioWidth > scrEnemyX + xx0 * 2
-            && marioX < scrEnemyX + enemy.width - xx0 * 2
-            && marioY + marioHeight > scrEnemyY - xx[5]
-            && marioY + marioHeight < scrEnemyY + xx1 + xx12
-            && (mmutekitm <= 0 || marioSpeedY >= 100)
+        if (player.position.x + player.size.width > scrEnemyX + xx0 * 2
+            && player.position.x < scrEnemyX + enemy.width - xx0 * 2
+            && player.position.y + player.size.height > scrEnemyY - xx[5]
+            && player.position.y + player.size.height < scrEnemyY + xx1 + xx12
+            && (player.mmutekitm <= 0 || player.speed.y >= 100)
             && enemy.createFromBlockTimer <= 0) {
             if (enemy.type != 4 && enemy.type != 9 && enemy.type != 10 && (enemy.type <= 78 || enemy.type == 85) &&
-                !marioOnGround && marioType != MarioType::DYING) {    // && enemy.type!=4 && enemy.type!=7){
+                !player.onGround && player.type != MarioType::DYING) {    // && enemy.type!=4 && enemy.type!=7){
 
                 if (enemy.type == 0) {
                     if (enemy.xtype == 0)
                         enemy.x = -900000;
                     if (enemy.xtype == 1) {
                         ot(oto[5]);
-                        marioY = scrEnemyY - 900 - enemy.height;
-                        marioSpeedY = -2100;
+                        player.position.y = scrEnemyY - 900 - enemy.height;
+                        player.speed.y = -2100;
                         xx25 = 1;
                         actaon[2] = 0;
                     }
@@ -2629,11 +2629,11 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                     enemy.xtype = 0;
                 }
 //こうら
-                else if (enemy.type == 2 && marioSpeedY >= 0) {
+                else if (enemy.type == 2 && player.speed.y >= 0) {
                     if (enemy.xtype == 1 || enemy.xtype == 2) {
                         enemy.xtype = 0;
                     } else if (enemy.xtype == 0) {
-                        if (marioX + marioWidth > scrEnemyX + xx0 * 2 && marioX < scrEnemyX + enemy.width / 2 - xx0 * 4) {
+                        if (player.position.x + player.size.width > scrEnemyX + xx0 * 2 && player.position.x < scrEnemyX + enemy.width / 2 - xx0 * 4) {
                             enemy.xtype = 1;
                             enemy.faceDirection = 1;
                         } else {
@@ -2648,7 +2648,7 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
 
                 if (enemy.type == 6) {
                     enemy.timer = 10;
-                    marioSpeedY = 0;
+                    player.speed.y = 0;
                     actaon[2] = 0;
                 }
 
@@ -2667,28 +2667,28 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                 if (enemy.type != 85) {
                     if (xx25 == 0) {
                         ot(oto[5]);
-                        marioY = scrEnemyY - 1000 - enemy.height;
-                        marioSpeedY = -1000;
+                        player.position.y = scrEnemyY - 1000 - enemy.height;
+                        player.speed.y = -1000;
                     }
                 }
                 if (enemy.type == 85) {
                     if (xx25 == 0) {
                         ot(oto[5]);
-                        marioY = scrEnemyY - 4000;
-                        marioSpeedY = -1000;
+                        player.position.y = scrEnemyY - 4000;
+                        player.speed.y = -1000;
                         enemy.xtype = 5;
                     }
                 }
 
                 if (actaon[2] == 1) {
-                    marioSpeedY = -1600;
+                    player.speed.y = -1600;
                     actaon[2] = 0;
                 }
             }
-//if (enemy.type==200){marioY=scrEnemyY-900-enemy.height;marioSpeedY=-2400;}
+//if (enemy.type==200){player.position.y=scrEnemyY-900-enemy.height;player.speed.y=-2400;}
         }
-//if (enemy.x+enemy.width-fx>scrEnemyX-xx0 && enemy.x-fx<scrEnemyX){marioSpeedY=-1000;}//enemy.x=-9000000;
-// && enemy.y-fy<scrEnemyY+xx1/2 && enemy.y+enemy.height-fy>scrEnemyY+marioHeight-xx2
+//if (enemy.x+enemy.width-fx>scrEnemyX-xx0 && enemy.x-fx<scrEnemyX){player.speed.y=-1000;}//enemy.x=-9000000;
+// && enemy.y-fy<scrEnemyY+xx1/2 && enemy.y+enemy.height-fy>scrEnemyY+player.size.height-xx2
 
         xx[15] = -500;
 
@@ -2700,25 +2700,25 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
             xx[16] = -3200;
         if (enemy.type == 85)
             xx[16] = -enemy.height + 6000;
-        if (marioX + marioWidth > scrEnemyX + xx[4]
-            && marioX < scrEnemyX + enemy.width - xx[4]
-            && marioY < scrEnemyY + enemy.height + xx[15]
-            && marioY + marioHeight > scrEnemyY + enemy.height - xx0 + xx[16]
+        if (player.position.x + player.size.width > scrEnemyX + xx[4]
+            && player.position.x < scrEnemyX + enemy.width - xx[4]
+            && player.position.y < scrEnemyY + enemy.height + xx[15]
+            && player.position.y + player.size.height > scrEnemyY + enemy.height - xx0 + xx[16]
             && enemy.safeCountdown <= 0 && enemy.createFromBlockTimer <= 0) {
-            if (mmutekion == 1) {
+            if (player.mmutekion == 1) {
                 enemy.x = -9000000;
             }
-            if (mmutekitm <= 0
+            if (player.mmutekitm <= 0
                 && (enemy.type <= 99 || enemy.type >= 200)) {
-                if (mmutekion != 1 && marioType != MarioType::DYING) {
-//if (mmutekitm<=0)
+                if (player.mmutekion != 1 && player.type != MarioType::DYING) {
+//if (player.mmutekitm<=0)
 
 //ダメージ
                     if ((enemy.type != 2 || enemy.xtype != 0)
-                        && marioHP >= 1) {
+                        && player.hp >= 1) {
                         if (enemy.type != 6) {
-                            marioHP -= 1;
-//mmutekitm=40;
+                            player.hp -= 1;
+//player.mmutekitm=40;
                         }
                     }
 
@@ -2726,7 +2726,7 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                         enemy.timer = 10;
                     }
 //せりふ
-                    if (marioHP == 0) {
+                    if (player.hp == 0) {
 
                         if (enemy.type == 0 || enemy.type == 7) {
                             enemy.msgTimer = 60;
@@ -2738,7 +2738,7 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                             enemy.msgIndex = rand(2) + 15;
                         }
 
-                        if (enemy.type == 2 && enemy.xtype >= 1 && mmutekitm <= 0) {
+                        if (enemy.type == 2 && enemy.xtype >= 1 && player.mmutekitm <= 0) {
                             enemy.msgTimer = 60;
                             enemy.msgIndex = 18;
                         }
@@ -2797,31 +2797,31 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                             enemy.type = 81;
                         }
 
-                    }    //marioHP==0
+                    }    //player.hp==0
 
 //こうら
                     if (enemy.type == 2) {
 //if (enemy.xtype==1 || enemy.xtype==2){enemy.xtype=0;}
                         if (enemy.xtype == 0) {
-                            if (marioX + marioWidth > scrEnemyX + xx0 * 2 && marioX < scrEnemyX + enemy.width / 2 - xx0 * 4) {
+                            if (player.position.x + player.size.width > scrEnemyX + xx0 * 2 && player.position.x < scrEnemyX + enemy.width / 2 - xx0 * 4) {
                                 enemy.xtype = 1;
                                 enemy.faceDirection = 1;
-                                enemy.x = marioX + marioWidth + fx + marioSpeedX;
-                                mmutekitm = 5;
+                                enemy.x = player.position.x + player.size.width + fx + player.speed.x;
+                                player.mmutekitm = 5;
                             } else {
                                 enemy.xtype = 1;
                                 enemy.faceDirection = 0;
-                                enemy.x = marioX - enemy.width + fx - marioSpeedX;
-                                mmutekitm = 5;
+                                enemy.x = player.position.x - enemy.width + fx - player.speed.x;
+                                player.mmutekitm = 5;
                             }
                         } else {
-                            marioHP -= 1;
-                        }    //mmutekitm=40;}
+                            player.hp -= 1;
+                        }    //player.mmutekitm=40;}
                     }
 
                 }
             }
-//else if (mmutekitm>=0 && mmutekitm<=2){mmutekitm+=1;}
+//else if (player.mmutekitm>=0 && player.mmutekitm<=2){player.mmutekitm+=1;}
 //アイテム
             if (enemy.type >= 100 && enemy.type <= 199) {
 
@@ -2836,22 +2836,22 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                     ot(oto[9]);
                 }
                 if (enemy.type == 100 && enemy.xtype == 2) {
-                    marioWidth = 5200;
-                    marioHeight = 7300;
+                    player.size.width = 5200;
+                    player.size.height = 7300;
                     ot(oto[9]);
-                    marioX -= 1100;
-                    marioY -= 4000;
-                    marioType = MarioType::HUGE;
-                    marioHP = 50000000;
+                    player.position.x -= 1100;
+                    player.position.y -= 4000;
+                    player.type = MarioType::HUGE;
+                    player.hp = 50000000;
                 }
 
                 if (enemy.type == 101) {
-                    marioHP -= 1;
+                    player.hp -= 1;
                     mmsgtm = 30;
                     mmsgtype = 11;
                 }
                 if (enemy.type == 102) {
-                    marioHP -= 1;
+                    player.hp -= 1;
                     mmsgtm = 30;
                     mmsgtype = 10;
                 }
@@ -2879,7 +2879,7 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                 }    //105
 
                 if (enemy.type == 110) {
-                    marioHP -= 1;
+                    player.hp -= 1;
                     mmsgtm = 30;
                     mmsgtype = 3;
                 }
@@ -2887,7 +2887,7 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                 enemy.x = -90000000;
             }
 
-        }        //(marioX
+        }        //(player.position.x
 
     } else {
         enemy.x = -9000000;
@@ -2952,7 +2952,7 @@ void processSceneAllStageClear() {
     }
     if (xx[30] <= -400) {
         gameScene = GameScene::TITLE;
-        marioLife = 2;
+        player.life = 2;
         gameSceneTimer = 0;
         ending = 0;
     }
@@ -3043,7 +3043,7 @@ void processSceneTitle() {
         gameScene = GameScene::LIFE_SPLASH;
         initialized = false;
         gameSceneTimer = 0;
-        marioLife = 2;
+        player.life = 2;
 
         fast = 0;
         trap = 0;
@@ -3206,8 +3206,8 @@ void stage() {
             if (groundType[i] == 500 && checkpoint >= 1) {
                 fx = groundX[i] - fxmax / 2;
                 fzx = fx;
-                marioX = groundX[i] - fx;
-                marioY = groundY[i] - fy;
+                player.position.x = groundX[i] - fx;
+                player.position.y = groundY[i] - fy;
                 checkpoint--;
                 xx[17]++;
 
@@ -3306,7 +3306,7 @@ void stagep() {
         //PlaySoundMem(oto[0],DX_PLAYTYPE_LOOP) ;
 
         scrollx = 0 * 100;
-        //marioX=3000;marioY=3000;
+        //player.position.x=3000;player.position.y=3000;
 
         byte stagedatex[17][1001] = {
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -3360,8 +3360,8 @@ void stagep() {
         bgmchange(otom[2]);
 
         scrollx = 4080 * 100;
-        marioX = 6000;
-        marioY = 3000;
+        player.position.x = 6000;
+        player.position.y = 3000;
         stagecolor = 2;
 
 	byte stagedatex[17][1001] = {
@@ -3534,8 +3534,8 @@ void stagep() {
 //PlaySoundMem(oto[0],DX_PLAYTYPE_LOOP) ;
 
         scrollx = 900 * 100;
-        marioX = 7500;
-        marioY = 3000 * 9;
+        player.position.x = 7500;
+        player.position.y = 3000 * 9;
 
 	byte stagedatex[17][1001] = {
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
@@ -3603,7 +3603,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 //PlaySoundMem(oto[0],DX_PLAYTYPE_LOOP) ;
 
         scrollx = 3900 * 100;
-//marioX=3000;marioY=3000;
+//player.position.x=3000;player.position.y=3000;
 
 	byte stagedatex[17][1001] = {	//                                                                                                                                                                                     中間
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,97, 0, 0, 0, 0, 0,97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -3748,8 +3748,8 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 
         if (stagepoint == 1) {
             stagepoint = 0;
-            marioX = 4500;
-            marioY = -3000;
+            player.position.x = 4500;
+            player.position.y = -3000;
             checkpoint = 0;
         }
 
@@ -3771,8 +3771,8 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 //PlaySoundMem(oto[0],DX_PLAYTYPE_LOOP) ;
 
         scrollx = 0 * 100;
-        marioX = 6000;
-        marioY = 6000;
+        player.position.x = 6000;
+        player.position.y = 6000;
         stagecolor = 2;
 
 	byte stagedatex[17][1001] = {
@@ -3815,8 +3815,8 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         bgmchange(otom[3]);
 
         scrollx = 0 * 100;
-        marioX = 3000;
-        marioY = 33000;
+        player.position.x = 3000;
+        player.position.y = 33000;
 
         stagepoint = 1;
 
@@ -3869,8 +3869,8 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 //PlaySoundMem(oto[0],DX_PLAYTYPE_LOOP) ;
 
         scrollx = 4400 * 100;
-        marioX = 12000;
-        marioY = 6000;
+        player.position.x = 12000;
+        player.position.y = 6000;
         stagecolor = 4;
 
 	byte stagedatex[17][1001] = {	//                                                                                                                                                                                     中間
@@ -4005,8 +4005,8 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
     }                //sta4
 
     if (sta == 2 && stb == 1 && stc == 0) {	// 2-1
-        marioX = 5600;
-        marioY = 32000;
+        player.position.x = 5600;
+        player.position.y = 32000;
         bgmchange(otom[1]);
         stagecolor = 1;
         scrollx = 2900 * (113 - 19);
@@ -4122,8 +4122,8 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
     if (sta == 2 && stb == 2 && stc == 1) {    //2-2(地下)
         bgmchange(otom[2]);
         stagecolor = 2;
-        marioX = 7500;
-        marioY = 9000;
+        player.position.x = 7500;
+        player.position.y = 9000;
         scrollx = 2900 * (137 - 19);
 //
 	byte stagedatex[17][1001] = {
@@ -4218,8 +4218,8 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         bgmchange(otom[1]);
         stagecolor = 1;
         scrollx = 2900 * (36 - 19);
-        marioX = 7500;
-        marioY = 3000 * 9;
+        player.position.x = 7500;
+        player.position.y = 3000 * 9;
 //
 	byte stagedatex[17][1001] = {
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -4274,8 +4274,8 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
     }
 //
     if (sta == 2 && stb == 3 && stc == 0) {	// 2-3
-        marioX = 7500;
-        marioY = 3000 * 8;
+        player.position.x = 7500;
+        player.position.y = 3000 * 8;
         bgmchange(otom[1]);
         stagecolor = 1;
         scrollx = 2900 * (126 - 19);
@@ -4381,11 +4381,11 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 //
     if (sta == 2 && stb == 4 && (stc == 0 || stc == 10 || stc == 12)) {	// 2-4(1番)
         if (stc == 0) {
-            marioX = 7500;
-            marioY = 3000 * 4;
+            player.position.x = 7500;
+            player.position.y = 3000 * 4;
         } else {
-            marioX = 19500;
-            marioY = 3000 * 11;
+            player.position.x = 19500;
+            player.position.y = 3000 * 11;
             stc = 0;
         }
         bgmchange(otom[4]);
@@ -4443,8 +4443,8 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
     }
 
     if (sta == 2 && stb == 4 && stc == 1) {    // 2-4(2番)
-        marioX = 4500;
-        marioY = 3000 * 11;
+        player.position.x = 4500;
+        player.position.y = 3000 * 11;
         bgmchange(otom[4]);
         stagecolor = 4;
         scrollx = 2900 * (21 - 19);
@@ -4493,8 +4493,8 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
     }
 
     if (sta == 2 && stb == 4 && stc == 2) {	// 2-4(3番)
-        marioX = 4500;
-        marioY = 3000 * 11;
+        player.position.x = 4500;
+        player.position.y = 3000 * 11;
         bgmchange(otom[5]);	//6
         stagecolor = 4;
         scrollx = 2900 * (128 - 19);
@@ -4613,8 +4613,8 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
     }
 
     if (sta == 3 && stb == 1 && stc == 0) {	// 3-1
-        marioX = 5600;
-        marioY = 32000;
+        player.position.x = 5600;
+        player.position.y = 32000;
         bgmchange(otom[1]);
         stagecolor = 5;
         scrollx = 2900 * (112 - 19);

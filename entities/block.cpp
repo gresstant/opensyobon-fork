@@ -125,12 +125,12 @@ bool LegacyBlock::onTick() {
     const int screenY = this->y - fy;
 
     if (this->type == 100 && this->xtype == 0) {
-        if (marioY > screenY - xx0 * 2 - 2000
-            && marioY < screenY + blockHeight - xx0 * 2 + 2000
-            && marioX + marioWidth > screenX - 400
-            && marioX < screenX + blockWidth
-            && marioSpeedY <= 0) {
-            this->y = marioY + fy - 1200 - blockHeight;
+        if (player.position.y > screenY - xx0 * 2 - 2000
+            && player.position.y < screenY + blockHeight - xx0 * 2 + 2000
+            && player.position.x + player.size.width > screenX - 400
+            && player.position.x < screenX + blockWidth
+            && player.speed.y <= 0) {
+            this->y = player.position.y + fy - 1200 - blockHeight;
         }
     } else if (this->type == 110) {
         // do nothing. make it return true. see afterMarioHit.
@@ -183,8 +183,8 @@ bool onMarioTouch(LegacyBlock* block) {
         liftActType[20] = 1;
         sron[20] = 1;
         Mix_HaltMusic();
-        marioType = MarioType::WIN_SWORD;
-        mtm = 0;
+        player.type = MarioType::WIN_SWORD;
+        player.mtm = 0;
         ot(oto[16]);
     } else {
         return false;
@@ -205,9 +205,9 @@ void afterMarioHit(LegacyBlock* block, int xx17) {
             eyobi(block->x + 10, block->y, 0, -800, 0, 40, blockWidth, blockHeight, 0, 16);
             block->type = 3;
         } else if (block->xtype == 1) {
-            if (marioX + marioWidth > screenX - 400 && marioX < screenX + blockWidth / 2 - 1500) {
+            if (player.position.x + player.size.width > screenX - 400 && player.position.x < screenX + blockWidth / 2 - 1500) {
                 block->x += blockWidth;
-            } else if (marioX + marioWidth >= screenX + blockWidth / 2 - 1500 && marioX < screenX + blockWidth) {
+            } else if (player.position.x + player.size.width >= screenX + blockWidth / 2 - 1500 && player.position.x < screenX + blockWidth) {
                 block->x -= blockWidth;
             }
         }
@@ -346,9 +346,9 @@ bool LegacyBlock::onMarioHit(int& xx17) {  // TODO remove xx17
     const int screenY = this->y - fy;
 
     xx17 = 1;
-    marioY = screenY + blockHeight + xx0;
-    if (marioSpeedY < 0) {
-        marioSpeedY = -marioSpeedY * 2 / 3;
+    player.position.y = screenY + blockHeight + xx0;
+    if (player.speed.y < 0) {
+        player.speed.y = -player.speed.y * 2 / 3;
     }
 
     if (this->type == 1) {  // 壊れる
@@ -365,15 +365,15 @@ bool LegacyBlock::onMarioHit(int& xx17) {  // TODO remove xx17
     } else if (this->type == 7) {  // 隠し
         ot(oto[4]);
         eyobi(this->x + 10, this->y, 0, -800, 0, 40, 3000, 3000, 0, 16);
-        marioY = screenY + blockHeight + xx0;
+        player.position.y = screenY + blockHeight + xx0;
         this->type = 3;
-        if (marioSpeedY < 0) {
-            marioSpeedY = -marioSpeedY * 2 / 3;
+        if (player.speed.y < 0) {
+            player.speed.y = -player.speed.y * 2 / 3;
         }
     } else if (this->type == 10) {  // トゲ
         mmsgtm = 30;
         mmsgtype = 3;
-        marioHP--;
+        player.hp--;
     }
 
     afterMarioHit(this, xx17);
@@ -388,9 +388,9 @@ bool LegacyBlock::onMarioStand() {
     const int screenY = this->y - fy;
 
     if (this->type != 115 && this->type != 400 && this->type != 117 && this->type != 118 && this->type != 120) {
-        marioY = screenY - marioHeight + 100;
-        marioSpeedY = 0;
-        marioOnGround = true;
+        player.position.y = screenY - player.size.height + 100;
+        player.speed.y = 0;
+        player.onGround = true;
     } else if (this->type == 115) {
         ot(oto[3]);
         eyobi(this->x + 1200, this->y + 1200, 300, -1000, 0, 160, 1000, 1000, 1, 120);
@@ -399,7 +399,7 @@ bool LegacyBlock::onMarioStand() {
         eyobi(this->x + 1200, this->y + 1200, -240, -1400, 0, 160, 1000, 1000, 1, 120);
         blockBreak(*this);
     } else if (this->type == 400) {  // Pスイッチ
-        marioSpeedY = 0;
+        player.speed.y = 0;
         this->x = -8000000;
         ot(oto[13]);
         for (const auto& b : blocks) {
@@ -410,21 +410,21 @@ bool LegacyBlock::onMarioStand() {
         Mix_HaltMusic();
     } else if (this->type == 117) {  // 音符+
         ot(oto[14]);
-        marioSpeedY = -1500;
-        marioType = MarioType::AFTER_ORANGE_NOTE;
-        mtm = 0;
-        if (this->xtype >= 2 && marioType == MarioType::AFTER_ORANGE_NOTE) {
-            marioType = MarioType::NORMAL;
-            marioSpeedY = -1600;
+        player.speed.y = -1500;
+        player.type = MarioType::AFTER_ORANGE_NOTE;
+        player.mtm = 0;
+        if (this->xtype >= 2 && player.type == MarioType::AFTER_ORANGE_NOTE) {
+            player.type = MarioType::NORMAL;
+            player.speed.y = -1600;
             this->xtype = 3;
         }
         if (this->xtype == 0)
             this->xtype = 1;
     } else if (this->type == 120) {  // ジャンプ台
         //this->xtype=0;
-        marioSpeedY = -2400;
-        marioType = MarioType::AFTER_SPRING;
-        mtm = 0;
+        player.speed.y = -2400;
+        player.type = MarioType::AFTER_SPRING;
+        player.mtm = 0;
     }
     
     return true;
@@ -437,8 +437,8 @@ bool LegacyBlock::onMarioTouchLeft() {
 
     const int screenX = this->x - fx;
 
-    marioX = screenX - marioWidth;
-    marioSpeedX = 0;
+    player.position.x = screenX - player.size.width;
+    player.speed.x = 0;
 
     return true;
 }
@@ -450,8 +450,8 @@ bool LegacyBlock::onMarioTouchRight() {
 
     const int screenX = this->x - fx;
 
-    marioX = screenX + blockWidth;
-    marioSpeedX = 0;
+    player.position.x = screenX + blockWidth;
+    player.speed.x = 0;
 
     return true;
 }

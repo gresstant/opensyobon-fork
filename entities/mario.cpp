@@ -2,28 +2,21 @@
 #include "../utilities/draw.h"
 #include "../utilities/colors.h"
 
-int marioX, marioY, marioWidth, marioHeight, marioHP;
-int marioSpeedX, marioSpeedY, atktm, marioLife = 3, mactp, marioActImg;
-
-MarioType marioType;
-int marioXType, mtm, mzz;
-bool marioOnGround;
-int mkasok, mmuki, mjumptm, mkeytm;
-int mmutekitm, mmutekion;
+Mario player;
 
 // プレイヤー描画
 void paintSceneInGameMario() {
     setColor(0, 0, 255);
 
-    if (mactp >= 2000) {
-        mactp -= 2000;
-        if (marioActImg == 0) {
-            marioActImg = 1;
+    if (player.mactp >= 2000) {
+        player.mactp -= 2000;
+        if (player.actImg == 0) {
+            player.actImg = 1;
         } else {
-            marioActImg = 0;
+            player.actImg = 0;
         }
     }
-    if (mmuki == 0)
+    if (player.faceDirection == FaceDirection::LEFT)
         mirror = true;
 
 //    char buffer[50];
@@ -31,20 +24,20 @@ void paintSceneInGameMario() {
 //    SDL_WM_SetCaption(buffer, nullptr);
 //    printf("%s\n", buffer);
 
-    if (marioType != MarioType::DYING && marioType != MarioType::HUGE) {
-        if (marioOnGround) {
-            if (marioActImg == 0) {  // 読みこんだグラフィックを拡大描画
-                drawImage(grap[0][0], marioX / 100, marioY / 100);
-            } else if (marioActImg == 1) {
-                drawImage(grap[1][0], marioX / 100, marioY / 100);
+    if (player.type != MarioType::DYING && player.type != MarioType::HUGE) {
+        if (player.onGround) {
+            if (player.actImg == 0) {  // 読みこんだグラフィックを拡大描画
+                drawImage(grap[0][0], player.position.x / 100, player.position.y / 100);
+            } else if (player.actImg == 1) {
+                drawImage(grap[1][0], player.position.x / 100, player.position.y / 100);
             }
         } else {
-            drawImage(grap[2][0], marioX / 100, marioY / 100);
+            drawImage(grap[2][0], player.position.x / 100, player.position.y / 100);
         }
-    } else if (marioType == MarioType::HUGE) {  // 巨大化
-        drawImage(grap[41][0], marioX / 100, marioY / 100);
-    } else if (marioType == MarioType::DYING) {  // dying
-        drawImage(grap[3][0], marioX / 100, marioY / 100);
+    } else if (player.type == MarioType::HUGE) {  // 巨大化
+        drawImage(grap[41][0], player.position.x / 100, player.position.y / 100);
+    } else if (player.type == MarioType::DYING) {  // dying
+        drawImage(grap[3][0], player.position.x / 100, player.position.y / 100);
     }
 
     mirror = false;

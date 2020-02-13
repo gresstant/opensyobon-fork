@@ -34,9 +34,9 @@ void ayobiCommon(int x, int y, int speedX, int speedY, int safeCountdown, int ty
     if (xtype >= 0 && xtype <= 99100)
         eiPtr->xtype = xtype;
     eiPtr->safeCountdown = safeCountdown;
-    if (eiPtr->x - fx <= marioX + marioWidth / 2)
+    if (eiPtr->x - fx <= player.position.x + player.size.width / 2)
         eiPtr->faceDirection = 1;
-    if (eiPtr->x - fx > marioX + marioWidth / 2)
+    if (eiPtr->x - fx > player.position.x + player.size.width / 2)
         eiPtr->faceDirection = 0;
 
     eiPtr->width = eiWidthStorage[type];
@@ -295,8 +295,8 @@ void paintSceneInGameEnemy(const EnemyInstance& enemy) {
             setColorToBlack();
             drawEllipse((screenX) / 100 + 15 - 1, (screenY) / 100, 10, 10);
         } else if (enemy.type == 86) {  // ニャッスン
-            if (marioX >= enemy.x - fx - marioWidth - 4000
-                && marioX <= enemy.x - fx + enemy.width + 4000) {
+            if (player.position.x >= enemy.x - fx - player.size.width - 4000
+                && player.position.x <= enemy.x - fx + enemy.width + 4000) {
                 drawImage(grap[152][3], screenX / 100, screenY / 100);
             } else {
                 drawImage(grap[86][3], screenX / 100, screenY / 100);
