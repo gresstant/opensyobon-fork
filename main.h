@@ -58,11 +58,48 @@ bool zeroMode = false;
 int stageonoff = 0;
 
 
+#include "utilities/ListIterateHelper.h"
+#include <functional>
+
+template <typename T>
+class SimpleListIterateHelper : public ListIterateHelper<T> {
+    std::function<void()> ptrRemoveFirst;
+    std::function<void()> ptrRemoveLast;
+    std::function<void()> ptrRemovePreviousIfExists;
+    std::function<void()> ptrRemoveThis;
+    std::function<void()> ptrRemoveNextIfExists;
+    std::function<void(T*)> ptrInsertAsFirst;
+    std::function<void(T*)> ptrInsertAsLast;
+    std::function<void(T*)> ptrInsertAsPrevious;
+    std::function<void(T*)> ptrInsertAsNext;
+
+public:
+    virtual void removeFirst()             { if (ptrRemoveFirst)            ptrRemoveFirst();    };
+    virtual void removeLast()              { if (ptrRemoveLast)             ptrRemoveLast();     };
+    virtual void removePreviousIfExists()  { if (ptrRemovePreviousIfExists) ptrRemovePreviousIfExists(); };
+    virtual void removeThis()              { if (ptrRemoveThis)             ptrRemoveThis();             };
+    virtual void removeNextIfExists()      { if (ptrRemoveNextIfExists)     ptrRemoveNextIfExists();     };
+    virtual void insertAsFirst(T* item)    { if (ptrInsertAsFirst)          ptrInsertAsFirst(item);      };
+    virtual void insertAsLast(T* item)     { if (ptrInsertAsLast)           ptrInsertAsLast(item);       };
+    virtual void insertAsPrevious(T* item) { if (ptrInsertAsPrevious)       ptrInsertAsPrevious(item);   };
+    virtual void insertAsNext(T* item)     { if (ptrInsertAsNext)           ptrInsertAsNext(item);       };
+
+    SimpleListIterateHelper(std::function<void()> removeFirst,            std::function<void()> removeLast,
+                            std::function<void()> removePreviousIfExists, std::function<void()> removeThis,
+                            std::function<void()> removeNextIfExists,     std::function<void(T*)> insertAsFirst,
+                            std::function<void(T*)> insertAsLast,         std::function<void(T*)> insertAsPrevious,
+                            std::function<void(T*)> insertAsNext)       : ptrRemoveFirst(removeFirst),
+                            ptrRemoveLast(removeLast),                    ptrRemovePreviousIfExists(removePreviousIfExists),
+                            ptrRemoveThis(removeThis),                    ptrRemoveNextIfExists(removeNextIfExists),
+                            ptrInsertAsFirst(insertAsFirst),              ptrInsertAsLast(insertAsLast),
+                            ptrInsertAsPrevious(insertAsPrevious),        ptrInsertAsNext(insertAsNext) {}
+};
+
 //メインプログラム
 void mainProgram();
 void processSceneInGame();
 class EnemyInstance;
-void processSceneInGameEnemyInstance(EnemyInstance* enemy);
+void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<EnemyInstance>& modifier);
 void processSceneAllStageClear();
 void processSceneLifeSplash();
 void processSceneTitle();

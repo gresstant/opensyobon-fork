@@ -5,6 +5,7 @@
 #include "ground.h"
 #include "block.h"
 #include "../utilities/draw.h"
+#include <functional>
 
 extern int fx, fy, fxmax, fymax, stagecolor;
 extern int xx[91];
@@ -19,7 +20,8 @@ std::deque<std::unique_ptr<EnemyInstance>> eis;
 int eiWidthStorage[160], eiHeightStorage[160];
 
 // 敵キャラ、アイテム作成
-void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype, int cfbt, int msgTimer, int msgIndex) {
+void ayobiCommon(int x, int y, int c, int d, int xnotm, int type, int xtype, int cfbt, int msgTimer, int msgIndex,
+                 std::function<void()> popFirst, std::function<void(std::unique_ptr<EnemyInstance>&)> pushBack) {
     auto eiPtr = std::make_unique<EnemyInstance>();
 
     int rz = 0;
@@ -80,15 +82,28 @@ void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype, int cfbt,
 //                eiCounter = 0;
 //            }
 
-            if (eis.size() > ENEMY_MAX * 2)
-                eis.pop_front();
+            while (eis.size() > ENEMY_MAX)
+                popFirst();
+//                eis.pop_front();
 
-            eis.push_back(std::move(eiPtr));
+//            eis.push_back(std::move(eiPtr));
+            pushBack(eiPtr);
             eiPtr = std::make_unique<EnemyInstance>();
         }            //i
 
         //if (ets[t]->available==1){ets[t]->available=0;}
     }
+}
+
+void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype, int cfbt, int msgTimer, int msgIndex) {
+    ayobiCommon(x, y, c, d, xnotm, type, xtype, cfbt, msgTimer, msgIndex,
+                []() { eis.pop_front(); }, [](auto& item) { eis.push_back(std::move(item)); });
+}
+
+void ayobiInIter(ListIterateHelper<EnemyInstance>& modifier, int x, int y, int c, int d,
+                 int xnotm, int type, int xtype, int cfbt, int msgTimer, int msgIndex) {
+    ayobiCommon(x, y, c, d, xnotm, type, xtype, cfbt, msgTimer, msgIndex,
+                [&]() { modifier.removeFirst(); }, [&](auto& item) { modifier.insertAsFirst(item.release()); });
 }
 
 void tekizimen(EnemyInstance& ei) {

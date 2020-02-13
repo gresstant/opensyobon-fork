@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <deque>
+#include "../utilities/ListIterateHelper.h"
 
 //敵キャラ  Enemy Instances
 
@@ -32,6 +33,8 @@ public:
 };
 
 void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype, int cfbt = 0, int msgTimer = 0, int msgIndex = 0);
+void ayobiInIter(ListIterateHelper<EnemyInstance>& modifier, int x, int y, int c, int d,
+                 int xnotm, int type, int xtype, int cfbt = 0, int msgTimer = 0, int msgIndex = 0);
 void tekizimen(EnemyInstance& ei);
 void paintSceneInGameEnemy(const EnemyInstance& enemy);
 

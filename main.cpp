@@ -537,11 +537,6 @@ void mainProgram() {
 }                //mainProgram()
 
 void processSceneInGame() {
-    // The variable "increment" indicates whether the iterator should be incremented at the end of the for-loop.
-    // I really don't want to use a "function-global" variable but I can't figure out a better approach to do this ...
-    // Should be set to true at the start of every cycle of every loop (that needs it).
-    bool increment;
-
     if (!initialized) {
         initialized = true;
         owataZone = 0;
@@ -1906,11 +1901,76 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
     }            //t
 
 //敵キャラ
-//    for (const auto& enemy : eis) {
-    for (auto iter = eis.begin(); iter != eis.end(); increment ? iter++ : iter) {
+    for (auto iter = eis.begin(); iter != eis.end(); ) {
         const auto& enemy = *iter;
-        increment = true;
-        processSceneInGameEnemyInstance(&*enemy);
+
+        bool removeThisElementLater = false;
+        decltype(iter) nextIterator = iter + 1;
+
+        SimpleListIterateHelper<EnemyInstance> modifier(
+                [&]() {  // void removeFirstIfExists()
+                    // assert eis.size() != 0;
+                    if (iter == eis.begin()) {
+                        removeThisElementLater = true;
+                    } else {
+                        eis.pop_front();  // invalidates only the iterator and the reference to the first element
+                    }
+                }, [&]() {  // void removeLastIfExists()
+                    // assert eis.size() != 0;
+                    if (iter == eis.end() - 1) {
+                        removeThisElementLater = true;
+                    } else {
+                        eis.pop_back();  // invalidates only the iterator and the reference to the last element
+                    }
+                }, [&]() {  // void removePreviousIfExists()
+                    if (iter == eis.begin()) {
+                        // no previous, do nothing
+                    } else {
+                        nextIterator = eis.erase(iter - 1) + 1;  // invalidates all iterators and references
+                    }
+                }, [&]() {  // void removeThis()
+                    removeThisElementLater = true;
+                }, [&]() {  // void removeNextIfExists()
+                    if (iter == eis.end() - 1) {
+                        // no next, do nothing
+                    } else {
+                        nextIterator = eis.erase(iter + 1);  // invalidates all iterators and references
+                    }
+                }, [&](EnemyInstance* item) {  // void insertAsFirst(EnemyInstance*)
+                    // push_front invalidates all iterators, but doesn't invalidate any refs to the elements,
+                    // so it'd be fine to simply find the valid iterator.
+                    eis.push_front(std::unique_ptr<EnemyInstance>(item));
+                    for (auto i = eis.begin(); i != eis.end(); i++) {
+                        if (&*i == &enemy) {
+                            nextIterator = i + 1;
+                            return;
+                        }
+                    }
+                    throw exception("Cannot find reference to original element in function insertAsFirst.");
+                }, [&](EnemyInstance* item) {  // void insertAsLast(EnemyInstance*)
+                    // the same as insertAsFirst
+                    eis.push_back(std::unique_ptr<EnemyInstance>(item));
+                    for (auto i = eis.begin(); i != eis.end(); i++) {
+                        if (&*i == &enemy) {
+                            nextIterator = i + 1;
+                            return;
+                        }
+                    }
+                    throw exception("Cannot find reference to original element in function insertAsLast.");
+                }, [&](EnemyInstance* item) {  // void insertAsPrevious(EnemyInstance*)
+                    nextIterator = eis.insert(iter, std::unique_ptr<EnemyInstance>(item)) + 1;
+                }, [&](EnemyInstance* item) {  // void insertAsNext(EnemyInstance*)
+                    nextIterator = eis.insert(iter + 1, std::unique_ptr<EnemyInstance>(item));
+                }
+        );
+        processSceneInGameEnemyInstance(*enemy, modifier);
+
+        if (removeThisElementLater) {
+            // erase(iterator) returns a new iterator pointing to the element after the one that was removed
+            nextIterator = eis.erase(iter);
+        }
+
+        iter = nextIterator;
     }            //t
 
 //スクロール
@@ -1936,15 +1996,15 @@ if (actaon[2]==1){marioY-=400;marioSpeedY=-1400;mjumptm=10;}
 
 }
 
-void processSceneInGameEnemyInstance(EnemyInstance* enemy) {
-    int scrEnemyX = enemy->x - fx;
-    int scrEnemyY = enemy->y - fy;
-    int enemyWidth = enemy->width;
-    int enemyHeight = enemy->height;
+void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<EnemyInstance>& modifier) {
+    int scrEnemyX = enemy.x - fx;
+    int scrEnemyY = enemy.y - fy;
+    int enemyWidth = enemy.width;
+    int enemyHeight = enemy.height;
     int xx14 = 12000 * 1;
 
-    if (enemy->safeCountdown >= 0)
-        enemy->safeCountdown--;
+    if (enemy.safeCountdown >= 0)
+        enemy.safeCountdown--;
     if (scrEnemyX + enemyWidth >= -xx14 && scrEnemyX <= fxmax + xx14
         && scrEnemyY + enemyHeight >= -10 - 9000 && scrEnemyY <= fymax + 20000) {
         int moveX = 0;
@@ -1952,7 +2012,7 @@ void processSceneInGameEnemyInstance(EnemyInstance* enemy) {
 
         int absMoveX = 0;
 
-        switch (enemy->type) {
+        switch (enemy.type) {
             case 0:
                 absMoveX = 100;
                 break;
@@ -1966,12 +2026,12 @@ void processSceneInGameEnemyInstance(EnemyInstance* enemy) {
             case 2:
                 absMoveX = 0;
                 xx[17] = 800;
-                if (enemy->xtype >= 1)
+                if (enemy.xtype >= 1)
                     absMoveX = xx[17];
-//if (enemy->xtype==1)absMoveX=xx[17];
-//if (enemy->xtype==2)absMoveX=-xx[17];
+//if (enemy.xtype==1)absMoveX=xx[17];
+//if (enemy.xtype==2)absMoveX=-xx[17];
 //他の敵を倒す
-                if (enemy->xtype >= 1) {
+                if (enemy.xtype >= 1) {
                     for (const auto& ei : eis) {
                         scrEnemyX = 250;
                         xx[5] = -800;
@@ -1979,11 +2039,11 @@ void processSceneInGameEnemyInstance(EnemyInstance* enemy) {
                         scrEnemyY = 1600;
                         xx[8] = ei->x - fx;
                         xx[9] = ei->y - fy;
-                        if (enemy != &*ei) {
-                            if (enemy->x + enemy->width - fx > xx[8] + scrEnemyX * 2
-                                && enemy->x - fx < xx[8] + ei->width - scrEnemyX * 2
-                                && enemy->y + enemy->height - fy > xx[9] + xx[5]
-                                && enemy->y + enemy->height - fy < xx[9] + scrEnemyY * 3 + xx[12] + 1500) {
+                        if (&enemy != &*ei) {
+                            if (enemy.x + enemy.width - fx > xx[8] + scrEnemyX * 2
+                                && enemy.x - fx < xx[8] + ei->width - scrEnemyX * 2
+                                && enemy.y + enemy.height - fy > xx[9] + xx[5]
+                                && enemy.y + enemy.height - fy < xx[9] + scrEnemyY * 3 + xx[12] + 1500) {
                                 ei->x = -800000;
                                 ot(oto[6]);
                             }
@@ -1995,12 +2055,12 @@ void processSceneInGameEnemyInstance(EnemyInstance* enemy) {
 
 //あらまき
             case 3:
-                enemy->groundType = 0;    //end();
-                if (enemy->xtype == 0) {
-                    enemy->y -= 800;
+                enemy.groundType = 0;    //end();
+                if (enemy.xtype == 0) {
+                    enemy.y -= 800;
                 }
-                if (enemy->xtype == 1)
-                    enemy->y += 1200;
+                if (enemy.xtype == 1)
+                    enemy.y += 1200;
 
 //absMoveX=100;
                 break;
@@ -2009,17 +2069,17 @@ void processSceneInGameEnemyInstance(EnemyInstance* enemy) {
             case 4:
                 absMoveX = 120;
                 scrEnemyX = 250;
-                xx[8] = enemy->x - fx;
-                xx[9] = enemy->y - fy;
-                if (enemy->timer >= 0)
-                    enemy->timer--;
+                xx[8] = enemy.x - fx;
+                xx[9] = enemy.y - fy;
+                if (enemy.timer >= 0)
+                    enemy.timer--;
                 if (abs(marioX + marioWidth - xx[8] - scrEnemyX * 2) < 9000
-                    && abs(marioX < xx[8] - enemy->width + scrEnemyX * 2) < 3000  // WTF
-                    && marioSpeedY <= -600 && enemy->timer <= 0) {
-                    if (enemy->xtype == 1 && !marioOnGround && enemy->xGroundType == 1) {
-                        enemy->speedY = -1600;
-                        enemy->timer = 40;
-                        enemy->y -= 1000;
+                    && abs(marioX < xx[8] - enemy.width + scrEnemyX * 2) < 3000  // WTF
+                    && marioSpeedY <= -600 && enemy.timer <= 0) {
+                    if (enemy.xtype == 1 && !marioOnGround && enemy.xGroundType == 1) {
+                        enemy.speedY = -1600;
+                        enemy.timer = 40;
+                        enemy.y -= 1000;
                     }
                 }        //
                 break;
@@ -2027,58 +2087,58 @@ void processSceneInGameEnemyInstance(EnemyInstance* enemy) {
 //クマー
             case 5:
                 absMoveX = 160;
-//enemy->groundType=2;
+//enemy.groundType=2;
                 break;
 
 //デフラグさん
             case 6:
-                if (enemy->groundType == 30) {
-                    enemy->speedY = -1600;
-                    enemy->y += enemy->speedY;
+                if (enemy.groundType == 30) {
+                    enemy.speedY = -1600;
+                    enemy.y += enemy.speedY;
                 }
 
                 absMoveX = 120;
-                if (enemy->timer >= 10) {
-                    enemy->timer++;
+                if (enemy.timer >= 10) {
+                    enemy.timer++;
                     if (marioHP >= 1) {
-                        if (enemy->timer <= 19) {
+                        if (enemy.timer <= 19) {
                             marioX = scrEnemyX;
                             marioY = scrEnemyY - 3000;
                             marioType = MarioType::NORMAL;
                         }
                         absMoveX = 0;
-                        if (enemy->timer == 20) {
+                        if (enemy.timer == 20) {
                             marioSpeedX = 700;
                             mkeytm = 24;
                             marioSpeedY = -1200;
                             marioY = scrEnemyY - 1000 - 3000;
-                            enemy->faceDirection = 1;
-                            if (enemy->xtype == 1) {
+                            enemy.faceDirection = 1;
+                            if (enemy.xtype == 1) {
                                 marioSpeedX = 840;
-                                enemy->xtype = 0;
+                                enemy.xtype = 0;
                             }
                         }
-                        if (enemy->timer == 40) {
-                            enemy->faceDirection = 0;
-                            enemy->timer = 0;
+                        if (enemy.timer == 40) {
+                            enemy.faceDirection = 0;
+                            enemy.timer = 0;
                         }
                     }
                 }
 //ポール捨て
-                if (enemy->xtype == 1) {
+                if (enemy.xtype == 1) {
                     for (int i = 0; i < GROUND_MAX; i++) {
                         if (groundType[i] == 300) {
 //groundX[groundCounter]=xx[21]*100;groundY[groundCounter]=xx[22]*100;groundWidth[groundCounter]=3000;groundHeight[groundCounter]=(12-index)*3000;groundType[groundCounter]=300;groundCounter++;
-                            if (enemy->x - fx >= -8000 && enemy->x >= groundX[i] + 2000
-                                && enemy->x <= groundX[i] + 3600 && enemy->xGroundType == 1) {
+                            if (enemy.x - fx >= -8000 && enemy.x >= groundX[i] + 2000
+                                && enemy.x <= groundX[i] + 3600 && enemy.xGroundType == 1) {
                                 groundX[i] = -800000;
-                                enemy->timer = 100;
+                                enemy.timer = 100;
                             }
                         }
                     }
 
-                    if (enemy->timer == 100) {
-                        eyobi(enemy->x + 1200 - 1200, enemy->y + 3000 - 10 * 3000 - 1500,
+                    if (enemy.timer == 100) {
+                        eyobi(enemy.x + 1200 - 1200, enemy.y + 3000 - 10 * 3000 - 1500,
                               0, 0, 0, 0, 1000, 10 * 3000 - 1200, 4, 20);
                         if (marioType == MarioType::_300) {
                             marioType = MarioType::NORMAL;StopSoundMem(oto[11]);
@@ -2089,20 +2149,20 @@ void processSceneInGameEnemyInstance(EnemyInstance* enemy) {
                                 groundX[i] = -80000000;
                         }
                     }
-                    if (enemy->timer == 120) {
-                        eyobi(enemy->x + 1200 - 1200, enemy->y + 3000 - 10 * 3000 - 1500,
+                    if (enemy.timer == 120) {
+                        eyobi(enemy.x + 1200 - 1200, enemy.y + 3000 - 10 * 3000 - 1500,
                               600, -1200, 0, 160, 1000, 10 * 3000 - 1200, 4, 240);
-                        enemy->faceDirection = 1;
+                        enemy.faceDirection = 1;
                     }
-//marioSpeedX=700;mkeytm=24;marioSpeedY=-1200;marioY=scrEnemyY-1000-3000;enemy->faceDirection=1;if (enemy->xtype==1){marioSpeedX=840;enemy->xtype=0;}}
-                    if (enemy->timer == 140) {
-                        enemy->faceDirection = 0;
-                        enemy->timer = 0;
+//marioSpeedX=700;mkeytm=24;marioSpeedY=-1200;marioY=scrEnemyY-1000-3000;enemy.faceDirection=1;if (enemy.xtype==1){marioSpeedX=840;enemy.xtype=0;}}
+                    if (enemy.timer == 140) {
+                        enemy.faceDirection = 0;
+                        enemy.timer = 0;
                     }
                 }
-                if (enemy->timer >= 220) {
-                    enemy->timer = 0;
-                    enemy->faceDirection = 0;
+                if (enemy.timer >= 220) {
+                    enemy.timer = 0;
+                    enemy.faceDirection = 0;
                 }
 //他の敵を投げる
                 for (const auto& ei : eis) {
@@ -2112,18 +2172,18 @@ void processSceneInGameEnemyInstance(EnemyInstance* enemy) {
                     scrEnemyY = 1600;
                     xx[8] = ei->x - fx;
                     xx[9] = ei->y - fy;
-                    if (enemy != &*ei && ei->type >= 100) {
-                        if (enemy->x + enemy->width - fx > xx[8] + scrEnemyX * 2
-                            && enemy->x - fx < xx[8] + ei->width - scrEnemyX * 2
-                            && enemy->y + enemy->height - fy > xx[9] + xx[5]
-                            && enemy->y + enemy->height - fy < xx[9] + scrEnemyY * 3 + xx[12] + 1500) {
+                    if (&enemy != &*ei && ei->type >= 100) {
+                        if (enemy.x + enemy.width - fx > xx[8] + scrEnemyX * 2
+                            && enemy.x - fx < xx[8] + ei->width - scrEnemyX * 2
+                            && enemy.y + enemy.height - fy > xx[9] + xx[5]
+                            && enemy.y + enemy.height - fy < xx[9] + scrEnemyY * 3 + xx[12] + 1500) {
                             //ei->x=-800000;
                             ei->faceDirection = 1;
-                            ei->x = enemy->x + 300;
-                            ei->y = enemy->y - 3000;
+                            ei->x = enemy.x + 300;
+                            ei->y = enemy.y - 3000;
                             ei->createFromBlockTimer = 120;    //ei->x=0;
-                            enemy->timer = 200;
-                            enemy->faceDirection = 1;
+                            enemy.timer = 200;
+                            enemy.faceDirection = 1;
                         }
                     }
                 }
@@ -2132,80 +2192,80 @@ void processSceneInGameEnemyInstance(EnemyInstance* enemy) {
 
 //ジエン大砲
             case 7:
-                enemy->groundType = 0;
+                enemy.groundType = 0;
                 absMoveX = 0;
                 xx[11] = 400;
-                if (enemy->xtype == 0)
+                if (enemy.xtype == 0)
                     absMoveX = xx[11];
-                if (enemy->xtype == 1)
+                if (enemy.xtype == 1)
                     absMoveX = -xx[11];
-                if (enemy->xtype == 2)
-                    enemy->y -= xx[11];
-                if (enemy->xtype == 3)
-                    enemy->y += xx[11];
+                if (enemy.xtype == 2)
+                    enemy.y -= xx[11];
+                if (enemy.xtype == 3)
+                    enemy.y += xx[11];
                 break;
 
 //スーパーブーン
             case 8:
-                enemy->groundType = 0;
+                enemy.groundType = 0;
                 xx[22] = 20;
-                if (enemy->timer == 0) {
-                    enemy->af += xx[22];
-                    enemy->speedY += xx[22];
+                if (enemy.timer == 0) {
+                    enemy.af += xx[22];
+                    enemy.speedY += xx[22];
                 }
-                if (enemy->timer == 1) {
-                    enemy->af -= xx[22];
-                    enemy->speedY -= xx[22];
+                if (enemy.timer == 1) {
+                    enemy.af -= xx[22];
+                    enemy.speedY -= xx[22];
                 }
-                if (enemy->speedY > 300)
-                    enemy->speedY = 300;
-                if (enemy->speedY < -300)
-                    enemy->speedY = -300;
-                if (enemy->af >= 1200)
-                    enemy->timer = 1;
-                if (enemy->af < -0)
-                    enemy->timer = 0;
-                enemy->y += enemy->speedY;
-//enemy->type=151;
+                if (enemy.speedY > 300)
+                    enemy.speedY = 300;
+                if (enemy.speedY < -300)
+                    enemy.speedY = -300;
+                if (enemy.af >= 1200)
+                    enemy.timer = 1;
+                if (enemy.af < -0)
+                    enemy.timer = 0;
+                enemy.y += enemy.speedY;
+//enemy.type=151;
                 break;
 //ノーマルブーン
             case 151:
-                enemy->groundType = 2;
+                enemy.groundType = 2;
                 break;
 
 //ファイアー玉
             case 9:
-                enemy->groundType = 5;
-                enemy->y += enemy->speedY;
-                enemy->speedY += 100;
-                if (enemy->y >= fymax + 1000) {
-                    enemy->speedY = 900;
+                enemy.groundType = 5;
+                enemy.y += enemy.speedY;
+                enemy.speedY += 100;
+                if (enemy.y >= fymax + 1000) {
+                    enemy.speedY = 900;
                 }
-                if (enemy->y >= fymax + 12000) {
-                    enemy->y = fymax;
-                    enemy->speedY = -2600;
+                if (enemy.y >= fymax + 12000) {
+                    enemy.y = fymax;
+                    enemy.speedY = -2600;
                 }
                 break;
 
 //ファイアー
             case 10:
-                enemy->groundType = 0;
+                enemy.groundType = 0;
                 absMoveX = 0;
                 xx[11] = 400;
-                if (enemy->xtype == 0)
+                if (enemy.xtype == 0)
                     absMoveX = xx[11];
-                if (enemy->xtype == 1)
+                if (enemy.xtype == 1)
                     absMoveX = -xx[11];
                 break;
 
 //モララー
             case 30:
-                enemy->timer += 1;
-                if (enemy->xtype == 0) {
-                    if (enemy->timer == 50 && marioY >= 6000) {
-                        enemy->speedX = 300;
-                        enemy->speedY -= 1600;
-                        enemy->y -= 1000;
+                enemy.timer += 1;
+                if (enemy.xtype == 0) {
+                    if (enemy.timer == 50 && marioY >= 6000) {
+                        enemy.speedX = 300;
+                        enemy.speedY -= 1600;
+                        enemy.y -= 1000;
                     }
 
                     for (const auto& ei : eis) {
@@ -2215,125 +2275,125 @@ void processSceneInGameEnemyInstance(EnemyInstance* enemy) {
                         scrEnemyY = 1600;
                         xx[8] = ei->x - fx;
                         xx[9] = ei->y - fy;
-                        if (enemy != &*ei && ei->type == 102) {
-                            if (enemy->x + enemy->width - fx > xx[8] + scrEnemyX * 2
-                                && enemy->x - fx < xx[8] + ei->width - scrEnemyX * 2
-                                && enemy->y + enemy->height - fy > xx[9] + xx[5]
-                                && enemy->y + enemy->height - fy < xx[9] + scrEnemyY * 3 + xx[12] + 1500) {
+                        if (&enemy != &*ei && ei->type == 102) {
+                            if (enemy.x + enemy.width - fx > xx[8] + scrEnemyX * 2
+                                && enemy.x - fx < xx[8] + ei->width - scrEnemyX * 2
+                                && enemy.y + enemy.height - fy > xx[9] + xx[5]
+                                && enemy.y + enemy.height - fy < xx[9] + scrEnemyY * 3 + xx[12] + 1500) {
                                 ei->x = -800000;
-                                enemy->xtype = 1;
-                                enemy->speedY = -1600;
-                                enemy->msgTimer = 30;
-                                enemy->msgIndex = 25;
+                                enemy.xtype = 1;
+                                enemy.speedY = -1600;
+                                enemy.msgTimer = 30;
+                                enemy.msgIndex = 25;
                             }
                         }
                     }
                 }
-                if (enemy->xtype == 1) {
-                    enemy->groundType = 0;
-                    enemy->y += enemy->speedY;
-                    enemy->speedY += 120;
+                if (enemy.xtype == 1) {
+                    enemy.groundType = 0;
+                    enemy.y += enemy.speedY;
+                    enemy.speedY += 120;
                 }
                 break;
 
 //レーザー
             case 79:
-                enemy->groundType = 0;
+                enemy.groundType = 0;
                 absMoveX = 1600;
-                if (enemy->xtype == 1) {
+                if (enemy.xtype == 1) {
                     absMoveX = 1200;
-                    enemy->y -= 200;
+                    enemy.y -= 200;
                 }
-                if (enemy->xtype == 2) {
+                if (enemy.xtype == 2) {
                     absMoveX = 1200;
-                    enemy->y += 200;
+                    enemy.y += 200;
                 }
-                if (enemy->xtype == 3) {
+                if (enemy.xtype == 3) {
                     absMoveX = 900;
-                    enemy->y -= 600;
+                    enemy.y -= 600;
                 }
-                if (enemy->xtype == 4) {
+                if (enemy.xtype == 4) {
                     absMoveX = 900;
-                    enemy->y += 600;
+                    enemy.y += 600;
                 }
                 break;
 
 //雲の敵
             case 80:
-                enemy->groundType = 0;
+                enemy.groundType = 0;
 //absMoveX=100;
                 break;
             case 81:
-                enemy->groundType = 0;
+                enemy.groundType = 0;
                 break;
             case 82:
-                enemy->groundType = 0;
+                enemy.groundType = 0;
                 break;
             case 83:
-                enemy->groundType = 0;
+                enemy.groundType = 0;
                 break;
 
             case 84:
-                enemy->groundType = 2;
+                enemy.groundType = 2;
                 break;
 
             case 85:
                 xx[23] = 400;
-                if (enemy->xtype == 0) {
-                    enemy->xtype = 1;
-                    enemy->faceDirection = 1;
+                if (enemy.xtype == 0) {
+                    enemy.xtype = 1;
+                    enemy.faceDirection = 1;
                 }
                 if (marioY >= 30000
-                    && marioX >= enemy->x - 3000 * 5 - fx
-                    && marioX <= enemy->x - fx && enemy->xtype == 1) {
-                    enemy->xtype = 5;
-                    enemy->faceDirection = 0;
+                    && marioX >= enemy.x - 3000 * 5 - fx
+                    && marioX <= enemy.x - fx && enemy.xtype == 1) {
+                    enemy.xtype = 5;
+                    enemy.faceDirection = 0;
                 }
                 if (marioY >= 24000
-                    && marioX <= enemy->x + 3000 * 8 - fx
-                    && marioX >= enemy->x - fx && enemy->xtype == 1) {
-                    enemy->xtype = 5;
-                    enemy->faceDirection = 1;
+                    && marioX <= enemy.x + 3000 * 8 - fx
+                    && marioX >= enemy.x - fx && enemy.xtype == 1) {
+                    enemy.xtype = 5;
+                    enemy.faceDirection = 1;
                 }
-                if (enemy->xtype == 5)
+                if (enemy.xtype == 5)
                     absMoveX = xx[23];
                 break;
 
             case 86:
-                enemy->groundType = 4;
+                enemy.groundType = 4;
                 xx[23] = 1000;
-                if (marioX >= enemy->x - fx - marioWidth - xx[26]
-                    && marioX <= enemy->x - fx + enemy->width + xx[26]) {
-                    enemy->timer = 1;
+                if (marioX >= enemy.x - fx - marioWidth - xx[26]
+                    && marioX <= enemy.x - fx + enemy.width + xx[26]) {
+                    enemy.timer = 1;
                 }
-                if (enemy->timer == 1) {
-                    enemy->y += 1200;
+                if (enemy.timer == 1) {
+                    enemy.y += 1200;
                 }
                 break;
 
 //ファイアバー
             case 87:
-                enemy->groundType = 0;
-                if (enemy->x % 10 != 1) {
-                    enemy->timer += 6;
+                enemy.groundType = 0;
+                if (enemy.x % 10 != 1) {
+                    enemy.timer += 6;
                 } else {
-                    enemy->timer -= 6;
+                    enemy.timer -= 6;
                 }
                 xx[25] = 2;
-                if (enemy->timer > 360 * xx[25])
-                    enemy->timer -= 360 * xx[25];
-                if (enemy->timer < 0)
-                    enemy->timer += 360 * xx[25];
+                if (enemy.timer > 360 * xx[25])
+                    enemy.timer -= 360 * xx[25];
+                if (enemy.timer < 0)
+                    enemy.timer += 360 * xx[25];
 
-                for (int i = 0; i <= enemy->xtype % 100; i++) {
+                for (int i = 0; i <= enemy.xtype % 100; i++) {
                     xx[26] = 18;
-                    xd[4] = i * xx[26] * cos(enemy->timer * pai / 180 / 2);
-                    xd[5] = i * xx[26] * sin(enemy->timer * pai / 180 / 2);
+                    xd[4] = i * xx[26] * cos(enemy.timer * pai / 180 / 2);
+                    xd[5] = i * xx[26] * sin(enemy.timer * pai / 180 / 2);
 
                     xx[4] = 1800;
                     xx[5] = 800;
-                    xx[8] = enemy->x - fx + int(xd[4]) * 100 - xx[4] / 2;
-                    xx[9] = enemy->y - fy + int(xd[5]) * 100 - xx[4] / 2;
+                    xx[8] = enemy.x - fx + int(xd[4]) * 100 - xx[4] / 2;
+                    xx[9] = enemy.y - fy + int(xd[5]) * 100 - xx[4] / 2;
 
                     if (marioX + marioWidth > xx[8] + xx[5]
                         && marioX < xx[8] + xx[4] - xx[5]
@@ -2348,27 +2408,27 @@ void processSceneInGameEnemyInstance(EnemyInstance* enemy) {
                 break;
 
             case 88:
-                enemy->groundType = 0;
-                if (enemy->x % 10 != 1) {
-                    enemy->timer += 6;
+                enemy.groundType = 0;
+                if (enemy.x % 10 != 1) {
+                    enemy.timer += 6;
                 } else {
-                    enemy->timer -= 6;
+                    enemy.timer -= 6;
                 }
                 xx[25] = 2;
-                if (enemy->timer > 360 * xx[25])
-                    enemy->timer -= 360 * xx[25];
-                if (enemy->timer < 0)
-                    enemy->timer += 360 * xx[25];
+                if (enemy.timer > 360 * xx[25])
+                    enemy.timer -= 360 * xx[25];
+                if (enemy.timer < 0)
+                    enemy.timer += 360 * xx[25];
 
-                for (int i = 0; i <= enemy->xtype % 100; i++) {
+                for (int i = 0; i <= enemy.xtype % 100; i++) {
                     xx[26] = 18;
-                    xd[4] = -i * xx[26] * cos(enemy->timer * pai / 180 / 2);
-                    xd[5] = i * xx[26] * sin(enemy->timer * pai / 180 / 2);
+                    xd[4] = -i * xx[26] * cos(enemy.timer * pai / 180 / 2);
+                    xd[5] = i * xx[26] * sin(enemy.timer * pai / 180 / 2);
 
                     xx[4] = 1800;
                     xx[5] = 800;
-                    xx[8] = enemy->x - fx + int(xd[4]) * 100 - xx[4] / 2;
-                    xx[9] = enemy->y - fy + int(xd[5]) * 100 - xx[4] / 2;
+                    xx[8] = enemy.x - fx + int(xd[4]) * 100 - xx[4] / 2;
+                    xx[9] = enemy.y - fy + int(xd[5]) * 100 - xx[4] / 2;
 
                     if (marioX + marioWidth > xx[8] + xx[5]
                         && marioX < xx[8] + xx[4] - xx[5]
@@ -2384,16 +2444,16 @@ void processSceneInGameEnemyInstance(EnemyInstance* enemy) {
 
             case 90:
                 absMoveX = 160;
-//enemy->groundType=0;
+//enemy.groundType=0;
                 break;
 
 //おいしいキノコ
             case 100:
-                enemy->groundType = 1;
+                enemy.groundType = 1;
                 absMoveX = 100;
 
 //ほかの敵を巨大化
-                if (enemy->xtype == 2) {
+                if (enemy.xtype == 2) {
                     for (const auto& ei : eis) {
                         scrEnemyX = 250;
                         xx[5] = -800;
@@ -2401,11 +2461,11 @@ void processSceneInGameEnemyInstance(EnemyInstance* enemy) {
                         scrEnemyY = 1600;
                         xx[8] = ei->x - fx;
                         xx[9] = ei->y - fy;
-                        if (enemy != &*ei) {
-                            if (enemy->x + enemy->width - fx > xx[8] + scrEnemyX * 2
-                                && enemy->x - fx < xx[8] + ei->width - scrEnemyX * 2
-                                && enemy->y + enemy->height - fy > xx[9] + xx[5]
-                                && enemy->y + enemy->height - fy < xx[9] + scrEnemyY * 3 + xx[12]) {
+                        if (&enemy != &*ei) {
+                            if (enemy.x + enemy.width - fx > xx[8] + scrEnemyX * 2
+                                && enemy.x - fx < xx[8] + ei->width - scrEnemyX * 2
+                                && enemy.y + enemy.height - fy > xx[9] + xx[5]
+                                && enemy.y + enemy.height - fy < xx[9] + scrEnemyY * 3 + xx[12]) {
                                 if (ei->type == 0 || ei->type == 4) {
                                     ei->type = 90;    //ot(oto[6]);
                                     ei->width = 6400;
@@ -2414,7 +2474,7 @@ void processSceneInGameEnemyInstance(EnemyInstance* enemy) {
                                     ei->x -= 1050;
                                     ei->y -= 1050;
                                     ot(oto[9]);
-                                    enemy->x = -80000000;
+                                    enemy.x = -80000000;
                                 }
                             }
                         }
@@ -2425,37 +2485,37 @@ void processSceneInGameEnemyInstance(EnemyInstance* enemy) {
 
 //毒キノコ
             case 102:
-                enemy->groundType = 1;
+                enemy.groundType = 1;
                 absMoveX = 100;
-                if (enemy->xtype == 1)
+                if (enemy.xtype == 1)
                     absMoveX = 200;
                 break;
 
 //悪スター
             case 110:
-                enemy->groundType = 1;
+                enemy.groundType = 1;
                 absMoveX = 200;
-                if (enemy->xGroundType == 1) {
-                    enemy->y -= 1200;
-                    enemy->speedY = -1400;
+                if (enemy.xGroundType == 1) {
+                    enemy.y -= 1200;
+                    enemy.speedY = -1400;
                 }
                 break;
 
             case 200:
-                enemy->groundType = 1;
+                enemy.groundType = 1;
                 absMoveX = 100;
                 break;
 
 /*
 case 1:
 absMoveX=180;
-if (enemy->xtype==2)absMoveX=0;
-if (enemy->xGroundType==1){
-enemy->y-=1000;enemy->speedY=-1200;
-if (enemy->xtype==1)enemy->speedY=-1600;
-if (enemy->xtype==2){
-enemy->timer+=1;
-if (enemy->timer>=2){enemy->timer=0;enemy->speedY=-1600;}else{enemy->speedY=-1000;}
+if (enemy.xtype==2)absMoveX=0;
+if (enemy.xGroundType==1){
+enemy.y-=1000;enemy.speedY=-1200;
+if (enemy.xtype==1)enemy.speedY=-1600;
+if (enemy.xtype==2){
+enemy.timer+=1;
+if (enemy.timer>=2){enemy.timer=0;enemy.speedY=-1600;}else{enemy.speedY=-1000;}
 }
 }
 
@@ -2463,48 +2523,48 @@ break;
 
 case 2:
 absMoveX=160;
-if (enemy->xtype==1)enemy->groundType=2;absMoveX=100;
-if (enemy->xtype==2)absMoveX=0;
+if (enemy.xtype==1)enemy.groundType=2;absMoveX=100;
+if (enemy.xtype==2)absMoveX=0;
 break;
 
 case 3:
 absMoveX=180;
-if (enemy->ae==0)enemy->speedY+=10;
-if (enemy->ae==1)enemy->speedY-=10;
-if (enemy->speedY>=100)enemy->ae=1;
-if (enemy->speedY<=-100)enemy->ae=0;
-enemy->y+=enemy->speedY;//enemy->speedY+=
+if (enemy.ae==0)enemy.speedY+=10;
+if (enemy.ae==1)enemy.speedY-=10;
+if (enemy.speedY>=100)enemy.ae=1;
+if (enemy.speedY<=-100)enemy.ae=0;
+enemy.y+=enemy.speedY;//enemy.speedY+=
 
-if (enemy->xtype==1){
-if (enemy->y<marioY){enemy->y+=100;}
+if (enemy.xtype==1){
+if (enemy.y<marioY){enemy.y+=100;}
 }
-if (enemy->xtype==2)absMoveX=0;
+if (enemy.xtype==2)absMoveX=0;
 break;
 
 case 4:
-if (enemy->ae==0)enemy->speedY+=8;
-if (enemy->ae==1)enemy->speedY-=8;
-if (enemy->speedY>=80)enemy->ae=1;
-if (enemy->speedY<=-80)enemy->ae=0;
-enemy->y+=enemy->speedY;
+if (enemy.ae==0)enemy.speedY+=8;
+if (enemy.ae==1)enemy.speedY-=8;
+if (enemy.speedY>=80)enemy.ae=1;
+if (enemy.speedY<=-80)enemy.ae=0;
+enemy.y+=enemy.speedY;
 
-//sstr=""+enemy->timer;
-if (enemy->xtype>=1){
+//sstr=""+enemy.timer;
+if (enemy.xtype>=1){
 xx[22]=200;xx[21]=3600;
 
-if (enemy->timer==0){enemy->timer=enemy->y%2+1;a2tm[index]=enemy->x;if (enemy->xtype%2==0)a2tm[index]=enemy->y;}
+if (enemy.timer==0){enemy.timer=enemy.y%2+1;a2tm[index]=enemy.x;if (enemy.xtype%2==0)a2tm[index]=enemy.y;}
 
-if (enemy->xtype%2==1){
-if (enemy->x<a2tm[index]-xx[21]){enemy->timer=2;}
-if (enemy->x>a2tm[index]+xx[21]){enemy->timer=1;}
-if (enemy->timer==1){enemy->x-=xx[22];enemy->faceDirection=0;}
-if (enemy->timer==2){enemy->x+=xx[22];enemy->faceDirection=1;}
+if (enemy.xtype%2==1){
+if (enemy.x<a2tm[index]-xx[21]){enemy.timer=2;}
+if (enemy.x>a2tm[index]+xx[21]){enemy.timer=1;}
+if (enemy.timer==1){enemy.x-=xx[22];enemy.faceDirection=0;}
+if (enemy.timer==2){enemy.x+=xx[22];enemy.faceDirection=1;}
 }
-if (enemy->xtype%2==0){
-if (enemy->y<a2tm[index]-xx[21]){enemy->timer=2;}
-if (enemy->y>a2tm[index]+xx[21]){enemy->timer=1;}
-if (enemy->timer==1){enemy->y-=xx[22];}
-if (enemy->timer==2){enemy->y+=xx[22];}
+if (enemy.xtype%2==0){
+if (enemy.y<a2tm[index]-xx[21]){enemy.timer=2;}
+if (enemy.y>a2tm[index]+xx[21]){enemy.timer=1;}
+if (enemy.timer==1){enemy.y-=xx[22];}
+if (enemy.timer==2){enemy.y+=xx[22];}
 }
 
 }//axtype1
@@ -2512,53 +2572,53 @@ if (enemy->timer==2){enemy->y+=xx[22];}
 break;
 
 case 5:
-absMoveX=120;enemy->timer++;
-if (enemy->xtype==2){absMoveX=200;enemy->groundType=2;}
-if (marioX+marioWidth>=enemy->x-fx && marioX<=enemy->x+enemy->width-fx && marioY+marioHeight+1000<enemy->y-fy){
+absMoveX=120;enemy.timer++;
+if (enemy.xtype==2){absMoveX=200;enemy.groundType=2;}
+if (marioX+marioWidth>=enemy.x-fx && marioX<=enemy.x+enemy.width-fx && marioY+marioHeight+1000<enemy.y-fy){
 absMoveX=300;
-if (enemy->xtype>=1){
+if (enemy.xtype>=1){
 //absMoveX=240;
-if (enemy->timer>=16){enemy->faceDirection+=1;if (enemy->faceDirection>=2)enemy->faceDirection=0;enemy->timer=0;
-//if (enemy->xtype==2){enemy->y-=600;enemy->speedY=-900;}
+if (enemy.timer>=16){enemy.faceDirection+=1;if (enemy.faceDirection>=2)enemy.faceDirection=0;enemy.timer=0;
+//if (enemy.xtype==2){enemy.y-=600;enemy.speedY=-900;}
 }}
 }
 break;
 
 case 6:
-enemy->timer+=1;absMoveX=0;
-if (enemy->xtype==1)enemy->timer+=(rand(9)-4);
-if (enemy->xtype==2)absMoveX=100;
-if (enemy->timer>=40){
-xx[22]=360;if (enemy->faceDirection==0)xx[22]=-xx[22];
-cyobi(enemy->x+enemy->faceDirection*enemy->width,enemy->y+1600,xx[22],0,0,0,0,60);
-enemy->timer=0;
+enemy.timer+=1;absMoveX=0;
+if (enemy.xtype==1)enemy.timer+=(rand(9)-4);
+if (enemy.xtype==2)absMoveX=100;
+if (enemy.timer>=40){
+xx[22]=360;if (enemy.faceDirection==0)xx[22]=-xx[22];
+cyobi(enemy.x+enemy.faceDirection*enemy.width,enemy.y+1600,xx[22],0,0,0,0,60);
+enemy.timer=0;
 }
 
-if (enemy->xtype!=2){
-if (marioX+marioWidth/2<=enemy->x+enemy->width/2-fx){enemy->faceDirection=0;}else{enemy->faceDirection=1;}
+if (enemy.xtype!=2){
+if (marioX+marioWidth/2<=enemy.x+enemy.width/2-fx){enemy.faceDirection=0;}else{enemy.faceDirection=1;}
 }
 break;
 
 case 7:
 absMoveX=160;
-if (enemy->xtype==1)absMoveX=240;
-if (enemy->xtype==2)absMoveX=60;
+if (enemy.xtype==1)absMoveX=240;
+if (enemy.xtype==2)absMoveX=60;
 break;
 
 case 8:
-enemy->timer+=1;absMoveX=0;
+enemy.timer+=1;absMoveX=0;
 xx[15]=12;xx[17]=0;
-if (enemy->xtype==1)xx[15]=8;
-if (enemy->xtype==2){xx[15]=40;xx[17]=3;}
+if (enemy.xtype==1)xx[15]=8;
+if (enemy.xtype==2){xx[15]=40;xx[17]=3;}
 
-if (enemy->timer>=xx[15]){
+if (enemy.timer>=xx[15]){
 for (t3=0;t3<=xx[17];t3++){
 xx[16]=300;xx[22]=rand(xx[16])*5/4-xx[16]/4;
 a2tm[index]+=1;if (a2tm[index]>=1){xx[22]=-xx[22];a2tm[index]=-1;}
-cyobi(enemy->x+enemy->faceDirection*enemy->width/2,enemy->y+600,xx[22],-400-rand(600),0,80,1,60);
-//if ((xx[16]==0) || t3==xx[16])enemy->timer=0;
+cyobi(enemy.x+enemy.faceDirection*enemy.width/2,enemy.y+600,xx[22],-400-rand(600),0,80,1,60);
+//if ((xx[16]==0) || t3==xx[16])enemy.timer=0;
 }//index
-enemy->timer=0;
+enemy.timer=0;
 }
 
 break;
@@ -2568,12 +2628,12 @@ break;
 
         }        //sw
 
-        if (enemy->createFromBlockTimer >= 1)
+        if (enemy.createFromBlockTimer >= 1)
             absMoveX = 0;
 
-        if (enemy->faceDirection == 0)
+        if (enemy.faceDirection == 0)
             moveX -= absMoveX;
-        if (enemy->faceDirection == 1)
+        if (enemy.faceDirection == 1)
             moveX += absMoveX;
 
 //最大値
@@ -2582,59 +2642,59 @@ break;
 
 //if (marioSpeedX>scrEnemyX){marioSpeedX=scrEnemyX;}
 //if (marioSpeedX<-scrEnemyX){marioSpeedX=-scrEnemyX;}
-        if (enemy->speedY > scrEnemyY && enemy->groundType != 5) {
-            enemy->speedY = scrEnemyY;
+        if (enemy.speedY > scrEnemyY && enemy.groundType != 5) {
+            enemy.speedY = scrEnemyY;
         }
 //行動
-        enemy->x += moveX;
-        //enemy->y += moveY;
+        enemy.x += moveX;
+        //enemy.y += moveY;
 
-        if ((enemy->groundType >= 1 || enemy->groundType == -1)
-            && enemy->createFromBlockTimer <= 0) {
-//if (enemy->type==4)end();
+        if ((enemy.groundType >= 1 || enemy.groundType == -1)
+            && enemy.createFromBlockTimer <= 0) {
+//if (enemy.type==4)end();
 
 //移動
-            enemy->x += enemy->speedX;
-            if (enemy->groundType >= 1 && enemy->groundType <= 3) {
-                enemy->y += enemy->speedY;
-                enemy->speedY += 120;
-            }        //enemy->speedY+=180;
+            enemy.x += enemy.speedX;
+            if (enemy.groundType >= 1 && enemy.groundType <= 3) {
+                enemy.y += enemy.speedY;
+                enemy.speedY += 120;
+            }        //enemy.speedY+=180;
 
-            if (enemy->xGroundType == 1) {
+            if (enemy.xGroundType == 1) {
                 scrEnemyX = 100;
-                if (enemy->speedX >= 200) {
-                    enemy->speedX -= scrEnemyX;
-                } else if (enemy->speedX <= -200) {
-                    enemy->speedX += scrEnemyX;
+                if (enemy.speedX >= 200) {
+                    enemy.speedX -= scrEnemyX;
+                } else if (enemy.speedX <= -200) {
+                    enemy.speedX += scrEnemyX;
                 } else {
-                    enemy->speedX = 0;
+                    enemy.speedX = 0;
                 }
             }
 
-            enemy->xGroundType = 0;
+            enemy.xGroundType = 0;
 
 //地面判定
-            if (enemy->groundType != 2) {
-                tekizimen(*enemy);
+            if (enemy.groundType != 2) {
+                tekizimen(enemy);
             }
 
-        }        //enemy->groundType>=1
+        }        //enemy.groundType>=1
 
 //ブロックから出現するさい
-        if (enemy->createFromBlockTimer > 0) {
-            enemy->createFromBlockTimer--;
-            if (enemy->createFromBlockTimer < 100) {
-                enemy->y -= 180;
+        if (enemy.createFromBlockTimer > 0) {
+            enemy.createFromBlockTimer--;
+            if (enemy.createFromBlockTimer < 100) {
+                enemy.y -= 180;
             }
-            if (enemy->createFromBlockTimer > 100) {
+            if (enemy.createFromBlockTimer > 100) {
             }
-            if (enemy->createFromBlockTimer == 100) {
-                enemy->y -= 800;
-                enemy->speedY = -1200;
-                enemy->speedX = 700;
-                enemy->createFromBlockTimer = 0;
+            if (enemy.createFromBlockTimer == 100) {
+                enemy.y -= 800;
+                enemy.speedY = -1200;
+                enemy.speedX = 700;
+                enemy.createFromBlockTimer = 0;
             }
-        }        //enemy->createFromBlockTimer>0
+        }        //enemy.createFromBlockTimer>0
 
 //プレイヤーからの判定
         scrEnemyX = 250;
@@ -2643,88 +2703,88 @@ break;
         xx[4] = 500;
         xx[5] = -800;
 
-        xx[8] = enemy->x - fx;
-        xx[9] = enemy->y - fy;
+        xx[8] = enemy.x - fx;
+        xx[9] = enemy.y - fy;
         xx[12] = 0;
         if (marioSpeedY >= 100)
             xx[12] = marioSpeedY;
         xx[25] = 0;
 
         if (marioX + marioWidth > xx[8] + scrEnemyX * 2
-            && marioX < xx[8] + enemy->width - scrEnemyX * 2
+            && marioX < xx[8] + enemy.width - scrEnemyX * 2
             && marioY + marioHeight > xx[9] - xx[5]
             && marioY + marioHeight < xx[9] + scrEnemyY + xx[12]
             && (mmutekitm <= 0 || marioSpeedY >= 100)
-            && enemy->createFromBlockTimer <= 0) {
-            if (enemy->type != 4 && enemy->type != 9 && enemy->type != 10 && (enemy->type <= 78 || enemy->type == 85) &&
-                !marioOnGround && marioType != MarioType::DYING) {    // && enemy->type!=4 && enemy->type!=7){
+            && enemy.createFromBlockTimer <= 0) {
+            if (enemy.type != 4 && enemy.type != 9 && enemy.type != 10 && (enemy.type <= 78 || enemy.type == 85) &&
+                !marioOnGround && marioType != MarioType::DYING) {    // && enemy.type!=4 && enemy.type!=7){
 
-                if (enemy->type == 0) {
-                    if (enemy->xtype == 0)
-                        enemy->x = -900000;
-                    if (enemy->xtype == 1) {
+                if (enemy.type == 0) {
+                    if (enemy.xtype == 0)
+                        enemy.x = -900000;
+                    if (enemy.xtype == 1) {
                         ot(oto[5]);
-                        marioY = xx[9] - 900 - enemy->height;
+                        marioY = xx[9] - 900 - enemy.height;
                         marioSpeedY = -2100;
                         xx[25] = 1;
                         actaon[2] = 0;
                     }
                 }
 
-                if (enemy->type == 1) {
-                    enemy->type = 2;
-                    enemy->height = 3000;
-                    enemy->xtype = 0;
+                if (enemy.type == 1) {
+                    enemy.type = 2;
+                    enemy.height = 3000;
+                    enemy.xtype = 0;
                 }
 //こうら
-                else if (enemy->type == 2 && marioSpeedY >= 0) {
-                    if (enemy->xtype == 1 || enemy->xtype == 2) {
-                        enemy->xtype = 0;
-                    } else if (enemy->xtype == 0) {
-                        if (marioX + marioWidth > xx[8] + scrEnemyX * 2 && marioX < xx[8] + enemy->width / 2 - scrEnemyX * 4) {
-                            enemy->xtype = 1;
-                            enemy->faceDirection = 1;
+                else if (enemy.type == 2 && marioSpeedY >= 0) {
+                    if (enemy.xtype == 1 || enemy.xtype == 2) {
+                        enemy.xtype = 0;
+                    } else if (enemy.xtype == 0) {
+                        if (marioX + marioWidth > xx[8] + scrEnemyX * 2 && marioX < xx[8] + enemy.width / 2 - scrEnemyX * 4) {
+                            enemy.xtype = 1;
+                            enemy.faceDirection = 1;
                         } else {
-                            enemy->xtype = 1;
-                            enemy->faceDirection = 0;
+                            enemy.xtype = 1;
+                            enemy.faceDirection = 0;
                         }
                     }
                 }
-                if (enemy->type == 3) {
+                if (enemy.type == 3) {
                     xx[25] = 1;
                 }
 
-                if (enemy->type == 6) {
-                    enemy->timer = 10;
+                if (enemy.type == 6) {
+                    enemy.timer = 10;
                     marioSpeedY = 0;
                     actaon[2] = 0;
                 }
 
-                if (enemy->type == 7) {
-                    enemy->x = -900000;
+                if (enemy.type == 7) {
+                    enemy.x = -900000;
                 }
 
-                if (enemy->type == 8) {
-                    enemy->type = 151;
-                    enemy->speedY = 0;
+                if (enemy.type == 8) {
+                    enemy.type = 151;
+                    enemy.speedY = 0;
                 }
-//if (enemy->type==4){
+//if (enemy.type==4){
 //xx[25]=1;
 //}
 
-                if (enemy->type != 85) {
+                if (enemy.type != 85) {
                     if (xx[25] == 0) {
                         ot(oto[5]);
-                        marioY = xx[9] - 1000 - enemy->height;
+                        marioY = xx[9] - 1000 - enemy.height;
                         marioSpeedY = -1000;
                     }
                 }
-                if (enemy->type == 85) {
+                if (enemy.type == 85) {
                     if (xx[25] == 0) {
                         ot(oto[5]);
                         marioY = xx[9] - 4000;
                         marioSpeedY = -1000;
-                        enemy->xtype = 5;
+                        enemy.xtype = 5;
                     }
                 }
 
@@ -2733,134 +2793,134 @@ break;
                     actaon[2] = 0;
                 }
             }
-//if (enemy->type==200){marioY=xx[9]-900-enemy->height;marioSpeedY=-2400;}
+//if (enemy.type==200){marioY=xx[9]-900-enemy.height;marioSpeedY=-2400;}
         }
-//if (enemy->x+enemy->width-fx>xx[8]-scrEnemyX && enemy->x-fx<xx[8]){marioSpeedY=-1000;}//enemy->x=-9000000;
-// && enemy->y-fy<xx[9]+scrEnemyY/2 && enemy->y+enemy->height-fy>xx[9]+marioHeight-enemyWidth
+//if (enemy.x+enemy.width-fx>xx[8]-scrEnemyX && enemy.x-fx<xx[8]){marioSpeedY=-1000;}//enemy.x=-9000000;
+// && enemy.y-fy<xx[9]+scrEnemyY/2 && enemy.y+enemy.height-fy>xx[9]+marioHeight-enemyWidth
 
         xx[15] = -500;
 
 //プレイヤーに触れた時
         xx[16] = 0;
-        if (enemy->type == 4 || enemy->type == 9 || enemy->type == 10)
+        if (enemy.type == 4 || enemy.type == 9 || enemy.type == 10)
             xx[16] = -3000;
-        if (enemy->type == 82 || enemy->type == 83 || enemy->type == 84)
+        if (enemy.type == 82 || enemy.type == 83 || enemy.type == 84)
             xx[16] = -3200;
-        if (enemy->type == 85)
-            xx[16] = -enemy->height + 6000;
+        if (enemy.type == 85)
+            xx[16] = -enemy.height + 6000;
         if (marioX + marioWidth > xx[8] + xx[4]
-            && marioX < xx[8] + enemy->width - xx[4]
-            && marioY < xx[9] + enemy->height + xx[15]
-            && marioY + marioHeight > xx[9] + enemy->height - scrEnemyX + xx[16]
-            && enemy->safeCountdown <= 0 && enemy->createFromBlockTimer <= 0) {
+            && marioX < xx[8] + enemy.width - xx[4]
+            && marioY < xx[9] + enemy.height + xx[15]
+            && marioY + marioHeight > xx[9] + enemy.height - scrEnemyX + xx[16]
+            && enemy.safeCountdown <= 0 && enemy.createFromBlockTimer <= 0) {
             if (mmutekion == 1) {
-                enemy->x = -9000000;
+                enemy.x = -9000000;
             }
             if (mmutekitm <= 0
-                && (enemy->type <= 99 || enemy->type >= 200)) {
+                && (enemy.type <= 99 || enemy.type >= 200)) {
                 if (mmutekion != 1 && marioType != MarioType::DYING) {
 //if (mmutekitm<=0)
 
 //ダメージ
-                    if ((enemy->type != 2 || enemy->xtype != 0)
+                    if ((enemy.type != 2 || enemy.xtype != 0)
                         && marioHP >= 1) {
-                        if (enemy->type != 6) {
+                        if (enemy.type != 6) {
                             marioHP -= 1;
 //mmutekitm=40;
                         }
                     }
 
-                    if (enemy->type == 6) {
-                        enemy->timer = 10;
+                    if (enemy.type == 6) {
+                        enemy.timer = 10;
                     }
 //せりふ
                     if (marioHP == 0) {
 
-                        if (enemy->type == 0 || enemy->type == 7) {
-                            enemy->msgTimer = 60;
-                            enemy->msgIndex = rand(7) + 1 + 1000 + (stb - 1) * 10;
+                        if (enemy.type == 0 || enemy.type == 7) {
+                            enemy.msgTimer = 60;
+                            enemy.msgIndex = rand(7) + 1 + 1000 + (stb - 1) * 10;
                         }
 
-                        if (enemy->type == 1) {
-                            enemy->msgTimer = 60;
-                            enemy->msgIndex = rand(2) + 15;
+                        if (enemy.type == 1) {
+                            enemy.msgTimer = 60;
+                            enemy.msgIndex = rand(2) + 15;
                         }
 
-                        if (enemy->type == 2 && enemy->xtype >= 1 && mmutekitm <= 0) {
-                            enemy->msgTimer = 60;
-                            enemy->msgIndex = 18;
+                        if (enemy.type == 2 && enemy.xtype >= 1 && mmutekitm <= 0) {
+                            enemy.msgTimer = 60;
+                            enemy.msgIndex = 18;
                         }
 
-                        if (enemy->type == 3) {
-                            enemy->msgTimer = 60;
-                            enemy->msgIndex = 20;
+                        if (enemy.type == 3) {
+                            enemy.msgTimer = 60;
+                            enemy.msgIndex = 20;
                         }
 
-                        if (enemy->type == 4) {
-                            enemy->msgTimer = 60;
-                            enemy->msgIndex = rand(7) + 1 + 1000 + (stb - 1) * 10;
+                        if (enemy.type == 4) {
+                            enemy.msgTimer = 60;
+                            enemy.msgIndex = rand(7) + 1 + 1000 + (stb - 1) * 10;
                         }
 
-                        if (enemy->type == 5) {
-                            enemy->msgTimer = 60;
-                            enemy->msgIndex = 21;
+                        if (enemy.type == 5) {
+                            enemy.msgTimer = 60;
+                            enemy.msgIndex = 21;
                         }
 
-                        if (enemy->type == 9 || enemy->type == 10) {
+                        if (enemy.type == 9 || enemy.type == 10) {
                             mmsgtm = 30;
                             mmsgtype = 54;
                         }
 
-                        if (enemy->type == 31) {
-                            enemy->msgTimer = 30;
-                            enemy->msgIndex = 24;
+                        if (enemy.type == 31) {
+                            enemy.msgTimer = 30;
+                            enemy.msgIndex = 24;
                         }
 
-                        if (enemy->type == 80 || enemy->type
+                        if (enemy.type == 80 || enemy.type
                                                  == 81) {
-                            enemy->msgTimer = 60;
-                            enemy->msgIndex = 30;
+                            enemy.msgTimer = 60;
+                            enemy.msgIndex = 30;
                         }
 
-                        if (enemy->type == 82) {
-                            enemy->msgTimer = 20;
-                            enemy->msgIndex = rand(1) + 31;
+                        if (enemy.type == 82) {
+                            enemy.msgTimer = 20;
+                            enemy.msgIndex = rand(1) + 31;
                             xx[24] = 900;
-                            enemy->type = 83;
-                            enemy->x -= xx[24] + 100;
-                            enemy->y -= xx[24] - 100 * 0;
+                            enemy.type = 83;
+                            enemy.x -= xx[24] + 100;
+                            enemy.y -= xx[24] - 100 * 0;
                         }    //82
 
-                        if (enemy->type == 84) {
+                        if (enemy.type == 84) {
                             mmsgtm = 30;
                             mmsgtype = 50;
                         }
 
-                        if (enemy->type == 85) {
-                            enemy->msgTimer = 60;
-                            enemy->msgIndex = rand(1) + 85;
+                        if (enemy.type == 85) {
+                            enemy.msgTimer = 60;
+                            enemy.msgIndex = rand(1) + 85;
                         }
 //雲
-                        if (enemy->type == 80) {
-                            enemy->type
+                        if (enemy.type == 80) {
+                            enemy.type
                                     = 81;
                         }
 
                     }    //marioHP==0
 
 //こうら
-                    if (enemy->type == 2) {
-//if (enemy->xtype==1 || enemy->xtype==2){enemy->xtype=0;}
-                        if (enemy->xtype == 0) {
-                            if (marioX + marioWidth > xx[8] + scrEnemyX * 2 && marioX < xx[8] + enemy->width / 2 - scrEnemyX * 4) {
-                                enemy->xtype = 1;
-                                enemy->faceDirection = 1;
-                                enemy->x = marioX + marioWidth + fx + marioSpeedX;
+                    if (enemy.type == 2) {
+//if (enemy.xtype==1 || enemy.xtype==2){enemy.xtype=0;}
+                        if (enemy.xtype == 0) {
+                            if (marioX + marioWidth > xx[8] + scrEnemyX * 2 && marioX < xx[8] + enemy.width / 2 - scrEnemyX * 4) {
+                                enemy.xtype = 1;
+                                enemy.faceDirection = 1;
+                                enemy.x = marioX + marioWidth + fx + marioSpeedX;
                                 mmutekitm = 5;
                             } else {
-                                enemy->xtype = 1;
-                                enemy->faceDirection = 0;
-                                enemy->x = marioX - enemy->width + fx - marioSpeedX;
+                                enemy.xtype = 1;
+                                enemy.faceDirection = 0;
+                                enemy.x = marioX - enemy.width + fx - marioSpeedX;
                                 mmutekitm = 5;
                             }
                         } else {
@@ -2872,19 +2932,19 @@ break;
             }
 //else if (mmutekitm>=0 && mmutekitm<=2){mmutekitm+=1;}
 //アイテム
-            if (enemy->type >= 100 && enemy->type <= 199) {
+            if (enemy.type >= 100 && enemy.type <= 199) {
 
-                if (enemy->type == 100 && enemy->xtype == 0) {
+                if (enemy.type == 100 && enemy.xtype == 0) {
                     mmsgtm = 30;
                     mmsgtype = 1;
                     ot(oto[9]);
                 }
-                if (enemy->type == 100 && enemy->xtype == 1) {
+                if (enemy.type == 100 && enemy.xtype == 1) {
                     mmsgtm = 30;
                     mmsgtype = 2;
                     ot(oto[9]);
                 }
-                if (enemy->type == 100 && enemy->xtype == 2) {
+                if (enemy.type == 100 && enemy.xtype == 2) {
                     marioWidth = 5200;
                     marioHeight = 7300;
                     ot(oto[9]);
@@ -2894,68 +2954,68 @@ break;
                     marioHP = 50000000;
                 }
 
-                if (enemy->type == 101) {
+                if (enemy.type == 101) {
                     marioHP -= 1;
                     mmsgtm = 30;
                     mmsgtype = 11;
                 }
-                if (enemy->type == 102) {
+                if (enemy.type == 102) {
                     marioHP -= 1;
                     mmsgtm = 30;
                     mmsgtype = 10;
                 }
 //?ボール
-                if (enemy->type == 105) {
-                    if (enemy->xtype == 0) {
+                if (enemy.type == 105) {
+                    if (enemy.xtype == 0) {
                         ot(oto[4]);
                         groundGType[26] = 6;
                     }
-                    if (enemy->xtype == 1) {
+                    if (enemy.xtype == 1) {
                         blocks[7]->xtype = 80;
                         ot(oto[4]);
 
-                        //ayobi(enemy->x - 6 * 3000 + 1000, -3 * 3000, 0, 0, 0, 110, 0);
-                        ayobi(enemy->x - 8 * 3000 - 1000, -4 * 3000, 0, 0, 0, 110, 0);
-                        ayobi(enemy->x - 10 * 3000 + 1000, -1 * 3000, 0, 0, 0, 110, 0);
+                        //ayobiInIter(modifier, enemy.x - 6 * 3000 + 1000, -3 * 3000, 0, 0, 0, 110, 0);
+                        ayobiInIter(modifier, enemy.x - 8 * 3000 - 1000, -4 * 3000, 0, 0, 0, 110, 0);
+                        ayobiInIter(modifier, enemy.x - 10 * 3000 + 1000, -1 * 3000, 0, 0, 0, 110, 0);
 
-                        ayobi(enemy->x + 4 * 3000 + 1000, -2 * 3000, 0, 0, 0, 110, 0);
-                        ayobi(enemy->x + 5 * 3000 - 1000, -3 * 3000, 0, 0, 0, 110, 0);
-                        ayobi(enemy->x + 6 * 3000 + 1000, -4 * 3000, 0, 0, 0, 110, 0);
-                        ayobi(enemy->x + 7 * 3000 - 1000, -2 * 3000, 0, 0, 0, 110, 0);
-                        ayobi(enemy->x + 8 * 3000 + 1000, -2 * 3000 - 1000, 0, 0, 0, 110, 0);
+                        ayobiInIter(modifier, enemy.x + 4 * 3000 + 1000, -2 * 3000, 0, 0, 0, 110, 0);
+                        ayobiInIter(modifier, enemy.x + 5 * 3000 - 1000, -3 * 3000, 0, 0, 0, 110, 0);
+                        ayobiInIter(modifier, enemy.x + 6 * 3000 + 1000, -4 * 3000, 0, 0, 0, 110, 0);
+                        ayobiInIter(modifier, enemy.x + 7 * 3000 - 1000, -2 * 3000, 0, 0, 0, 110, 0);
+                        ayobiInIter(modifier, enemy.x + 8 * 3000 + 1000, -2 * 3000 - 1000, 0, 0, 0, 110, 0);
                         blocks[0]->y += 3000 * 3;
                     }
                 }    //105
 
-                if (enemy->type == 110) {
+                if (enemy.type == 110) {
                     marioHP -= 1;
                     mmsgtm = 30;
                     mmsgtype = 3;
                 }
 
 /*
-if (enemy->type==101){mmutekitm=120;mmutekion=1;}
-if (enemy->type==102){marioHP-=1;mmutekitm=20;}
-if (enemy->type==103){
+if (enemy.type==101){mmutekitm=120;mmutekion=1;}
+if (enemy.type==102){marioHP-=1;mmutekitm=20;}
+if (enemy.type==103){
 //xx[24]=2400;
-eyobi(enemy->x-500,enemy->y,0,-600,0,80,2500,1600,2,32);
+eyobi(enemy.x-500,enemy.y,0,-600,0,80,2500,1600,2,32);
 }
 
-if (enemy->type==120){marioType=3;marioWidth=3800;marioHeight=2300;}
+if (enemy.type==120){marioType=3;marioWidth=3800;marioHeight=2300;}
 
-if (enemy->type==130){msoubi=1;}
-if (enemy->type==131){msoubi=2;}
-if (enemy->type==132){msoubi=3;}
-if (enemy->type==133){msoubi=4;}
+if (enemy.type==130){msoubi=1;}
+if (enemy.type==131){msoubi=2;}
+if (enemy.type==132){msoubi=3;}
+if (enemy.type==133){msoubi=4;}
 
 */
-                enemy->x = -90000000;
+                enemy.x = -90000000;
             }
 
         }        //(marioX
 
     } else {
-        enemy->x = -9000000;
+        enemy.x = -9000000;
     }
 }
 
