@@ -3,11 +3,11 @@
 
 #include <memory>
 #include <vector>
+#include "common.h"
 
 class EnemyTemplate {
 public:
-    int x;
-    int y;
+    Point position;
     int type;
     int xtype;
     int btm;

@@ -251,8 +251,8 @@ void paintSceneInGame() {
 
     // ファイアバー  Fireball
     for (const auto& ei : eis) {
-        int screenX = ei->x - fx;
-        int screenY = ei->y - fy;
+        int screenX = ei->position.x - fx;
+        int screenY = ei->position.y - fy;
         const int xx2 = 32;
         const int xx14 = 12000;
 
@@ -292,8 +292,8 @@ void paintSceneInGame() {
 
             string str = getEnemyMsg(ei->msgIndex);
 
-            int x = (ei->x + ei->width + 300 - fx) / 100;
-            int y = (ei->msgIndex != 31 ? ei->y - fy : ei->y - fy - 800) / 100;
+            int x = (ei->position.x + ei->size.width + 300 - fx) / 100;
+            int y = (ei->msgIndex != 31 ? ei->position.y - fy : ei->position.y - fy - 800) / 100;
 
             ChangeFontType(DX_FONTTYPE_EDGE);
             drawString(colors::WHITE, str.c_str(), x, y);
@@ -585,8 +585,8 @@ void processSceneInGame() {
             }
             for (const auto& et : ets) {
                 if (rand(2) <= 1) {
-                    et->x = (rand(500) - 1) * 29 * 100;
-                    et->y = rand(15) * 100 * 29 - 1200 - 3000;
+                    et->position.x = (rand(500) - 1) * 29 * 100;
+                    et->position.y = rand(15) * 100 * 29 - 1200 - 3000;
                     if (rand(6) == 0) {
                         et->type = rand(9);
                     }
@@ -1806,12 +1806,12 @@ if (actaon[2]==1){player.position.y-=400;player.speed.y=-1400;player.mjumptm=10;
 //敵キャラ適用
             for (const auto& ei : eis) {
                 if (ei->groundType == 1) {
-                    if (ei->x + ei->width - fx > xx[8] + xx[0]
-                        && ei->x - fx < xx[8] + xx[12] - xx[0]
-                        && ei->y + ei->height > xx[11] - 100
-                        && ei->y + ei->height < xx[11] + xx[1] + 500 && ei->speedY >= -100) {
-                        ei->y = xx[9] - ei->height + 100;
-                        ei->speedY = 0;
+                    if (ei->position.x + ei->size.width - fx > xx[8] + xx[0]
+                        && ei->position.x - fx < xx[8] + xx[12] - xx[0]
+                        && ei->position.y + ei->size.height > xx[11] - 100
+                        && ei->position.y + ei->size.height < xx[11] + xx[1] + 500 && ei->speed.y >= -100) {
+                        ei->position.y = xx[9] - ei->size.height + 100;
+                        ei->speed.y = 0;
                         ei->xGroundType = 1;
                     }
                 }
@@ -1844,27 +1844,27 @@ if (actaon[2]==1){player.position.y-=400;player.speed.y=-1400;player.mjumptm=10;
 
 //敵キャラの配置
     for (const auto& et : ets) {
-        if (et->x >= -80000) {
+        if (et->position.x >= -80000) {
 
             if (et->btm >= 0) {
                 et->btm--;
             }
 
             for (int i = 0; i <= 1; i++) {
-                int screenX = et->x - fx;
-                int screenY = et->y - fy;
+                int screenX = et->position.x - fx;
+                int screenY = et->position.y - fy;
 
                 xx[0] = 0;
                 xx[1] = 0;
 
                 bool forcedFD = false;
-                int faceDirection;
+                FaceDirection faceDirection = FaceDirection::LEFT;
                 if (!et->available && et->btm < 0
                     && screenX >= fxmax + 2000
                     && screenX < fxmax + 2000 + player.speed.x && i == 0) {
                     xx[0] = 1;
                     forcedFD = true;
-                    faceDirection = 0;
+                    faceDirection = FaceDirection::LEFT;
                 }        // && player.faceDirection==1
                 if (!et->available && et->btm < 0
                     && screenX >= -400 - eiWidthStorage[et->type] + player.speed.x
@@ -1872,7 +1872,7 @@ if (actaon[2]==1){player.position.y-=400;player.speed.y=-1400;player.mjumptm=10;
                     xx[0] = 1;
                     xx[1] = 1;
                     forcedFD = true;
-                    faceDirection = 1;
+                    faceDirection = FaceDirection::RIGHT;
                 }        // && player.faceDirection==0
                 if (et->available && screenX >= 0 - eiWidthStorage[et->type]
                     && screenX <= fxmax + 4000
@@ -1891,7 +1891,7 @@ if (actaon[2]==1){player.position.y-=400;player.speed.y=-1400;player.mjumptm=10;
                         et->btm = 9999999;
                     }
 //10
-                    ayobi(et->x, et->y, 0, 0, 0, et->type, et->xtype);
+                    ayobi(et->position.x, et->position.y, 0, 0, 0, et->type, et->xtype);
                     if (forcedFD) eis.back()->faceDirection = faceDirection;
                 }
 
@@ -1997,10 +1997,10 @@ if (actaon[2]==1){player.position.y-=400;player.speed.y=-1400;player.mjumptm=10;
 }
 
 void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<EnemyInstance>& modifier) {
-    int scrEnemyX = enemy.x - fx;  // xx0
-    int scrEnemyY = enemy.y - fy;  // xx1
-    int enemyWidth = enemy.width;  // xx2
-    int enemyHeight = enemy.height;  // xx3
+    int scrEnemyX = enemy.position.x - fx;  // xx0
+    int scrEnemyY = enemy.position.y - fy;  // xx1
+    int enemyWidth = enemy.size.width;  // xx2
+    int enemyHeight = enemy.size.height;  // xx3
     int xx14 = 12000 * 1;
 
     if (enemy.safeCountdown >= 0)
@@ -2037,14 +2037,14 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                         int xx5 = -800;
                         int xx12 = 0;
                         int xx1 = 1600;
-                        int scrEiX = ei->x - fx;
-                        int scrEiY = ei->y - fy;
+                        int scrEiX = ei->position.x - fx;
+                        int scrEiY = ei->position.y - fy;
                         if (&enemy != &*ei) {
-                            if (enemy.x + enemy.width - fx > scrEiX + xx0 * 2
-                                && enemy.x - fx < scrEiX + ei->width - xx0 * 2
-                                && enemy.y + enemy.height - fy > scrEiY + xx5
-                                && enemy.y + enemy.height - fy < scrEiY + xx1 * 3 + xx12 + 1500) {
-                                ei->x = -800000;
+                            if (enemy.position.x + enemy.size.width - fx > scrEiX + xx0 * 2
+                                && enemy.position.x - fx < scrEiX + ei->size.width - xx0 * 2
+                                && enemy.position.y + enemy.size.height - fy > scrEiY + xx5
+                                && enemy.position.y + enemy.size.height - fy < scrEiY + xx1 * 3 + xx12 + 1500) {
+                                ei->position.x = -800000;
                                 ot(oto[6]);
                             }
                         }
@@ -2057,10 +2057,10 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
             case 3: {  //あらまき
                 enemy.groundType = 0;    //end();
                 if (enemy.xtype == 0) {
-                    enemy.y -= 800;
+                    enemy.position.y -= 800;
                 }
                 if (enemy.xtype == 1)
-                    enemy.y += 1200;
+                    enemy.position.y += 1200;
 
                 //absMoveX=100;
                 break;
@@ -2069,17 +2069,17 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
             case 4: {  //スーパージエン
                 absMoveX = 120;
                 int xx0 = 250;
-                scrEnemyX = enemy.x - fx;
-                scrEnemyY = enemy.y - fy;
+                scrEnemyX = enemy.position.x - fx;
+                scrEnemyY = enemy.position.y - fy;
                 if (enemy.timer >= 0)
                     enemy.timer--;
                 if (abs(player.position.x + player.size.width - scrEnemyX - xx0 * 2) < 9000
-                    && abs(player.position.x < scrEnemyX - enemy.width + xx0 * 2) < 3000  // WTF
+                    && abs(player.position.x < scrEnemyX - enemy.size.width + xx0 * 2) < 3000  // WTF
                     && player.speed.y <= -600 && enemy.timer <= 0) {
                     if (enemy.xtype == 1 && !player.onGround && enemy.xGroundType == 1) {
-                        enemy.speedY = -1600;
+                        enemy.speed.y = -1600;
                         enemy.timer = 40;
-                        enemy.y -= 1000;
+                        enemy.position.y -= 1000;
                     }
                 }        //
                 break;
@@ -2093,8 +2093,8 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
 
             case 6: {  //デフラグさん
                 if (enemy.groundType == 30) {
-                    enemy.speedY = -1600;
-                    enemy.y += enemy.speedY;
+                    enemy.speed.y = -1600;
+                    enemy.position.y += enemy.speed.y;
                 }
 
                 absMoveX = 120;
@@ -2112,14 +2112,14 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                             player.mkeytm = 24;
                             player.speed.y = -1200;
                             player.position.y = scrEnemyY - 1000 - 3000;
-                            enemy.faceDirection = 1;
+                            enemy.faceDirection = FaceDirection::RIGHT;
                             if (enemy.xtype == 1) {
                                 player.speed.x = 840;
                                 enemy.xtype = 0;
                             }
                         }
                         if (enemy.timer == 40) {
-                            enemy.faceDirection = 0;
+                            enemy.faceDirection = FaceDirection::LEFT;
                             enemy.timer = 0;
                         }
                     }
@@ -2129,8 +2129,8 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                     for (int i = 0; i < GROUND_MAX; i++) {
                         if (groundType[i] == 300) {
                             //groundX[groundCounter]=xx[21]*100;groundY[groundCounter]=xx[22]*100;groundWidth[groundCounter]=3000;groundHeight[groundCounter]=(12-index)*3000;groundType[groundCounter]=300;groundCounter++;
-                            if (enemy.x - fx >= -8000 && enemy.x >= groundX[i] + 2000
-                                && enemy.x <= groundX[i] + 3600 && enemy.xGroundType == 1) {
+                            if (enemy.position.x - fx >= -8000 && enemy.position.x >= groundX[i] + 2000
+                                && enemy.position.x <= groundX[i] + 3600 && enemy.xGroundType == 1) {
                                 groundX[i] = -800000;
                                 enemy.timer = 100;
                             }
@@ -2138,7 +2138,7 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                     }
 
                     if (enemy.timer == 100) {
-                        eyobi(enemy.x + 1200 - 1200, enemy.y + 3000 - 10 * 3000 - 1500,
+                        eyobi(enemy.position.x + 1200 - 1200, enemy.position.y + 3000 - 10 * 3000 - 1500,
                               0, 0, 0, 0, 1000, 10 * 3000 - 1200, 4, 20);
                         if (player.type == MarioType::_300) {
                             player.type = MarioType::NORMAL;StopSoundMem(oto[11]);
@@ -2150,19 +2150,19 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                         }
                     }
                     if (enemy.timer == 120) {
-                        eyobi(enemy.x + 1200 - 1200, enemy.y + 3000 - 10 * 3000 - 1500,
+                        eyobi(enemy.position.x + 1200 - 1200, enemy.position.y + 3000 - 10 * 3000 - 1500,
                               600, -1200, 0, 160, 1000, 10 * 3000 - 1200, 4, 240);
-                        enemy.faceDirection = 1;
+                        enemy.faceDirection = FaceDirection::RIGHT;
                     }
                     //player.speed.x=700;player.mkeytm=24;player.speed.y=-1200;player.position.y=xx1-1000-3000;enemy.faceDirection=1;if (enemy.xtype==1){player.speed.x=840;enemy.xtype=0;}}
                     if (enemy.timer == 140) {
-                        enemy.faceDirection = 0;
+                        enemy.faceDirection = FaceDirection::LEFT;
                         enemy.timer = 0;
                     }
                 }
                 if (enemy.timer >= 220) {
                     enemy.timer = 0;
-                    enemy.faceDirection = 0;
+                    enemy.faceDirection = FaceDirection::LEFT;
                 }
                 //他の敵を投げる
                 for (const auto& ei : eis) {
@@ -2170,20 +2170,20 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                     int xx5 = -800;
                     int xx12 = 0;
                     int xx1 = 1600;
-                    int scrEiX = ei->x - fx;
-                    int scrEiY = ei->y - fy;
+                    int scrEiX = ei->position.x - fx;
+                    int scrEiY = ei->position.y - fy;
                     if (&enemy != &*ei && ei->type >= 100) {
-                        if (enemy.x + enemy.width - fx > scrEiX + xx0 * 2
-                            && enemy.x - fx < scrEiX + ei->width - xx0 * 2
-                            && enemy.y + enemy.height - fy > scrEiY + xx5
-                            && enemy.y + enemy.height - fy < scrEiY + xx1 * 3 + xx12 + 1500) {
-                            //ei->x=-800000;
-                            ei->faceDirection = 1;
-                            ei->x = enemy.x + 300;
-                            ei->y = enemy.y - 3000;
-                            ei->createFromBlockTimer = 120;    //ei->x=0;
+                        if (enemy.position.x + enemy.size.width - fx > scrEiX + xx0 * 2
+                            && enemy.position.x - fx < scrEiX + ei->size.width - xx0 * 2
+                            && enemy.position.y + enemy.size.height - fy > scrEiY + xx5
+                            && enemy.position.y + enemy.size.height - fy < scrEiY + xx1 * 3 + xx12 + 1500) {
+                            //ei->position.x=-800000;
+                            ei->faceDirection = FaceDirection::RIGHT;
+                            ei->position.x = enemy.position.x + 300;
+                            ei->position.y = enemy.position.y - 3000;
+                            ei->createFromBlockTimer = 120;    //ei->position.x=0;
                             enemy.timer = 200;
-                            enemy.faceDirection = 1;
+                            enemy.faceDirection = FaceDirection::RIGHT;
                         }
                     }
                 }
@@ -2200,9 +2200,9 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                 if (enemy.xtype == 1)
                     absMoveX = -xx11;
                 if (enemy.xtype == 2)
-                    enemy.y -= xx11;
+                    enemy.position.y -= xx11;
                 if (enemy.xtype == 3)
-                    enemy.y += xx11;
+                    enemy.position.y += xx11;
                 break;
             }
 
@@ -2211,22 +2211,22 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                 int xx22 = 20;
                 if (enemy.timer == 0) {
                     enemy.af += xx22;
-                    enemy.speedY += xx22;
+                    enemy.speed.y += xx22;
                 } else if (enemy.timer == 1) {
                     enemy.af -= xx22;
-                    enemy.speedY -= xx22;
+                    enemy.speed.y -= xx22;
                 }
-                if (enemy.speedY > 300) {
-                    enemy.speedY = 300;
-                } else if (enemy.speedY < -300) {
-                    enemy.speedY = -300;
+                if (enemy.speed.y > 300) {
+                    enemy.speed.y = 300;
+                } else if (enemy.speed.y < -300) {
+                    enemy.speed.y = -300;
                 }
                 if (enemy.af >= 1200) {
                     enemy.timer = 1;
                 } else if (enemy.af < -0) {
                     enemy.timer = 0;
                 }
-                enemy.y += enemy.speedY;
+                enemy.position.y += enemy.speed.y;
                 //enemy.type=151;
                 break;
             }
@@ -2238,14 +2238,14 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
 
             case 9: {  //ファイアー玉
                 enemy.groundType = 5;
-                enemy.y += enemy.speedY;
-                enemy.speedY += 100;
-                if (enemy.y >= fymax + 1000) {
-                    enemy.speedY = 900;
+                enemy.position.y += enemy.speed.y;
+                enemy.speed.y += 100;
+                if (enemy.position.y >= fymax + 1000) {
+                    enemy.speed.y = 900;
                 }
-                if (enemy.y >= fymax + 12000) {
-                    enemy.y = fymax;
-                    enemy.speedY = -2600;
+                if (enemy.position.y >= fymax + 12000) {
+                    enemy.position.y = fymax;
+                    enemy.speed.y = -2600;
                 }
                 break;
             }
@@ -2265,9 +2265,9 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                 enemy.timer += 1;
                 if (enemy.xtype == 0) {
                     if (enemy.timer == 50 && player.position.y >= 6000) {
-                        enemy.speedX = 300;
-                        enemy.speedY -= 1600;
-                        enemy.y -= 1000;
+                        enemy.speed.x = 300;
+                        enemy.speed.y -= 1600;
+                        enemy.position.y -= 1000;
                     }
 
                     for (const auto& ei : eis) {
@@ -2275,16 +2275,16 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                         int xx5 = -800;
                         int xx12 = 0;
                         int xx1 = 1600;
-                        int scrEiX = ei->x - fx;
-                        int scrEiY = ei->y - fy;
+                        int scrEiX = ei->position.x - fx;
+                        int scrEiY = ei->position.y - fy;
                         if (&enemy != &*ei && ei->type == 102) {
-                            if (enemy.x + enemy.width - fx > scrEiX + xx0 * 2
-                                && enemy.x - fx < scrEiX + ei->width - xx0 * 2
-                                && enemy.y + enemy.height - fy > scrEiY + xx5
-                                && enemy.y + enemy.height - fy < scrEiY + xx1 * 3 + xx12 + 1500) {
-                                ei->x = -800000;
+                            if (enemy.position.x + enemy.size.width - fx > scrEiX + xx0 * 2
+                                && enemy.position.x - fx < scrEiX + ei->size.width - xx0 * 2
+                                && enemy.position.y + enemy.size.height - fy > scrEiY + xx5
+                                && enemy.position.y + enemy.size.height - fy < scrEiY + xx1 * 3 + xx12 + 1500) {
+                                ei->position.x = -800000;
                                 enemy.xtype = 1;
-                                enemy.speedY = -1600;
+                                enemy.speed.y = -1600;
                                 enemy.msgTimer = 30;
                                 enemy.msgIndex = 25;
                             }
@@ -2293,8 +2293,8 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                 }
                 if (enemy.xtype == 1) {
                     enemy.groundType = 0;
-                    enemy.y += enemy.speedY;
-                    enemy.speedY += 120;
+                    enemy.position.y += enemy.speed.y;
+                    enemy.speed.y += 120;
                 }
                 break;
             }
@@ -2304,19 +2304,19 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                 absMoveX = 1600;
                 if (enemy.xtype == 1) {
                     absMoveX = 1200;
-                    enemy.y -= 200;
+                    enemy.position.y -= 200;
                 }
                 if (enemy.xtype == 2) {
                     absMoveX = 1200;
-                    enemy.y += 200;
+                    enemy.position.y += 200;
                 }
                 if (enemy.xtype == 3) {
                     absMoveX = 900;
-                    enemy.y -= 600;
+                    enemy.position.y -= 600;
                 }
                 if (enemy.xtype == 4) {
                     absMoveX = 900;
-                    enemy.y += 600;
+                    enemy.position.y += 600;
                 }
                 break;
             }
@@ -2351,19 +2351,19 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                 xx[23] = 400;
                 if (enemy.xtype == 0) {
                     enemy.xtype = 1;
-                    enemy.faceDirection = 1;
+                    enemy.faceDirection = FaceDirection::RIGHT;
                 }
                 if (player.position.y >= 30000
-                    && player.position.x >= enemy.x - 3000 * 5 - fx
-                    && player.position.x <= enemy.x - fx && enemy.xtype == 1) {
+                    && player.position.x >= enemy.position.x - 3000 * 5 - fx
+                    && player.position.x <= enemy.position.x - fx && enemy.xtype == 1) {
                     enemy.xtype = 5;
-                    enemy.faceDirection = 0;
+                    enemy.faceDirection = FaceDirection::LEFT;
                 }
                 if (player.position.y >= 24000
-                    && player.position.x <= enemy.x + 3000 * 8 - fx
-                    && player.position.x >= enemy.x - fx && enemy.xtype == 1) {
+                    && player.position.x <= enemy.position.x + 3000 * 8 - fx
+                    && player.position.x >= enemy.position.x - fx && enemy.xtype == 1) {
                     enemy.xtype = 5;
-                    enemy.faceDirection = 1;
+                    enemy.faceDirection = FaceDirection::RIGHT;
                 }
                 if (enemy.xtype == 5)
                     absMoveX = xx[23];
@@ -2373,19 +2373,19 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
             case 86: {
                 enemy.groundType = 4;
                 xx[23] = 1000;
-                if (player.position.x >= enemy.x - fx - player.size.width - xx[26]
-                    && player.position.x <= enemy.x - fx + enemy.width + xx[26]) {
+                if (player.position.x >= enemy.position.x - fx - player.size.width - xx[26]
+                    && player.position.x <= enemy.position.x - fx + enemy.size.width + xx[26]) {
                     enemy.timer = 1;
                 }
                 if (enemy.timer == 1) {
-                    enemy.y += 1200;
+                    enemy.position.y += 1200;
                 }
                 break;
             }
 
             case 87: {  //ファイアバー
                 enemy.groundType = 0;
-                if (enemy.x % 10 != 1) {
+                if (enemy.position.x % 10 != 1) {
                     enemy.timer += 6;
                 } else {
                     enemy.timer -= 6;
@@ -2403,8 +2403,8 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
 
                     xx[4] = 1800;
                     xx[5] = 800;
-                    xx[8] = enemy.x - fx + int(xd[4]) * 100 - xx[4] / 2;
-                    xx[9] = enemy.y - fy + int(xd[5]) * 100 - xx[4] / 2;
+                    xx[8] = enemy.position.x - fx + int(xd[4]) * 100 - xx[4] / 2;
+                    xx[9] = enemy.position.y - fy + int(xd[5]) * 100 - xx[4] / 2;
 
                     if (player.position.x + player.size.width > xx[8] + xx[5]
                         && player.position.x < xx[8] + xx[4] - xx[5]
@@ -2421,7 +2421,7 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
 
             case 88: {
                 enemy.groundType = 0;
-                if (enemy.x % 10 != 1) {
+                if (enemy.position.x % 10 != 1) {
                     enemy.timer += 6;
                 } else {
                     enemy.timer -= 6;
@@ -2439,8 +2439,8 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
 
                     xx[4] = 1800;
                     xx[5] = 800;
-                    xx[8] = enemy.x - fx + int(xd[4]) * 100 - xx[4] / 2;
-                    xx[9] = enemy.y - fy + int(xd[5]) * 100 - xx[4] / 2;
+                    xx[8] = enemy.position.x - fx + int(xd[4]) * 100 - xx[4] / 2;
+                    xx[9] = enemy.position.y - fy + int(xd[5]) * 100 - xx[4] / 2;
 
                     if (player.position.x + player.size.width > xx[8] + xx[5]
                         && player.position.x < xx[8] + xx[4] - xx[5]
@@ -2472,22 +2472,22 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                         xx[5] = -800;
                         xx[12] = 0;
                         int xx1 = 1600;
-                        xx[8] = ei->x - fx;
-                        xx[9] = ei->y - fy;
+                        xx[8] = ei->position.x - fx;
+                        xx[9] = ei->position.y - fy;
                         if (&enemy != &*ei) {
-                            if (enemy.x + enemy.width - fx > xx[8] + xx0 * 2
-                                && enemy.x - fx < xx[8] + ei->width - xx0 * 2
-                                && enemy.y + enemy.height - fy > xx[9] + xx[5]
-                                && enemy.y + enemy.height - fy < xx[9] + xx1 * 3 + xx[12]) {
+                            if (enemy.position.x + enemy.size.width - fx > xx[8] + xx0 * 2
+                                && enemy.position.x - fx < xx[8] + ei->size.width - xx0 * 2
+                                && enemy.position.y + enemy.size.height - fy > xx[9] + xx[5]
+                                && enemy.position.y + enemy.size.height - fy < xx[9] + xx1 * 3 + xx[12]) {
                                 if (ei->type == 0 || ei->type == 4) {
                                     ei->type = 90;    //ot(oto[6]);
-                                    ei->width = 6400;
-                                    ei->height = 6300;
+                                    ei->size.width = 6400;
+                                    ei->size.height = 6300;
                                     ei->xtype = 0;
-                                    ei->x -= 1050;
-                                    ei->y -= 1050;
+                                    ei->position.x -= 1050;
+                                    ei->position.y -= 1050;
                                     ot(oto[9]);
-                                    enemy.x = -80000000;
+                                    enemy.position.x = -80000000;
                                 }
                             }
                         }
@@ -2509,8 +2509,8 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                 enemy.groundType = 1;
                 absMoveX = 200;
                 if (enemy.xGroundType == 1) {
-                    enemy.y -= 1200;
-                    enemy.speedY = -1400;
+                    enemy.position.y -= 1200;
+                    enemy.speed.y = -1400;
                 }
                 break;
             }
@@ -2525,9 +2525,9 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
         if (enemy.createFromBlockTimer >= 1)
             absMoveX = 0;
 
-        if (enemy.faceDirection == 0)
+        if (enemy.faceDirection == FaceDirection::LEFT)
             moveX -= absMoveX;
-        if (enemy.faceDirection == 1)
+        if (enemy.faceDirection == FaceDirection::RIGHT)
             moveX += absMoveX;
 
 //最大値
@@ -2536,32 +2536,32 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
 
 //if (player.speed.x>xx0){player.speed.x=xx0;}
 //if (player.speed.x<-xx0){player.speed.x=-xx0;}
-        if (enemy.speedY > xx1 && enemy.groundType != 5) {
-            enemy.speedY = xx1;
+        if (enemy.speed.y > xx1 && enemy.groundType != 5) {
+            enemy.speed.y = xx1;
         }
 //行動
-        enemy.x += moveX;
-        //enemy.y += moveY;
+        enemy.position.x += moveX;
+        //enemy.position.y += moveY;
 
         if ((enemy.groundType >= 1 || enemy.groundType == -1)
             && enemy.createFromBlockTimer <= 0) {
 //if (enemy.type==4)end();
 
 //移動
-            enemy.x += enemy.speedX;
+            enemy.position.x += enemy.speed.x;
             if (enemy.groundType >= 1 && enemy.groundType <= 3) {
-                enemy.y += enemy.speedY;
-                enemy.speedY += 120;
-            }        //enemy.speedY+=180;
+                enemy.position.y += enemy.speed.y;
+                enemy.speed.y += 120;
+            }        //enemy.speed.y+=180;
 
             if (enemy.xGroundType == 1) {
                 xx0 = 100;
-                if (enemy.speedX >= 200) {
-                    enemy.speedX -= xx0;
-                } else if (enemy.speedX <= -200) {
-                    enemy.speedX += xx0;
+                if (enemy.speed.x >= 200) {
+                    enemy.speed.x -= xx0;
+                } else if (enemy.speed.x <= -200) {
+                    enemy.speed.x += xx0;
                 } else {
-                    enemy.speedX = 0;
+                    enemy.speed.x = 0;
                 }
             }
 
@@ -2578,14 +2578,14 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
         if (enemy.createFromBlockTimer > 0) {
             enemy.createFromBlockTimer--;
             if (enemy.createFromBlockTimer < 100) {
-                enemy.y -= 180;
+                enemy.position.y -= 180;
             }
             if (enemy.createFromBlockTimer > 100) {
             }
             if (enemy.createFromBlockTimer == 100) {
-                enemy.y -= 800;
-                enemy.speedY = -1200;
-                enemy.speedX = 700;
+                enemy.position.y -= 800;
+                enemy.speed.y = -1200;
+                enemy.speed.x = 700;
                 enemy.createFromBlockTimer = 0;
             }
         }        //enemy.createFromBlockTimer>0
@@ -2597,13 +2597,13 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
         xx[4] = 500;
         xx[5] = -800;
 
-        scrEnemyX = enemy.x - fx;  // update value
-        scrEnemyY = enemy.y - fy;  // update value
+        scrEnemyX = enemy.position.x - fx;  // update value
+        scrEnemyY = enemy.position.y - fy;  // update value
         int xx12 = player.speed.y < 100 ? 0 : player.speed.y;
         int xx25 = 0;
 
         if (player.position.x + player.size.width > scrEnemyX + xx0 * 2
-            && player.position.x < scrEnemyX + enemy.width - xx0 * 2
+            && player.position.x < scrEnemyX + enemy.size.width - xx0 * 2
             && player.position.y + player.size.height > scrEnemyY - xx[5]
             && player.position.y + player.size.height < scrEnemyY + xx1 + xx12
             && (player.mmutekitm <= 0 || player.speed.y >= 100)
@@ -2613,10 +2613,10 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
 
                 if (enemy.type == 0) {
                     if (enemy.xtype == 0)
-                        enemy.x = -900000;
+                        enemy.position.x = -900000;
                     if (enemy.xtype == 1) {
                         ot(oto[5]);
-                        player.position.y = scrEnemyY - 900 - enemy.height;
+                        player.position.y = scrEnemyY - 900 - enemy.size.height;
                         player.speed.y = -2100;
                         xx25 = 1;
                         actaon[2] = 0;
@@ -2625,7 +2625,7 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
 
                 if (enemy.type == 1) {
                     enemy.type = 2;
-                    enemy.height = 3000;
+                    enemy.size.height = 3000;
                     enemy.xtype = 0;
                 }
 //こうら
@@ -2633,12 +2633,12 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                     if (enemy.xtype == 1 || enemy.xtype == 2) {
                         enemy.xtype = 0;
                     } else if (enemy.xtype == 0) {
-                        if (player.position.x + player.size.width > scrEnemyX + xx0 * 2 && player.position.x < scrEnemyX + enemy.width / 2 - xx0 * 4) {
+                        if (player.position.x + player.size.width > scrEnemyX + xx0 * 2 && player.position.x < scrEnemyX + enemy.size.width / 2 - xx0 * 4) {
                             enemy.xtype = 1;
-                            enemy.faceDirection = 1;
+                            enemy.faceDirection = FaceDirection::RIGHT;
                         } else {
                             enemy.xtype = 1;
-                            enemy.faceDirection = 0;
+                            enemy.faceDirection = FaceDirection::LEFT;
                         }
                     }
                 }
@@ -2653,12 +2653,12 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                 }
 
                 if (enemy.type == 7) {
-                    enemy.x = -900000;
+                    enemy.position.x = -900000;
                 }
 
                 if (enemy.type == 8) {
                     enemy.type = 151;
-                    enemy.speedY = 0;
+                    enemy.speed.y = 0;
                 }
 //if (enemy.type==4){
 //xx25=1;
@@ -2667,7 +2667,7 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                 if (enemy.type != 85) {
                     if (xx25 == 0) {
                         ot(oto[5]);
-                        player.position.y = scrEnemyY - 1000 - enemy.height;
+                        player.position.y = scrEnemyY - 1000 - enemy.size.height;
                         player.speed.y = -1000;
                     }
                 }
@@ -2685,10 +2685,10 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                     actaon[2] = 0;
                 }
             }
-//if (enemy.type==200){player.position.y=scrEnemyY-900-enemy.height;player.speed.y=-2400;}
+//if (enemy.type==200){player.position.y=scrEnemyY-900-enemy.size.height;player.speed.y=-2400;}
         }
-//if (enemy.x+enemy.width-fx>scrEnemyX-xx0 && enemy.x-fx<scrEnemyX){player.speed.y=-1000;}//enemy.x=-9000000;
-// && enemy.y-fy<scrEnemyY+xx1/2 && enemy.y+enemy.height-fy>scrEnemyY+player.size.height-xx2
+//if (enemy.position.x+enemy.size.width-fx>scrEnemyX-xx0 && enemy.position.x-fx<scrEnemyX){player.speed.y=-1000;}//enemy.position.x=-9000000;
+// && enemy.position.y-fy<scrEnemyY+xx1/2 && enemy.position.y+enemy.size.height-fy>scrEnemyY+player.size.height-xx2
 
         xx[15] = -500;
 
@@ -2699,14 +2699,14 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
         if (enemy.type == 82 || enemy.type == 83 || enemy.type == 84)
             xx[16] = -3200;
         if (enemy.type == 85)
-            xx[16] = -enemy.height + 6000;
+            xx[16] = -enemy.size.height + 6000;
         if (player.position.x + player.size.width > scrEnemyX + xx[4]
-            && player.position.x < scrEnemyX + enemy.width - xx[4]
-            && player.position.y < scrEnemyY + enemy.height + xx[15]
-            && player.position.y + player.size.height > scrEnemyY + enemy.height - xx0 + xx[16]
+            && player.position.x < scrEnemyX + enemy.size.width - xx[4]
+            && player.position.y < scrEnemyY + enemy.size.height + xx[15]
+            && player.position.y + player.size.height > scrEnemyY + enemy.size.height - xx0 + xx[16]
             && enemy.safeCountdown <= 0 && enemy.createFromBlockTimer <= 0) {
             if (player.mmutekion == 1) {
-                enemy.x = -9000000;
+                enemy.position.x = -9000000;
             }
             if (player.mmutekitm <= 0
                 && (enemy.type <= 99 || enemy.type >= 200)) {
@@ -2779,8 +2779,8 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                             enemy.msgIndex = rand(1) + 31;
                             xx[24] = 900;
                             enemy.type = 83;
-                            enemy.x -= xx[24] + 100;
-                            enemy.y -= xx[24] - 100 * 0;
+                            enemy.position.x -= xx[24] + 100;
+                            enemy.position.y -= xx[24] - 100 * 0;
                         }    //82
 
                         if (enemy.type == 84) {
@@ -2803,15 +2803,15 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                     if (enemy.type == 2) {
 //if (enemy.xtype==1 || enemy.xtype==2){enemy.xtype=0;}
                         if (enemy.xtype == 0) {
-                            if (player.position.x + player.size.width > scrEnemyX + xx0 * 2 && player.position.x < scrEnemyX + enemy.width / 2 - xx0 * 4) {
+                            if (player.position.x + player.size.width > scrEnemyX + xx0 * 2 && player.position.x < scrEnemyX + enemy.size.width / 2 - xx0 * 4) {
                                 enemy.xtype = 1;
-                                enemy.faceDirection = 1;
-                                enemy.x = player.position.x + player.size.width + fx + player.speed.x;
+                                enemy.faceDirection = FaceDirection::RIGHT;
+                                enemy.position.x = player.position.x + player.size.width + fx + player.speed.x;
                                 player.mmutekitm = 5;
                             } else {
                                 enemy.xtype = 1;
-                                enemy.faceDirection = 0;
-                                enemy.x = player.position.x - enemy.width + fx - player.speed.x;
+                                enemy.faceDirection = FaceDirection::LEFT;
+                                enemy.position.x = player.position.x - enemy.size.width + fx - player.speed.x;
                                 player.mmutekitm = 5;
                             }
                         } else {
@@ -2865,15 +2865,15 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                         blocks[7]->xtype = 80;
                         ot(oto[4]);
 
-                        //ayobiInIter(modifier, enemy.x - 6 * 3000 + 1000, -3 * 3000, 0, 0, 0, 110, 0);
-                        ayobiInIter(modifier, enemy.x - 8 * 3000 - 1000, -4 * 3000, 0, 0, 0, 110, 0);
-                        ayobiInIter(modifier, enemy.x - 10 * 3000 + 1000, -1 * 3000, 0, 0, 0, 110, 0);
+                        //ayobiInIter(modifier, enemy.position.x - 6 * 3000 + 1000, -3 * 3000, 0, 0, 0, 110, 0);
+                        ayobiInIter(modifier, enemy.position.x - 8 * 3000 - 1000, -4 * 3000, 0, 0, 0, 110, 0);
+                        ayobiInIter(modifier, enemy.position.x - 10 * 3000 + 1000, -1 * 3000, 0, 0, 0, 110, 0);
 
-                        ayobiInIter(modifier, enemy.x + 4 * 3000 + 1000, -2 * 3000, 0, 0, 0, 110, 0);
-                        ayobiInIter(modifier, enemy.x + 5 * 3000 - 1000, -3 * 3000, 0, 0, 0, 110, 0);
-                        ayobiInIter(modifier, enemy.x + 6 * 3000 + 1000, -4 * 3000, 0, 0, 0, 110, 0);
-                        ayobiInIter(modifier, enemy.x + 7 * 3000 - 1000, -2 * 3000, 0, 0, 0, 110, 0);
-                        ayobiInIter(modifier, enemy.x + 8 * 3000 + 1000, -2 * 3000 - 1000, 0, 0, 0, 110, 0);
+                        ayobiInIter(modifier, enemy.position.x + 4 * 3000 + 1000, -2 * 3000, 0, 0, 0, 110, 0);
+                        ayobiInIter(modifier, enemy.position.x + 5 * 3000 - 1000, -3 * 3000, 0, 0, 0, 110, 0);
+                        ayobiInIter(modifier, enemy.position.x + 6 * 3000 + 1000, -4 * 3000, 0, 0, 0, 110, 0);
+                        ayobiInIter(modifier, enemy.position.x + 7 * 3000 - 1000, -2 * 3000, 0, 0, 0, 110, 0);
+                        ayobiInIter(modifier, enemy.position.x + 8 * 3000 + 1000, -2 * 3000 - 1000, 0, 0, 0, 110, 0);
                         blocks[0]->y += 3000 * 3;
                     }
                 }    //105
@@ -2884,13 +2884,13 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                     mmsgtype = 3;
                 }
 
-                enemy.x = -90000000;
+                enemy.position.x = -90000000;
             }
 
         }        //(player.position.x
 
     } else {
-        enemy.x = -9000000;
+        enemy.position.x = -9000000;
     }
 }
 

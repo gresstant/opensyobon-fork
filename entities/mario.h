@@ -1,7 +1,7 @@
 #ifndef OSAFORK_MARIO_H
 #define OSAFORK_MARIO_H
 
-#include "../entities/common.h"
+#include "common.h"
 
 enum class MarioType : int {
     NORMAL = 0, HUGE = 1, AFTER_ORANGE_NOTE = 2, AFTER_SPRING = 3,

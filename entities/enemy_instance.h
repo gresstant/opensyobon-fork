@@ -4,17 +4,15 @@
 #include <memory>
 #include <deque>
 #include "../utilities/ListIterateHelper.h"
+#include "common.h"
 
 //敵キャラ  Enemy Instances
 
 class EnemyInstance {
 public:
-    int x;
-    int y;
-    int width;
-    int height;
-    int speedX;
-    int speedY;
+    Point position;
+    Size size;
+    Speed speed;
     int ae;
     int af;
     int createFromBlockTimer;
@@ -24,7 +22,7 @@ public:
     int type;
     int xtype;
 
-    int faceDirection;
+    FaceDirection faceDirection;
     int safeCountdown;
     int timer;
 

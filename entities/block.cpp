@@ -478,9 +478,9 @@ bool LegacyBlock::onEnemyHit(EnemyInstance& enemy) {
 
     constexpr int xx0 = 200;
 
-    enemy.y = this->y - fy + blockHeight + xx0 + fy;
-    if (enemy.speedY < 0) {
-        enemy.speedY = 0;
+    enemy.position.y = this->y - fy + blockHeight + xx0 + fy;
+    if (enemy.speed.y < 0) {
+        enemy.speed.y = 0;
     }
 
     return true;
@@ -490,12 +490,12 @@ bool LegacyBlock::onEnemyStand(EnemyInstance& enemy) {
     if (enemy.type == 86 || enemy.type == 90 || this->type == 140) { onEnemyTouch(this, enemy); return true; }
     if (this->type == 7 || this->type == 117) return false;
 
-    enemy.y = this->y - fy - enemy.height + 100 + fy;
-    enemy.speedY = 0;
+    enemy.position.y = this->y - fy - enemy.size.height + 100 + fy;
+    enemy.speed.y = 0;
     enemy.xGroundType = 1;
 
     if (this->type == 120) {  // ジャンプ台  spring (jump platform)
-        enemy.speedY = -1600;
+        enemy.speed.y = -1600;
         enemy.groundType = 30;
     }
 
@@ -523,9 +523,9 @@ bool LegacyBlock::onEnemyTouchLeft(EnemyInstance& enemy) {
     if (enemy.type == 86 || enemy.type == 90 || this->type == 140) { onEnemyTouch(this, enemy); return true; }
     if (!((enemy.type >= 100 || this->type != 7 || (this->type == 7 && enemy.type == 2)) && this->type != 117)) return false;
 
-    enemy.x = this->x - fx - enemy.width + fx;
-    enemy.speedX = 0;
-    enemy.faceDirection = 0;
+    enemy.position.x = this->x - fx - enemy.size.width + fx;
+    enemy.speed.x = 0;
+    enemy.faceDirection = FaceDirection::LEFT;
     onEnemyTouchEndCommon(this, enemy);
     return true;
 }
@@ -534,9 +534,9 @@ bool LegacyBlock::onEnemyTouchRight(EnemyInstance& enemy) {
     if (enemy.type == 86 || enemy.type == 90 || this->type == 140) { onEnemyTouch(this, enemy); return true; }
     if (!((enemy.type >= 100 || this->type != 7 || (this->type == 7 && enemy.type == 2)) && this->type != 117)) return false;
 
-    enemy.x = this->x - fx + blockWidth + fx;
-    enemy.speedX = 0;
-    enemy.faceDirection = 1;
+    enemy.position.x = this->x - fx + blockWidth + fx;
+    enemy.speed.x = 0;
+    enemy.faceDirection = FaceDirection::RIGHT;
     onEnemyTouchEndCommon(this, enemy);
     return true;
 }

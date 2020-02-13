@@ -4,8 +4,8 @@ std::vector<std::unique_ptr<EnemyTemplate>> ets;
 
 void createEnemyTemplate(int x, int y, int type, int xtype) {
     auto etPtr = std::make_unique<EnemyTemplate>();
-    etPtr->x = x;
-    etPtr->y = y;
+    etPtr->position.x = x;
+    etPtr->position.y = y;
     etPtr->type = type;
     etPtr->xtype = xtype;
     etPtr->available = true;

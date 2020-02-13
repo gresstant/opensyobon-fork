@@ -24,32 +24,32 @@ void ayobiCommon(int x, int y, int speedX, int speedY, int safeCountdown, int ty
                  const std::function<void()>& popFirst, const std::function<void(std::unique_ptr<EnemyInstance>&)>& pushBack) {
     auto eiPtr = std::make_unique<EnemyInstance>();
 
-    eiPtr->x = x;
-    eiPtr->y = y;
-    eiPtr->speedX = speedX;
-    eiPtr->speedY = speedY;
+    eiPtr->position.x = x;
+    eiPtr->position.y = y;
+    eiPtr->speed.x = speedX;
+    eiPtr->speed.y = speedY;
     if (xtype > 100)
-        eiPtr->speedX = xtype;
+        eiPtr->speed.x = xtype;
     eiPtr->type = type;
     if (xtype >= 0 && xtype <= 99100)
         eiPtr->xtype = xtype;
     eiPtr->safeCountdown = safeCountdown;
-    if (eiPtr->x - fx <= player.position.x + player.size.width / 2)
-        eiPtr->faceDirection = 1;
-    if (eiPtr->x - fx > player.position.x + player.size.width / 2)
-        eiPtr->faceDirection = 0;
+    if (eiPtr->position.x - fx <= player.position.x + player.size.width / 2)
+        eiPtr->faceDirection = FaceDirection::RIGHT;
+    if (eiPtr->position.x - fx > player.position.x + player.size.width / 2)
+        eiPtr->faceDirection = FaceDirection::LEFT;
 
-    eiPtr->width = eiWidthStorage[type];
-    eiPtr->height = eiHeightStorage[type];
+    eiPtr->size.width = eiWidthStorage[type];
+    eiPtr->size.height = eiHeightStorage[type];
 
     eiPtr->createFromBlockTimer = cfbt;
     eiPtr->msgTimer = msgTimer;
     eiPtr->msgIndex = msgIndex;
 
     if (eiPtr->createFromBlockTimer >= 1)
-        eiPtr->faceDirection = 1;
+        eiPtr->faceDirection = FaceDirection::RIGHT;
     if (eiPtr->createFromBlockTimer == 20)
-        eiPtr->faceDirection = 0;
+        eiPtr->faceDirection = FaceDirection::LEFT;
 
     if (type == 7 && CheckSoundMem(oto[10]) == 0) {  // 大砲音
         ot(oto[10]);
@@ -86,37 +86,37 @@ void tekizimen(EnemyInstance& ei) {
         if (groundX[i] - fx + groundWidth[i] >= -12010 && groundX[i] - fx <= fxmax + 12100 && groundType[i] <= 99) {
             int xx0 = 200;
             int xx2 = 1000;
-            int xx1 = 2000;    //ei.width
+            int xx1 = 2000;    //ei.size.width
 
             int scrGroundTop = groundY[i] - fy, scrGroundBottom = groundY[i] + groundHeight[i] - fy;
             int scrGroundLeft = groundX[i] - fx, scrGroundRight = groundX[i] + groundWidth[i] - fx;
 
-            int scrEnemyTop = ei.y - fy, scrEnemyBottom = ei.y + ei.height - fy;
-            int scrEnemyLeft = ei.x - fx, scrEnemyRight = ei.x + ei.width - fx;
+            int scrEnemyTop = ei.position.y - fy, scrEnemyBottom = ei.position.y + ei.size.height - fy;
+            int scrEnemyLeft = ei.position.x - fx, scrEnemyRight = ei.position.x + ei.size.width - fx;
 
             if (scrEnemyRight > scrGroundLeft - xx0
                 && scrEnemyLeft < scrGroundLeft + xx2
                 && scrEnemyBottom > scrGroundTop + xx1 * 3 / 4
                 && scrEnemyTop < scrGroundBottom - xx2) {
-                ei.x = scrGroundLeft - xx0 - ei.width + fx;
-                ei.faceDirection = 0;
+                ei.position.x = scrGroundLeft - xx0 - ei.size.width + fx;
+                ei.faceDirection = FaceDirection::LEFT;
             }
             if (scrEnemyRight > scrGroundRight - xx0
                 && scrEnemyLeft < scrGroundRight + xx0
                 && scrEnemyBottom > scrGroundTop + xx1 * 3 / 4
                 && scrEnemyTop < scrGroundBottom - xx2) {
-                ei.x = scrGroundRight + xx0 + fx;
-                ei.faceDirection = 1;
+                ei.position.x = scrGroundRight + xx0 + fx;
+                ei.faceDirection = FaceDirection::RIGHT;
             }
 
-//if (ei.x+ei.width-fx>scrGroundLeft+xx0 && ei.x-fx<scrGroundLeft+groundWidth[i]-xx0 && ei.y+ei.height-fy>scrGroundTop && ei.y+ei.height-fy<scrGroundTop+xx1 && ei.speedY>=-100){ei.y=groundY[i]-fy-ei.height+100+fy;ei.speedY=0;}//marioOnGround=1;}
+//if (ei.position.x+ei.size.width-fx>scrGroundLeft+xx0 && ei.position.x-fx<scrGroundLeft+groundWidth[i]-xx0 && ei.position.y+ei.size.height-fy>scrGroundTop && ei.position.y+ei.size.height-fy<scrGroundTop+xx1 && ei.speed.y>=-100){ei.position.y=groundY[i]-fy-ei.size.height+100+fy;ei.speed.y=0;}//marioOnGround=1;}
             if (scrEnemyRight > scrGroundLeft + xx0
                 && scrEnemyLeft < scrGroundRight - xx0
                 && scrEnemyBottom > scrGroundTop
                 && scrEnemyBottom < scrGroundBottom - xx1
-                && ei.speedY >= -100) {
-                ei.y = groundY[i] - fy - ei.height + 100 + fy;
-                ei.speedY = 0;
+                && ei.speed.y >= -100) {
+                ei.position.y = groundY[i] - fy - ei.size.height + 100 + fy;
+                ei.speed.y = 0;
                 ei.xGroundType = 1;
             }
 
@@ -124,9 +124,9 @@ void tekizimen(EnemyInstance& ei) {
                 && scrEnemyLeft < scrGroundRight - xx0
                 && scrEnemyTop > scrGroundBottom - xx1
                 && scrEnemyTop < scrGroundBottom + xx0) {
-                ei.y = scrGroundBottom + xx0 + fy;
-                if (ei.speedY < 0) {
-                    ei.speedY = -ei.speedY * 2 / 3;
+                ei.position.y = scrGroundBottom + xx0 + fy;
+                if (ei.speed.y < 0) {
+                    ei.speed.y = -ei.speed.y * 2 / 3;
                 }        //ei.xGroundType=1;
             }
 
@@ -141,8 +141,8 @@ void tekizimen(EnemyInstance& ei) {
         int scrBlockTop = block->y - fy, scrBlockBottom = block->y + blockHeight - fy;
         int scrBlockLeft = block->x - fx, scrBlockRight = block->x + blockWidth - fx;
 
-        int scrEnemyTop = ei.y - fy, scrEnemyBottom = ei.y + ei.height - fy;
-        int scrEnemyLeft = ei.x - fx, scrEnemyRight = ei.x + ei.width - fx;
+        int scrEnemyTop = ei.position.y - fy, scrEnemyBottom = ei.position.y + ei.size.height - fy;
+        int scrEnemyLeft = ei.position.x - fx, scrEnemyRight = ei.position.x + ei.size.width - fx;
 
         if (scrBlockRight >= -12010 && scrBlockLeft <= fxmax + 12000) {
             //上
@@ -150,7 +150,7 @@ void tekizimen(EnemyInstance& ei) {
                 && scrEnemyLeft < scrBlockRight - xx0 * 1
                 && scrEnemyBottom > scrBlockTop
                 && scrEnemyBottom < scrBlockBottom
-                && ei.speedY >= -100) {
+                && ei.speed.y >= -100) {
                 block->onEnemyStand(ei);
             }
 
@@ -182,10 +182,10 @@ void tekizimen(EnemyInstance& ei) {
 
 // 敵キャラとファイアバー
 void paintSceneInGameEnemy(const EnemyInstance& enemy) {
-    int screenX = enemy.x - fx;
-    int screenY = enemy.y - fy;
-    int width = enemy.width / 100;
-    int height = enemy.height / 100;
+    int screenX = enemy.position.x - fx;
+    int screenY = enemy.position.y - fy;
+    int width = enemy.size.width / 100;
+    int height = enemy.size.height / 100;
 
     xx[14] = 3000;
     xx[16] = 0;  // WTF?
@@ -193,14 +193,14 @@ void paintSceneInGameEnemy(const EnemyInstance& enemy) {
     if (screenX + width * 100 >= -10 - xx[14] && screenY <= fxmax + xx[14]
         && screenY + height * 100 >= -10 && height <= fymax) {
 
-        if (enemy.faceDirection == 1) {
+        if (enemy.faceDirection == FaceDirection::RIGHT) {
             mirror = enemy.type < 100;
         }
 
         if (enemy.type == 3 && enemy.xtype == 1) {
             DrawVertTurnGraph(screenX / 100 + 13, screenY / 100 + 15, grap[enemy.type][3]);
             xx[16] = 1;
-        } else if (enemy.type == 9 && enemy.speedY >= 1) {
+        } else if (enemy.type == 9 && enemy.speed.y >= 1) {
             DrawVertTurnGraph(screenX / 100 + 13, screenY / 100 + 15, grap[enemy.type][3]);
             xx[16] = 1;
         }
@@ -295,8 +295,8 @@ void paintSceneInGameEnemy(const EnemyInstance& enemy) {
             setColorToBlack();
             drawEllipse((screenX) / 100 + 15 - 1, (screenY) / 100, 10, 10);
         } else if (enemy.type == 86) {  // ニャッスン
-            if (player.position.x >= enemy.x - fx - player.size.width - 4000
-                && player.position.x <= enemy.x - fx + enemy.width + 4000) {
+            if (player.position.x >= enemy.position.x - fx - player.size.width - 4000
+                && player.position.x <= enemy.position.x - fx + enemy.size.width + 4000) {
                 drawImage(grap[152][3], screenX / 100, screenY / 100);
             } else {
                 drawImage(grap[86][3], screenX / 100, screenY / 100);
