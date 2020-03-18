@@ -2972,7 +2972,7 @@ void processSceneLifeSplash() {
 
 void processSceneTitle() {
     gameSceneTimer++;
-    xx[0] = 0;
+    bool startGame = false;
     if (gameSceneTimer <= 10) {
         gameSceneTimer = 11;
         sta = 1;
@@ -2981,65 +2981,65 @@ void processSceneTitle() {
         zeroMode = false;
     }
 
-    if (CheckHitKey(KEY_INPUT_1) == 1) {
+    if (CheckHitKey(KEY_INPUT_1)) {
         sta = 1;
         stb = 1;
         stc = 0;
     }
-    if (CheckHitKey(KEY_INPUT_2) == 1) {
+    if (CheckHitKey(KEY_INPUT_2)) {
         sta = 1;
         stb = 2;
         stc = 0;
     }
-    if (CheckHitKey(KEY_INPUT_3) == 1) {
+    if (CheckHitKey(KEY_INPUT_3)) {
         sta = 1;
         stb = 3;
         stc = 0;
     }
-    if (CheckHitKey(KEY_INPUT_4) == 1) {
+    if (CheckHitKey(KEY_INPUT_4)) {
         sta = 1;
         stb = 4;
         stc = 0;
     }
-    if (CheckHitKey(KEY_INPUT_5) == 1) {
+    if (CheckHitKey(KEY_INPUT_5)) {
         sta = 2;
         stb = 1;
         stc = 0;
     }
-    if (CheckHitKey(KEY_INPUT_6) == 1) {
+    if (CheckHitKey(KEY_INPUT_6)) {
         sta = 2;
         stb = 2;
         stc = 0;
     }
-    if (CheckHitKey(KEY_INPUT_7) == 1) {
+    if (CheckHitKey(KEY_INPUT_7)) {
         sta = 2;
         stb = 3;
         stc = 0;
     }
-    if (CheckHitKey(KEY_INPUT_8) == 1) {
+    if (CheckHitKey(KEY_INPUT_8)) {
         sta = 2;
         stb = 4;
         stc = 0;
     }
-    if (CheckHitKey(KEY_INPUT_9) == 1) {
+    if (CheckHitKey(KEY_INPUT_9)) {
         sta = 3;
         stb = 1;
         stc = 0;
     }
-    if (CheckHitKey(KEY_INPUT_0) == 1) {
-        xx[0] = 1;
+    if (CheckHitKey(KEY_INPUT_0)) {
+        startGame = true;
         zeroMode = true;
     }
     //if (CheckHitKeyAll() == 0){end();}
-    if (CheckHitKey(KEY_INPUT_RETURN) == 1) {
-        xx[0] = 1;
+    if (CheckHitKey(KEY_INPUT_RETURN)) {
+        startGame = true;
     }
-    //if (CheckHitKey(KEY_INPUT_SPACE)==1){xx[0]=1;}
-    if (CheckHitKey(KEY_INPUT_Z) == 1) {
-        xx[0] = 1;
+    //if (CheckHitKey(KEY_INPUT_SPACE)==1){startGame=1;}
+    if (CheckHitKey(KEY_INPUT_Z)) {
+        startGame = true;
     }
 
-    if (xx[0] == 1) {
+    if (startGame == 1) {
         gameScene = GameScene::LIFE_SPLASH;
         initialized = false;
         gameSceneTimer = 0;
@@ -3201,7 +3201,7 @@ void stage() {
     }
 
     if (checkpoint >= 1) {
-        xx[17] = 0;
+        int xx17 = 0;  // seems like a counter, but i don't what it's for
         for (int i = 0; i < GROUND_MAX; i++) {
             if (groundType[i] == 500 && checkpoint >= 1) {
                 fx = groundX[i] - fxmax / 2;
@@ -3209,12 +3209,12 @@ void stage() {
                 player.position.x = groundX[i] - fx;
                 player.position.y = groundY[i] - fy;
                 checkpoint--;
-                xx[17]++;
+                xx17++;
 
                 groundX[i] = -80000000;
             }
         }
-        checkpoint += xx[17];
+        checkpoint += xx17;
     }
 //createBlock(1,2,3);
 

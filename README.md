@@ -7,6 +7,7 @@
 Open Syobon Action (オープンしょぼんのアクション) is an open-source cross-platform port of Syobon Action using SDL.
 
 OSA Fork is a project that is trying to clean up codes and add additional extensibility (like map files) to OSA.
+Currently, OSA Fork only targets Windows, which means that Linux / Mac support could be broken intentionally or unintentionally.
 
 Syobon Action is also called "Shobon no Action," "Neko Mario," "Cat Mario," or "Cat MeOUCHio."
 

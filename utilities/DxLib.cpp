@@ -159,7 +159,7 @@ byte ProcessMessage() {
     return ex;
 }
 
-byte CheckHitKey(int key) {
+bool CheckHitKey(int key) {
     if (key == SDLK_z && keysHeld[SDLK_SEMICOLON]) return true;
     return keysHeld[key];
 }

@@ -79,7 +79,7 @@ extern SDL_Joystick* joystick;
 
 void UpdateKeys();
 byte ProcessMessage();
-byte CheckHitKey(int key);
+bool CheckHitKey(int key);
 byte WaitKey();
 
 #define GetColor(r, g, b) SDL_MapRGB(screen->format, r, g, b)
