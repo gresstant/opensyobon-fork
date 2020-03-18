@@ -862,7 +862,7 @@ if (player.speed.x>=800 || player.speed.x<=-800){player.speed.y=-1800;}
 
 //普通の土管
         if (player.type == MarioType::IN_PIPE) {
-            if (player.xtype == 0) {
+            if (player.typeInPipe == MarioExTypeInPipe::ROCKET) {
                 player.speed.x = 0;
                 player.speed.y = 0;
                 t = 28;
@@ -907,7 +907,7 @@ if (player.speed.x>=800 || player.speed.x<=-800){player.speed.y=-1800;}
 
             }
 //ふっとばし
-            else if (player.xtype == 10) {
+            else if (player.typeInPipe == MarioExTypeInPipe::FLY_OUT_LEFTWARDS) {
                 player.speed.x = 0;
                 player.speed.y = 0;
                 if (player.mtm <= 16) {
@@ -930,20 +930,20 @@ if (player.speed.x>=800 || player.speed.x<=-800){player.speed.y=-1800;}
             } else {
                 player.speed.x = 0;
                 player.speed.y = 0;
-                if (player.mtm <= 16 && player.xtype != 3) {
+                if (player.mtm <= 16 && player.typeInPipe != MarioExTypeInPipe::NORMAL_RIGHTWARDS) {
                     player.position.y += 240;
                 }        //player.mzz=100;}
-                if (player.mtm <= 16 && player.xtype == 3) {
+                if (player.mtm <= 16 && player.typeInPipe == MarioExTypeInPipe::NORMAL_RIGHTWARDS) {
                     player.position.x += 240;
                 }
-                if (player.mtm == 19 && player.xtype == 2) {
+                if (player.mtm == 19 && player.typeInPipe == MarioExTypeInPipe::DIE_FIREBALL) {
                     player.hp = 0;
                     player.type = MarioType::_2000;
                     player.mtm = 0;
                     mmsgtm = 30;
                     mmsgtype = 51;
                 }
-                if (player.mtm == 19 && player.xtype == 5) {
+                if (player.mtm == 19 && player.typeInPipe == MarioExTypeInPipe::DIE_OWATA) {
                     player.hp = 0;
                     player.type = MarioType::_2000;
                     player.mtm = 0;
@@ -951,13 +951,13 @@ if (player.speed.x>=800 || player.speed.x<=-800){player.speed.y=-1800;}
                     mmsgtype = 52;
                 }
                 if (player.mtm == 20) {
-                    if (player.xtype == 6) {
+                    if (player.typeInPipe == MarioExTypeInPipe::LOOP) {
                         stc += 10;
                     } else {
                         stc++;
                     }
                     player.position.y = -80000000;
-                    player.xtype = 0;  // seems no effect ...
+                    player.typeInPipe = MarioExTypeInPipe::ROCKET;  // seems no effect ...
                     blackx = 1;
                     blacktm = 20;
                     stagerr = 0;
@@ -1349,39 +1349,40 @@ if (player.mtm==250)end();
                             && player.position.y + player.size.height < screenY + xx[1] + 3000
                             && player.onGround
                             && actaon[3] == 1 && player.type == MarioType::NORMAL) {
+                        printf("groundXType[%d] == %d", t, groundXType[t]);
 //飛び出し
                         if (groundXType[t] == 0) {
                             player.type = MarioType::IN_PIPE;
                             player.mtm = 0;
                             ot(oto[7]);
-                            player.xtype = 0;
+                            player.typeInPipe = MarioExTypeInPipe::ROCKET;
                         }
 //普通
                         if (groundXType[t] == 1) {
                             player.type = MarioType::IN_PIPE;
                             player.mtm = 0;
                             ot(oto[7]);
-                            player.xtype = 1;
+                            player.typeInPipe = MarioExTypeInPipe::NORMAL_DOWNWARDS;
                         }
 //普通
                         if (groundXType[t] == 2) {
                             player.type = MarioType::IN_PIPE;
                             player.mtm = 0;
                             ot(oto[7]);
-                            player.xtype = 2;
+                            player.typeInPipe = MarioExTypeInPipe::DIE_FIREBALL;
                         }
                         if (groundXType[t] == 5) {
                             player.type = MarioType::IN_PIPE;
                             player.mtm = 0;
                             ot(oto[7]);
-                            player.xtype = 5;
+                            player.typeInPipe = MarioExTypeInPipe::DIE_OWATA;
                         }
 // ループ
                         if (groundXType[t] == 6) {
                             player.type = MarioType::IN_PIPE;
                             player.mtm = 0;
                             ot(oto[7]);
-                            player.xtype = 6;
+                            player.typeInPipe = MarioExTypeInPipe::LOOP;
                         }
                     }
                 }        //50
@@ -1395,15 +1396,15 @@ if (player.mtm==250)end();
                         if (groundXType[t] == 0) {
                             player.type = MarioType::_500;
                             player.mtm = 0;
-                            ot(oto[7]);    //player.xtype=1;
+                            ot(oto[7]);    //player.typeInPipe=1;
                             player.type = MarioType::IN_PIPE;
-                            player.xtype = 10;
+                            player.typeInPipe = MarioExTypeInPipe::FLY_OUT_LEFTWARDS;
                         }
 
                         if (groundXType[t] == 2) {
-                            player.xtype = 3;
+                            player.typeInPipe = MarioExTypeInPipe::NORMAL_RIGHTWARDS;
                             player.mtm = 0;
-                            ot(oto[7]);    //player.xtype=1;
+                            ot(oto[7]);    //player.typeInPipe=1;
                             player.type = MarioType::IN_PIPE;
                         }
 // ループ
@@ -1411,7 +1412,7 @@ if (player.mtm==250)end();
                             player.type = MarioType::AFTER_SPRING;
                             player.mtm = 0;
                             ot(oto[7]);
-                            player.xtype = 6;
+                            player.typeInPipe = MarioExTypeInPipe::LOOP;
                         }
                     }
                 }        //40
@@ -2028,8 +2029,8 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                 int xx17 = 800;
                 if (enemy.xtype >= 1)
                     absMoveX = xx17;
-                //if (enemy.xtype == 1) absMoveX = xx17;
-                //if (enemy.xtype == 2) absMoveX = -xx17;
+                //if (enemy.typeInPipe == 1) absMoveX = xx17;
+                //if (enemy.typeInPipe == 2) absMoveX = -xx17;
                 //他の敵を倒す
                 if (enemy.xtype >= 1) {
                     for (const auto& ei : eis) {
@@ -2154,7 +2155,7 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                               600, -1200, 0, 160, 1000, 10 * 3000 - 1200, 4, 240);
                         enemy.faceDirection = FaceDirection::RIGHT;
                     }
-                    //player.speed.x=700;player.mkeytm=24;player.speed.y=-1200;player.position.y=xx1-1000-3000;enemy.faceDirection=1;if (enemy.xtype==1){player.speed.x=840;enemy.xtype=0;}}
+                    //player.speed.x=700;player.mkeytm=24;player.speed.y=-1200;player.position.y=xx1-1000-3000;enemy.faceDirection=1;if (enemy.typeInPipe==1){player.speed.x=840;enemy.typeInPipe=0;}}
                     if (enemy.timer == 140) {
                         enemy.faceDirection = FaceDirection::LEFT;
                         enemy.timer = 0;
@@ -2801,7 +2802,7 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
 
 //こうら
                     if (enemy.type == 2) {
-//if (enemy.xtype==1 || enemy.xtype==2){enemy.xtype=0;}
+//if (enemy.typeInPipe==1 || enemy.typeInPipe==2){enemy.typeInPipe=0;}
                         if (enemy.xtype == 0) {
                             if (player.position.x + player.size.width > scrEnemyX + xx0 * 2 && player.position.x < scrEnemyX + enemy.size.width / 2 - xx0 * 4) {
                                 enemy.xtype = 1;
@@ -3286,7 +3287,7 @@ void stagep() {
         ets.clear();
         createEnemyTemplate(27 * 29 * 100, (9 * 29 - 12) * 100, 0, 0);
         createEnemyTemplate(103 * 29 * 100, (5 * 29 - 12 + 10) * 100, 80, 0);
-        //t=etCounter;ets[t]->x=13*29*100;ets[t]->y=(5*29-12)*100;ets[t]->type=81;ets[t]->xtype=0;etCounter++;
+        //t=etCounter;ets[t]->x=13*29*100;ets[t]->y=(5*29-12)*100;ets[t]->type=81;ets[t]->typeInPipe=0;etCounter++;
 
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -3342,7 +3343,7 @@ void stagep() {
         syobi(14 * 29 * 100 + 1000, -6000, 5000, 70000, 100, 1);
 
         //ブロックもどき
-        //t=etCounter;ets[t]->x=7*29*100;ets[t]->y=(9*29-12)*100;ets[t]->type=82;ets[t]->xtype=0;etCounter++;
+        //t=etCounter;ets[t]->x=7*29*100;ets[t]->y=(9*29-12)*100;ets[t]->type=82;ets[t]->typeInPipe=0;etCounter++;
 
         for (tt = 0; tt <= 1000; tt++) {
             for (t = 0; t <= 16; t++) {
@@ -3396,7 +3397,7 @@ void stagep() {
         createBlock(80 * 29 * 100, (5 * 29 - 12) * 100, 104, 1);
         createBlock(78 * 29 * 100, (5 * 29 - 12) * 100, 102, 2);
 
-//blocks[blockCounter]->xtype=1;createBlock(11*29,9*29-12,114);//毒1
+//blocks[blockCounter]->typeInPipe=1;createBlock(11*29,9*29-12,114);//毒1
 
         groundCounter = 0;
         syobi(2 * 29 * 100, (13 * 29 - 12) * 100, 3000 * 1 - 1, 3000, 52);
@@ -3462,7 +3463,7 @@ void stagep() {
 
         ets.clear();
         createEnemyTemplate(18 * 29 * 100, (10 * 29 - 12) * 100, 82, 1);
-//t=etCounter;ets[t]->x=52*29*100;ets[t]->y=(2*29-12)*100;ets[t]->type=82;ets[t]->xtype=1;etCounter++;
+//t=etCounter;ets[t]->x=52*29*100;ets[t]->y=(2*29-12)*100;ets[t]->type=82;ets[t]->typeInPipe=1;etCounter++;
         createEnemyTemplate(51 * 29 * 100 + 1000, (2 * 29 - 12 + 10) * 100, 80, 1);
 
 //？ボール
@@ -3676,7 +3677,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         createEnemyTemplate(10 * 29 * 100 + 100, (11 * 29 - 12) * 100, 105, 1);
 //ブロックもどき
         createEnemyTemplate(43 * 29 * 100, (11 * 29 - 12) * 100, 82, 1);
-//t=etCounter;ets[t]->x=146*29*100;ets[t]->y=(12*29-12)*100;ets[t]->type=82;ets[t]->xtype=1;etCounter++;
+//t=etCounter;ets[t]->x=146*29*100;ets[t]->y=(12*29-12)*100;ets[t]->type=82;ets[t]->typeInPipe=1;etCounter++;
 //うめぇ
         createEnemyTemplate(1 * 29 * 100, (2 * 29 - 12 + 10) * 100 - 1000, 80, 0);
 
@@ -3847,7 +3848,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         createBlock(12 * 29 * 100, (4 * 29 - 12) * 100, 112, 0);
 //ヒント3
         createBlock(12 * 29 * 100, (8 * 29 - 12) * 100, 300, 3);
-//blocks[blockCounter]->xtype=0;createBlock(13*29,4*29-12,110);
+//blocks[blockCounter]->typeInPipe=0;createBlock(13*29,4*29-12,110);
 
 //stc=0;
 
@@ -3950,7 +3951,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 //ファイア
         createBlock(86 * 29 * 100, (9 * 29 - 12) * 100, 101, 3);
 //キノコなし　普通
-//blocks[blockCounter]->xtype=2;createBlock(81*29,1*29-12,5);
+//blocks[blockCounter]->typeInPipe=2;createBlock(81*29,1*29-12,5);
 //音符
         createBlock(86 * 29 * 100, (6 * 29 - 12) * 100, 117, 2);
 
@@ -4300,7 +4301,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 	};
         //
         blocks.clear();
-//        blocks[blockCounter]->xtype = 0;  // default value of xtype is 0, so i assume this line is ensuring xtype being 0.
+//        blocks[blockCounter]->typeInPipe = 0;  // default value of typeInPipe is 0, so i assume this line is ensuring typeInPipe being 0.
         for (int i = -1; i > -7; i -= 1) {
             createBlock(55 * 29 * 100, (i * 29 - 12) * 100, 4, 0);
         }
@@ -4319,7 +4320,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 	   ets[etCounter]->x=(54*29-12)*100;
 	   ets[etCounter]->y=(1*29-12)*100;
 	   ets[etCounter]->type=80;
-	   ets[etCounter]->xtype=0;
+	   ets[etCounter]->typeInPipe=0;
 	   etCounter += 1;
 	 */
         groundCounter = 0;

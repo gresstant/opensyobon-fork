@@ -10,6 +10,10 @@ enum class MarioType : int {
     _500 = 500, _2000 = 2000
 };
 
+enum class MarioExTypeInPipe : int {
+    ROCKET = 0, NORMAL_DOWNWARDS = 1, DIE_FIREBALL = 2, NORMAL_RIGHTWARDS = 3, DIE_OWATA = 5, LOOP = 6, FLY_OUT_LEFTWARDS = 10
+};
+
 class Mario {
 public:
     Point position;
@@ -23,7 +27,7 @@ public:
     int actImg;
 
     MarioType type;
-    int xtype;
+    MarioExTypeInPipe typeInPipe;  // extended type info when this->type == MarioType::IN_PIPE
     int mtm;
     int mzz;
 

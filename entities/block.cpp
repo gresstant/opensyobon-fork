@@ -421,7 +421,7 @@ bool LegacyBlock::onMarioStand() {
         if (this->xtype == 0)
             this->xtype = 1;
     } else if (this->type == 120) {  // ジャンプ台
-        //this->xtype=0;
+        //this->typeInPipe=0;
         player.speed.y = -2400;
         player.type = MarioType::AFTER_SPRING;
         player.mtm = 0;
