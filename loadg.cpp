@@ -4,7 +4,6 @@
 #define strcasecmp _stricmp
 #endif
 
-extern int marioX, t, tt;
 extern SDL_Surface *grap[161][8];
 extern SDL_Surface *mgrap[51];
 int x1;
@@ -13,9 +12,9 @@ extern Mix_Chunk *oto[19];
 
 extern int eiWidthStorage[160], eiHeightStorage[160];
 
-void loadg(void) {
-    for (t = 0; t < 51; t++) {
-        mgrap[t] = 0;
+void loadg() {
+    for (int i = 0; i < 51; i++) {
+        mgrap[i] = 0;
     }
     for (int i = 0; i < 161; i++)
         for (int j = 0; j < 8; j++)
@@ -67,11 +66,11 @@ void loadg(void) {
 
     x1 = 1;
     //ブロック読み込み
-    for (t = 0; t <= 6; t++) {
-        grap[t][x1] = DerivationGraph(33 * t, 0, 30, 30, mgrap[x1]);
-        grap[t + 30][x1] = DerivationGraph(33 * t, 33, 30, 30, mgrap[x1]);
-        grap[t + 60][x1] = DerivationGraph(33 * t, 66, 30, 30, mgrap[x1]);
-        grap[t + 90][x1] = DerivationGraph(33 * t, 99, 30, 30, mgrap[x1]);
+    for (int i = 0; i <= 6; i++) {
+        grap[i][x1] = DerivationGraph(33 * i, 0, 30, 30, mgrap[x1]);
+        grap[i + 30][x1] = DerivationGraph(33 * i, 33, 30, 30, mgrap[x1]);
+        grap[i + 60][x1] = DerivationGraph(33 * i, 66, 30, 30, mgrap[x1]);
+        grap[i + 90][x1] = DerivationGraph(33 * i, 99, 30, 30, mgrap[x1]);
     }
     grap[8][x1] = DerivationGraph(33 * 7, 0, 30, 30, mgrap[x1]);
     grap[16][x1] = DerivationGraph(33 * 6, 0, 24, 27, mgrap[2]);
@@ -81,8 +80,8 @@ void loadg(void) {
     grap[100][x1] = DerivationGraph(33 * 9, 99, 30, 30, mgrap[x1]);
     //ブロック読み込み2
     x1 = 5;
-    for (t = 0; t <= 6; t++) {
-        grap[t][x1] = DerivationGraph(33 * t, 0, 30, 30, mgrap[x1]);
+    for (int i = 0; i <= 6; i++) {
+        grap[i][x1] = DerivationGraph(33 * i, 0, 30, 30, mgrap[x1]);
     }
     grap[10][5] = DerivationGraph(33 * 1, 33, 30, 30, mgrap[x1]);
     grap[11][5] = DerivationGraph(33 * 2, 33, 30, 30, mgrap[x1]);
@@ -92,8 +91,8 @@ void loadg(void) {
 
     //アイテム読み込み
     x1 = 2;
-    for (t = 0; t <= 5; t++) {
-        grap[t][x1] = DerivationGraph(33 * t, 0, 30, 30, mgrap[x1]);
+    for (int i = 0; i <= 5; i++) {
+        grap[i][x1] = DerivationGraph(33 * i, 0, 30, 30, mgrap[x1]);
     }
 
     //敵キャラ読み込み
@@ -169,16 +168,16 @@ void loadg(void) {
     //敵サイズ収得
     //int GrHandle=0;
     x1 = 3;
-    for (t = 0; t <= 140; t++) {
-        if (grap[t][x1]) {
-            eiWidthStorage[t] = grap[t][x1]->w;
-            eiHeightStorage[t] = grap[t][x1]->h;
-    //GetGraphSize(grap[t][x1] ,&eiWidthStorage[t] ,&eiHeightStorage[t]);
-            eiWidthStorage[t] *= 100;
-            eiHeightStorage[t] *= 100;
+    for (int i = 0; i <= 140; i++) {
+        if (grap[i][x1]) {
+            eiWidthStorage[i] = grap[i][x1]->w;
+            eiHeightStorage[i] = grap[i][x1]->h;
+    //GetGraphSize(grap[i][x1] ,&eiWidthStorage[i] ,&eiHeightStorage[i]);
+            eiWidthStorage[i] *= 100;
+            eiHeightStorage[i] *= 100;
         } else {
-            eiWidthStorage[t] = 0;
-            eiHeightStorage[t] = 0;
+            eiWidthStorage[i] = 0;
+            eiHeightStorage[i] = 0;
         }
     }
     eiWidthStorage[79] = 120 * 100;
