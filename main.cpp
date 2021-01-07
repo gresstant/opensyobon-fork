@@ -862,10 +862,11 @@ if (player.speed.x>=800 || player.speed.x<=-800){player.speed.y=-1800;}
 
 //普通の土管
         if (player.type == MarioType::IN_PIPE) {
+            int pipeId = player.pipeId;
+
             if (player.typeInPipe == MarioExTypeInPipe::ROCKET) {
                 player.speed.x = 0;
                 player.speed.y = 0;
-                t = 28;
                 if (player.mtm <= 16) {
                     player.position.y += 240;
                     player.mzz = 100;
@@ -874,28 +875,28 @@ if (player.speed.x>=800 || player.speed.x<=-800){player.speed.y=-1800;}
                     player.position.y = -80000000;
                 }
                 if (player.mtm == 23) {
-                    groundX[t] -= 100;
+                    groundX[pipeId] -= 100;
                 }
                 if (player.mtm >= 44 && player.mtm <= 60) {
                     if (player.mtm % 2 == 0)
-                        groundX[t] += 200;
+                        groundX[pipeId] += 200;
                     if (player.mtm % 2 == 1)
-                        groundX[t] -= 200;
+                        groundX[pipeId] -= 200;
                 }
                 if (player.mtm >= 61 && player.mtm <= 77) {
                     if (player.mtm % 2 == 0)
-                        groundX[t] += 400;
+                        groundX[pipeId] += 400;
                     if (player.mtm % 2 == 1)
-                        groundX[t] -= 400;
+                        groundX[pipeId] -= 400;
                 }
                 if (player.mtm >= 78 && player.mtm <= 78 + 16) {
                     if (player.mtm % 2 == 0)
-                        groundX[t] += 600;
+                        groundX[pipeId] += 600;
                     if (player.mtm % 2 == 1)
-                        groundX[t] -= 600;
+                        groundX[pipeId] -= 600;
                 }
                 if (player.mtm >= 110) {
-                    groundY[t] -= player.mzz;
+                    groundY[pipeId] -= player.mzz;
                     player.mzz += 80;
                     if (player.mzz > 1600)
                         player.mzz = 1600;
@@ -1350,6 +1351,9 @@ if (player.mtm==250)end();
                             && player.onGround
                             && actaon[3] == 1 && player.type == MarioType::NORMAL) {
                         printf("groundXType[%d] == %d", t, groundXType[t]);
+
+                        player.pipeId = t;
+
 //飛び出し
                         if (groundXType[t] == 0) {
                             player.type = MarioType::IN_PIPE;
@@ -1392,6 +1396,9 @@ if (player.mtm==250)end();
                     if (player.position.x + player.size.width > screenX - 300 && player.position.x < screenX + groundWidth[t] - 1000 && player.position.y > screenY + 1000 &&
                             player.position.y + player.size.height < screenY + xx[1] + 4000 && player.onGround && actaon[4] == 1 &&
                             player.type == MarioType::NORMAL) {    //end();
+
+                        player.pipeId = t;
+
 //飛び出し
                         if (groundXType[t] == 0) {
                             player.type = MarioType::_500;
@@ -3274,13 +3281,7 @@ void stagep() {
         syobi(117 * 29 * 100, (2 * 29 - 12) * 100 - 1500, 15000, 3000, 103);
         syobi(125 * 29 * 100, -6000, 9000, 70000, 101);
         //t=groundCounter;groundX[t]=77*29*100;groundY[t]=(6*29-12)*100-1500;groundWidth[t]=12000;groundHeight[t]=3000;groundType[t]=103;groundCounter++;
-        t = 28;
-        groundX[t] = 29 * 29 * 100 + 500;
-        groundY[t] = (9 * 29 - 12) * 100;
-        groundWidth[t] = 6000;
-        groundHeight[t] = 12000 - 200;
-        groundType[t] = 50;
-        groundCounter++;
+        syobi(29 * 29 * 100 + 500, (9 * 29 - 12) * 100, 6000, 12000 - 200, 50);
         syobi(49 * 29 * 100, (5 * 29 - 12) * 100, 9000 - 1, 3000, 51, 0, 0);
         syobi(72 * 29 * 100, (13 * 29 - 12) * 100, 3000 * 5 - 1, 3000, 52);
 

@@ -30,6 +30,7 @@ public:
     MarioExTypeInPipe typeInPipe;  // extended type info when this->type == MarioType::IN_PIPE
     int mtm;
     int mzz;
+    int pipeId;  // tmp field. the pipe in which mario is.
 
     bool onGround;
     int mkasok;
