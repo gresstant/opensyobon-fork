@@ -22,6 +22,6 @@ extern int groundCounter;
 extern int groundX[GROUND_MAX], groundY[GROUND_MAX], groundWidth[GROUND_MAX], groundHeight[GROUND_MAX];
 extern int groundType[GROUND_MAX], groundXType[GROUND_MAX], sr[GROUND_MAX], groundGType[GROUND_MAX];
 
-extern std::vector<std::unique_ptr<Ground>> grounds;
+extern std::vector<std::shared_ptr<Ground>> grounds;
 
 #endif //OSAFORK_GROUND_H

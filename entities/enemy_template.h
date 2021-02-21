@@ -16,6 +16,6 @@ public:
 
 void createEnemyTemplate(int x, int y, int type, int xtype);
 
-extern std::vector<std::unique_ptr<EnemyTemplate>> ets;
+extern std::vector<std::shared_ptr<EnemyTemplate>> ets;
 
 #endif //OSAFORK_ENEMY_TEMPLATE_H

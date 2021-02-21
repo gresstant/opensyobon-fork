@@ -4,7 +4,7 @@
 
 extern int fx, fy, fxmax, fymax, fmaZ, fmb, stagecolor;
 
-std::vector<std::unique_ptr<BackgroundItem>> bgItems;
+std::vector<std::shared_ptr<BackgroundItem>> bgItems;
 
 void nyobi(int x, int y, int type) {
     auto itemPtr = std::make_unique<BackgroundItem>();

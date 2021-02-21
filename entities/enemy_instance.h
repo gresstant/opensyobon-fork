@@ -40,7 +40,7 @@ void paintSceneInGameEnemy(const EnemyInstance& enemy);
 extern int eiWidthStorage[160], eiHeightStorage[160];
 
 // I'm to use deque to make it possible to remove elements more quickly.
-extern std::deque<std::unique_ptr<EnemyInstance>> eis;
+extern std::deque<std::shared_ptr<EnemyInstance>> eis;
 
 //       ac --> EnemyInstance::speedX (improper)
 //       ad --> EnemyInstance::speedY (improper)

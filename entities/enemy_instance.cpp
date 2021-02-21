@@ -14,15 +14,15 @@ extern Mix_Chunk *oto[19];
 int rand(int Rand);
 void ot(Mix_Chunk * x);
 
-std::deque<std::unique_ptr<EnemyInstance>> eis;
+std::deque<std::shared_ptr<EnemyInstance>> eis;
 
 // 敵キャラ  Enemy Instances
 int eiWidthStorage[160], eiHeightStorage[160];
 
 // 敵キャラ、アイテム作成
 void ayobiCommon(int x, int y, int speedX, int speedY, int safeCountdown, int type, int xtype, int cfbt, int msgTimer, int msgIndex,
-                 const std::function<void()>& popFirst, const std::function<void(std::unique_ptr<EnemyInstance>&)>& pushBack) {
-    auto eiPtr = std::make_unique<EnemyInstance>();
+                 const std::function<void()>& popFirst, const std::function<void(std::shared_ptr<EnemyInstance>&)>& pushBack) {
+    auto eiPtr = std::make_shared<EnemyInstance>();
 
     eiPtr->position.x = x;
     eiPtr->position.y = y;
@@ -77,7 +77,7 @@ void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype, int cfbt,
 void ayobiInIter(ListIterateHelper<EnemyInstance>& modifier, int x, int y, int c, int d,
                  int xnotm, int type, int xtype, int cfbt, int msgTimer, int msgIndex) {
     ayobiCommon(x, y, c, d, xnotm, type, xtype, cfbt, msgTimer, msgIndex,
-                [&]() { modifier.removeFirst(); }, [&](auto& item) { modifier.insertAsFirst(item.release()); });
+                [&]() { modifier.removeFirst(); }, [&](auto& item) { modifier.insertAsFirst(item.get()); });
 }
 
 void tekizimen(EnemyInstance& ei) {

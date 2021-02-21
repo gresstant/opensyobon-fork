@@ -34,8 +34,8 @@ void blockBreak(int index);
 void paintSceneInGameBlock(const LegacyBlock& block);
 
 // plan to use polymorphism in the future.
-// in order to minimize codes to change, i'm using unique_ptr instead of direct LegacyBlock.
-extern std::vector<std::unique_ptr<LegacyBlock>> blocks;
+// in order to minimize codes to change, i'm using shared_ptr instead of direct LegacyBlock.
+extern std::vector<std::shared_ptr<LegacyBlock>> blocks;
 
 // move these two to class LegacyBlock later
 constexpr int blockWidth = 3000;

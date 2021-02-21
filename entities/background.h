@@ -18,6 +18,6 @@ void paintSceneInGameBgItem(const BackgroundItem& bgItem);
 //extern int bgCounter;
 //extern int bgX[BG_MAX], bgY[BG_MAX], bgType[BG_MAX];
 
-extern std::vector<std::unique_ptr<BackgroundItem>> bgItems;
+extern std::vector<std::shared_ptr<BackgroundItem>> bgItems;
 
 #endif //OSAFORK_BACKGROUND_H

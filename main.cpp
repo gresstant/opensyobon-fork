@@ -1947,7 +1947,7 @@ if (actaon[2]==1){player.position.y-=400;player.speed.y=-1400;player.mjumptm=10;
                 }, [&](EnemyInstance* item) {  // void insertAsFirst(EnemyInstance*)
                     // push_front invalidates all iterators, but doesn't invalidate any refs to the elements,
                     // so it'd be fine to simply find the valid iterator.
-                    eis.push_front(std::unique_ptr<EnemyInstance>(item));
+                    eis.push_front(std::shared_ptr<EnemyInstance>(item));
                     for (auto i = eis.begin(); i != eis.end(); i++) {
                         if (&*i == &enemy) {
                             nextIterator = i + 1;
@@ -1957,7 +1957,7 @@ if (actaon[2]==1){player.position.y-=400;player.speed.y=-1400;player.mjumptm=10;
                     throw exception("Cannot find reference to original element in function insertAsFirst.");
                 }, [&](EnemyInstance* item) {  // void insertAsLast(EnemyInstance*)
                     // the same as insertAsFirst
-                    eis.push_back(std::unique_ptr<EnemyInstance>(item));
+                    eis.push_back(std::shared_ptr<EnemyInstance>(item));
                     for (auto i = eis.begin(); i != eis.end(); i++) {
                         if (&*i == &enemy) {
                             nextIterator = i + 1;
@@ -1966,9 +1966,9 @@ if (actaon[2]==1){player.position.y-=400;player.speed.y=-1400;player.mjumptm=10;
                     }
                     throw exception("Cannot find reference to original element in function insertAsLast.");
                 }, [&](EnemyInstance* item) {  // void insertAsPrevious(EnemyInstance*)
-                    nextIterator = eis.insert(iter, std::unique_ptr<EnemyInstance>(item)) + 1;
+                    nextIterator = eis.insert(iter, std::shared_ptr<EnemyInstance>(item)) + 1;
                 }, [&](EnemyInstance* item) {  // void insertAsNext(EnemyInstance*)
-                    nextIterator = eis.insert(iter + 1, std::unique_ptr<EnemyInstance>(item));
+                    nextIterator = eis.insert(iter + 1, std::shared_ptr<EnemyInstance>(item));
                 }
         );
         processSceneInGameEnemyInstance(*enemy, modifier);
