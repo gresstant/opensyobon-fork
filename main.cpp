@@ -85,59 +85,60 @@ void paintSceneInGame() {
     }
 
     //地面(壁)//土管も
-    for (int i = 0; i < GROUND_MAX; i++) {
-        int screenX = groundX[i] - fx;
-        int screenY = groundY[i] - fy;
+//    for (int i = 0; i < GROUND_MAX; i++) {
+    for (const auto& ground: grounds) {
+        int screenX = ground->x - fx;
+        int screenY = ground->y - fy;
         
-        if (screenX + groundWidth[i] >= -10 && screenX <= fxmax + 1100) {
+        if (screenX + ground->width >= -10 && screenX <= fxmax + 1100) {
 
-            if (groundType[i] == 0) {
+            if (ground->type == 0) {
                 setColor(40, 200, 40);
-                fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb, groundWidth[i] / 100, groundHeight[i] / 100);
-                drawRect(screenX / 100 + fmaZ, screenY / 100 + fmb, groundWidth[i] / 100, groundHeight[i] / 100);
-            } else if (groundType[i] == 1) {  // 土管  Tube
+                fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb, ground->width / 100, ground->height / 100);
+                drawRect(screenX / 100 + fmaZ, screenY / 100 + fmb, ground->width / 100, ground->height / 100);
+            } else if (ground->type == 1) {  // 土管  Tube
                 setColor(colors::TUBE_GREEN);
-                fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb, groundWidth[i] / 100, groundHeight[i] / 100);
+                fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb, ground->width / 100, ground->height / 100);
                 setColorToBlack();
-                drawRect(screenX / 100 + fmaZ, screenY / 100 + fmb, groundWidth[i] / 100, groundHeight[i] / 100);
-            } else if (groundType[i] == 2) {  // 土管(下)  Tube (Downwards)
+                drawRect(screenX / 100 + fmaZ, screenY / 100 + fmb, ground->width / 100, ground->height / 100);
+            } else if (ground->type == 2) {  // 土管(下)  Tube (Downwards)
                 setColor(colors::TUBE_GREEN);
-                fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb + 1, groundWidth[i] / 100, groundHeight[i] / 100);
+                fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb + 1, ground->width / 100, ground->height / 100);
                 setColorToBlack();
                 drawLine(screenX / 100 + fmaZ, screenY / 100 + fmb, screenX / 100 + fmaZ,
-                         screenY / 100 + fmb + groundHeight[i] / 100);
-                drawLine(screenX / 100 + fmaZ + groundWidth[i] / 100, screenY / 100 + fmb,
-                         screenX / 100 + fmaZ + groundWidth[i] / 100, screenY / 100 + fmb + groundHeight[i] / 100);
-            } else if (groundType[i] == 5) {  // 土管(横)  Tube (Horizontal)
+                         screenY / 100 + fmb + ground->height / 100);
+                drawLine(screenX / 100 + fmaZ + ground->width / 100, screenY / 100 + fmb,
+                         screenX / 100 + fmaZ + ground->width / 100, screenY / 100 + fmb + ground->height / 100);
+            } else if (ground->type == 5) {  // 土管(横)  Tube (Horizontal)
                 setColor(colors::TUBE_GREEN);
-                fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb + 1, groundWidth[i] / 100, groundHeight[i] / 100);
+                fillRect(screenX / 100 + fmaZ, screenY / 100 + fmb + 1, ground->width / 100, ground->height / 100);
                 setColorToBlack();
-                drawLine(screenX / 100 + fmaZ, screenY / 100 + fmb, screenX / 100 + fmaZ + groundWidth[i] / 100,
+                drawLine(screenX / 100 + fmaZ, screenY / 100 + fmb, screenX / 100 + fmaZ + ground->width / 100,
                          screenY / 100 + fmb);
-                drawLine(screenX / 100 + fmaZ, screenY / 100 + fmb + groundHeight[i] / 100,
-                         screenX / 100 + fmaZ + groundWidth[i] / 100, screenY / 100 + fmb + groundHeight[i] / 100);
-            } else if (groundType[i] == 51) {  // 落ちてくるブロック  Falling Block
-                if (groundXType[i] == 0) {
-                    for (t3 = 0; t3 <= groundWidth[i] / 3000; t3++) {
+                drawLine(screenX / 100 + fmaZ, screenY / 100 + fmb + ground->height / 100,
+                         screenX / 100 + fmaZ + ground->width / 100, screenY / 100 + fmb + ground->height / 100);
+            } else if (ground->type == 51) {  // 落ちてくるブロック  Falling Block
+                if (ground->xtype == 0) {
+                    for (t3 = 0; t3 <= ground->width / 3000; t3++) {
                         drawImage(grap[1][1], screenX / 100 + fmaZ + 29 * t3, screenY / 100 + fmb);
                     }
-                } else if (groundXType[i] == 1 || groundXType[i] == 2) {
-                    for (t3 = 0; t3 <= groundWidth[i] / 3000; t3++) {
+                } else if (ground->xtype == 1 || ground->xtype == 2) {
+                    for (t3 = 0; t3 <= ground->width / 3000; t3++) {
                         drawImage(grap[31][1], screenX / 100 + fmaZ + 29 * t3, screenY / 100 + fmb);
                     }
-                } else if (groundXType[i] == 3 || groundXType[i] == 4) {
-                    for (t3 = 0; t3 <= groundWidth[i] / 3000; t3++) {
-                        for (t2 = 0; t2 <= groundHeight[i] / 3000; t2++) {
+                } else if (ground->xtype == 3 || ground->xtype == 4) {
+                    for (t3 = 0; t3 <= ground->width / 3000; t3++) {
+                        for (t2 = 0; t2 <= ground->height / 3000; t2++) {
                             drawImage(grap[65][1], screenX / 100 + fmaZ + 29 * t3,
                                       screenY / 100 + 29 * t2 + fmb);
                         }
                     }
-                } else if (groundXType[i] == 10) {
-                    for (t3 = 0; t3 <= groundWidth[i] / 3000; t3++) {
+                } else if (ground->xtype == 10) {
+                    for (t3 = 0; t3 <= ground->width / 3000; t3++) {
                         drawImage(grap[65][1], screenX / 100 + fmaZ + 29 * t3, screenY / 100 + fmb);
                     }
                 }
-            } else if (groundType[i] == 52) {  // 落ちるやつ
+            } else if (ground->type == 52) {  // 落ちるやつ
                 xx[29] = 0;
                 if (stagecolor == 2) {
                     xx[29] = 30;
@@ -147,8 +148,8 @@ void paintSceneInGame() {
                     xx[29] = 90;
                 }
 
-                for (int j = 0; j <= groundWidth[i] / 3000; j++) {
-                    if (groundXType[i] == 0) {
+                for (int j = 0; j <= ground->width / 3000; j++) {
+                    if (ground->xtype == 0) {
                         drawImage(grap[5 + xx[29]][1], screenX / 100 + fmaZ + 29 * j, screenY / 100 + fmb);
                         if (stagecolor != 4) {
                             drawImage(grap[6 + xx[29]][1], screenX / 100 + fmaZ + 29 * j,
@@ -157,13 +158,13 @@ void paintSceneInGame() {
                             drawImage(grap[5 + xx[29]][1], screenX / 100 + fmaZ + 29 * j,
                                       screenY / 100 + fmb + 29);
                         }
-                    } else if (groundXType[i] == 1) {
-                        for (int k = 0; k <= groundHeight[i] / 3000; k++) {
+                    } else if (ground->xtype == 1) {
+                        for (int k = 0; k <= ground->height / 3000; k++) {
                             drawImage(grap[1 + xx[29]][1], screenX / 100 + fmaZ + 29 * j,
                                       screenY / 100 + fmb + 29 * k);
                         }
-                    } else if (groundXType[i] == 2) {
-                        for (int k = 0; k <= groundHeight[i] / 3000; k++) {
+                    } else if (ground->xtype == 2) {
+                        for (int k = 0; k <= ground->height / 3000; k++) {
                             drawImage(grap[5 + xx[29]][1], screenX / 100 + fmaZ + 29 * j,
                                       screenY / 100 + fmb + 29 * k);
                         }
@@ -173,75 +174,75 @@ void paintSceneInGame() {
             }
 
             if (trap == 1) {  // ステージトラップ
-                if (groundType[i] >= 100 && groundType[i] <= 299) {
+                if (ground->type >= 100 && ground->type <= 299) {
                     if (stagecolor == 1 || stagecolor == 3 || stagecolor == 5)
                         setColorToBlack();
                     if (stagecolor == 2 || stagecolor == 4)
                         setColorToWhite();
-                    drawRect(screenX / 100 + fmaZ, screenY / 100 + fmb, groundWidth[i] / 100, groundHeight[i] / 100);
+                    drawRect(screenX / 100 + fmaZ, screenY / 100 + fmb, ground->width / 100, ground->height / 100);
                 }
             }
 
-            if (groundType[i] == 300) {  // ゴール
+            if (ground->type == 300) {  // ゴール
                 setColorToWhite();
-                fillRect(screenX / 100 + 10, screenY / 100, 10, groundHeight[i] / 100 - 8);
+                fillRect(screenX / 100 + 10, screenY / 100, 10, ground->height / 100 - 8);
                 setColorToBlack();
-                drawRect(screenX / 100 + 10, screenY / 100, 10, groundHeight[i] / 100 - 8);
+                drawRect(screenX / 100 + 10, screenY / 100, 10, ground->height / 100 - 8);
                 setColor(250, 250, 0);
                 fillEllipse(screenX / 100 + 15 - 1, screenY / 100, 10, 10);
                 setColorToBlack();
                 drawEllipse(screenX / 100 + 15 - 1, screenY / 100, 10, 10);
-            } else if (groundType[i] == 500) {  // 中間
+            } else if (ground->type == 500) {  // 中間
                 drawImage(grap[20][4], screenX / 100, screenY / 100);
             }
         }
     }
 
     //描画上書き(土管)
-    for (int i = 0; i < GROUND_MAX; i++) {  // TODO merge GROUND_MAX loop
-        if (groundX[i] - fx + groundWidth[i] >= -10 && groundX[i] - fx <= fxmax + 1100) {
+    for (const auto& ground: grounds) {  // TODO merge GROUND_MAX loop
+        if (ground->x - fx + ground->width >= -10 && ground->x - fx <= fxmax + 1100) {
 
 //入る土管(右)
-            if (groundType[i] == 40) {
+            if (ground->type == 40) {
                 setColor(colors::TUBE_GREEN);
-                fillRect((groundX[i] - fx) / 100 + fmaZ,
-                         (groundY[i] - fy) / 100 + fmb + 1,
-                         groundWidth[i] / 100, groundHeight[i] / 100);
+                fillRect((ground->x - fx) / 100 + fmaZ,
+                         (ground->y - fy) / 100 + fmb + 1,
+                         ground->width / 100, ground->height / 100);
                 setColorToBlack();
-                drawRect((groundX[i] - fx) / 100 + fmaZ,
-                         (groundY[i] - fy) / 100 + fmb + 1,
-                         groundWidth[i] / 100, groundHeight[i] / 100);
+                drawRect((ground->x - fx) / 100 + fmaZ,
+                         (ground->y - fy) / 100 + fmb + 1,
+                         ground->width / 100, ground->height / 100);
             }
 //とぶ土管
-            if (groundType[i] == 50) {
+            if (ground->type == 50) {
                 setColor(colors::TUBE_GREEN);
-                fillRect((groundX[i] - fx) / 100 + fmaZ + 5,
-                         (groundY[i] - fy) / 100 + fmb + 30,
-                         50, groundHeight[i] / 100 - 30);
+                fillRect((ground->x - fx) / 100 + fmaZ + 5,
+                         (ground->y - fy) / 100 + fmb + 30,
+                         50, ground->height / 100 - 30);
                 setColorToBlack();
-                drawLine((groundX[i] - fx) / 100 + 5 + fmaZ,
-                         (groundY[i] - fy) / 100 + fmb + 30,
-                         (groundX[i] - fx) / 100 + fmaZ + 5,
-                         (groundY[i] - fy) / 100 + fmb + groundHeight[i] / 100);
-                drawLine((groundX[i] - fx) / 100 + 5 + fmaZ + 50,
-                         (groundY[i] - fy) / 100 + fmb + 30,
-                         (groundX[i] - fx) / 100 + fmaZ + 50 + 5,
-                         (groundY[i] - fy) / 100 + fmb + groundHeight[i] / 100);
+                drawLine((ground->x - fx) / 100 + 5 + fmaZ,
+                         (ground->y - fy) / 100 + fmb + 30,
+                         (ground->x - fx) / 100 + fmaZ + 5,
+                         (ground->y - fy) / 100 + fmb + ground->height / 100);
+                drawLine((ground->x - fx) / 100 + 5 + fmaZ + 50,
+                         (ground->y - fy) / 100 + fmb + 30,
+                         (ground->x - fx) / 100 + fmaZ + 50 + 5,
+                         (ground->y - fy) / 100 + fmb + ground->height / 100);
 
                 setColor(colors::TUBE_GREEN);
-                fillRect((groundX[i] - fx) / 100 + fmaZ,
-                         (groundY[i] - fy) / 100 + fmb + 1, 60, 30);
+                fillRect((ground->x - fx) / 100 + fmaZ,
+                         (ground->y - fy) / 100 + fmb + 1, 60, 30);
                 setColorToBlack();
-                drawRect((groundX[i] - fx) / 100 + fmaZ,
-                         (groundY[i] - fy) / 100 + fmb + 1, 60, 30);
+                drawRect((ground->x - fx) / 100 + fmaZ,
+                         (ground->y - fy) / 100 + fmb + 1, 60, 30);
             }
 //地面(ブロック)
-            if (groundType[i] == 200) {
-                for (t3 = 0; t3 <= groundWidth[i] / 3000; t3++) {
-                    for (t2 = 0; t2 <= groundHeight[i] / 3000; t2++) {
+            if (ground->type == 200) {
+                for (t3 = 0; t3 <= ground->width / 3000; t3++) {
+                    for (t2 = 0; t2 <= ground->height / 3000; t2++) {
                         drawImage(grap[65][1],
-                                  (groundX[i] - fx) / 100 + fmaZ + 29 * t3,
-                                  (groundY[i] - fy) / 100 + 29 * t2 + fmb);
+                                  (ground->x - fx) / 100 + fmaZ + 29 * t3,
+                                  (ground->y - fy) / 100 + 29 * t2 + fmb);
                     }
                 }
             }
@@ -862,9 +863,9 @@ if (player.speed.x>=800 || player.speed.x<=-800){player.speed.y=-1800;}
 
 //普通の土管
         if (player.type == MarioType::IN_PIPE) {
-            int pipeId = player.pipeId;
+            const std::shared_ptr<Ground>& pipe = player.pipe.lock();
 
-            if (player.typeInPipe == MarioExTypeInPipe::ROCKET) {
+            if (pipe != nullptr && player.typeInPipe == MarioExTypeInPipe::ROCKET) {
                 player.speed.x = 0;
                 player.speed.y = 0;
                 if (player.mtm <= 16) {
@@ -875,28 +876,28 @@ if (player.speed.x>=800 || player.speed.x<=-800){player.speed.y=-1800;}
                     player.position.y = -80000000;
                 }
                 if (player.mtm == 23) {
-                    groundX[pipeId] -= 100;
+                    pipe->x -= 100;
                 }
                 if (player.mtm >= 44 && player.mtm <= 60) {
                     if (player.mtm % 2 == 0)
-                        groundX[pipeId] += 200;
+                        pipe->x += 200;
                     if (player.mtm % 2 == 1)
-                        groundX[pipeId] -= 200;
+                        pipe->x -= 200;
                 }
                 if (player.mtm >= 61 && player.mtm <= 77) {
                     if (player.mtm % 2 == 0)
-                        groundX[pipeId] += 400;
+                        pipe->x += 400;
                     if (player.mtm % 2 == 1)
-                        groundX[pipeId] -= 400;
+                        pipe->x -= 400;
                 }
                 if (player.mtm >= 78 && player.mtm <= 78 + 16) {
                     if (player.mtm % 2 == 0)
-                        groundX[pipeId] += 600;
+                        pipe->x += 600;
                     if (player.mtm % 2 == 1)
-                        groundX[pipeId] -= 600;
+                        pipe->x -= 600;
                 }
                 if (player.mtm >= 110) {
-                    groundY[pipeId] -= player.mzz;
+                    pipe->y -= player.mzz;
                     player.mzz += 80;
                     if (player.mzz > 1600)
                         player.mzz = 1600;
@@ -1216,126 +1217,130 @@ if (player.mtm==250)end();
     }            //ブロック
 
 //壁
-    for (int t = 0; t < GROUND_MAX; t++) {
-        if (groundX[t] - fx + groundWidth[t] >= -12000 && groundX[t] - fx <= fxmax) {
+//    for (int i = 0; i < GROUND_MAX; i++) {
+    for (const auto& ground : grounds) {
+        if (ground->x - fx + ground->width >= -12000 && ground->x - fx <= fxmax) {
             xx[0] = 200;
             xx[1] = 2400;
             xx[2] = 1000;
             xx[7] = 0;
 
-            int screenX = groundX[t] - fx;
-            int screenY = groundY[t] - fy;
+            int screenX = ground->x - fx;
+            int screenY = ground->y - fy;
 
-            if ((groundType[t] <= 99 || groundType[t] == 200)
+            if ((ground->type <= 99 || ground->type == 200)
                 && int(player.type) < 10) {
 
 //おちるブロック  Falling Blocks
-                if (groundType[t] == 51) {
+                if (ground->type == 51) {
                     if (player.position.x + player.size.width > screenX + xx[0] + 3000
-                            && player.position.x < screenX + groundWidth[t] - xx[0]
-                            && player.position.y + player.size.height > screenY + 3000 && groundGType[t] == 0) {
-                        if (groundXType[t] == 0) {
-                            groundGType[t] = 1;
-                            sr[t] = 0;
+                            && player.position.x < screenX + ground->width - xx[0]
+                            && player.position.y + player.size.height > screenY + 3000 && ground->gtype == 0) {
+                        if (ground->xtype == 0) {
+                            ground->gtype = 1;
+                            ground->sr = 0;
                         }
                     }
                     if (player.position.x + player.size.width > screenX + xx[0] + 1000
-                            && player.position.x < screenX + groundWidth[t] - xx[0]
-                            && player.position.y + player.size.height > screenY + 3000 && groundGType[t] == 0) {
-                        if ((groundXType[t] == 10)
-                            && groundGType[t] == 0) {
-                            groundGType[t] = 1;
-                            sr[t] = 0;
+                            && player.position.x < screenX + ground->width - xx[0]
+                            && player.position.y + player.size.height > screenY + 3000 && ground->gtype == 0) {
+                        if ((ground->xtype == 10)
+                            && ground->gtype == 0) {
+                            ground->gtype = 1;
+                            ground->sr = 0;
                         }
                     }
 
-                    if ((groundXType[t] == 1)
-                            && groundY[27] >= 25000
-                            && groundX[27] > player.position.x + player.size.width
-                            && t != 27 && groundGType[t] == 0) {
-                        groundGType[t] = 1;
-                        sr[t] = 0;
+                    // TODO stop using "magic numbers". refactor these using game scripts
+
+                    if (ground->xtype == 1 && ground->gtype == 0 && !ground->hasAlias("g27")) {
+                        auto g27 = getGroundByAlias("g27");
+                        if (g27 != nullptr && g27->y >= 25000 && g27->x > player.position.x + player.size.width) {
+                            ground->gtype = 1;
+                            ground->sr = 0;
+                        }
                     }
-                    if (groundXType[t] == 2
-                            && groundY[28] >= 48000
-                            && t != 28 && groundGType[t] == 0 && player.hp >= 1) {
-                        groundGType[t] = 1;
-                        sr[t] = 0;
+                    if (ground->xtype == 2 && ground->gtype == 0 && player.hp >= 1 && !ground->hasAlias("g28")) {
+                        auto g28 = getGroundByAlias("g28");
+                        if (g28 != nullptr && g28->y > 48000) {
+                            ground->gtype = 1;
+                            ground->sr = 0;
+                        }
                     }
-                    if ((groundXType[t] == 3 && player.position.y >= 30000
-                             || groundXType[t] == 4 && player.position.y >= 25000)
-                            && groundGType[t] == 0
+                    if ((ground->xtype == 3 && player.position.y >= 30000
+                             || ground->xtype == 4 && player.position.y >= 25000)
+                            && ground->gtype == 0
                             && player.hp >= 1
                             && player.position.x + player.size.width > screenX + xx[0] + 3000 - 300
-                            && player.position.x < screenX + groundWidth[t] - xx[0]) {
-                        groundGType[t] = 1;
-                        sr[t] = 0;
-                        if (groundXType[t] == 4)
-                            sr[t] = 100;
+                            && player.position.x < screenX + ground->width - xx[0]) {
+                        ground->gtype = 1;
+                        ground->sr = 0;
+                        if (ground->xtype == 4)
+                            ground->sr = 100;
                     }
 
-                    if (groundGType[t] == 1 && groundY[t] <= fymax + 18000) {
-                        sr[t] += 120;
-                        if (sr[t] >= 1600) {
-                            sr[t] = 1600;
+                    if (ground->gtype == 1 && ground->y <= fymax + 18000) {
+                        ground->sr += 120;
+                        if (ground->sr >= 1600) {
+                            ground->sr = 1600;
                         }
-                        groundY[t] += sr[t];
+                        ground->y += ground->sr;
                         if (player.position.x + player.size.width > screenX + xx[0]
-                                && player.position.x < screenX + groundWidth[t] - xx[0]
+                                && player.position.x < screenX + ground->width - xx[0]
                                 && player.position.y + player.size.height > screenY
-                                && player.position.y < screenY + groundHeight[t] + xx[0]) {
+                                && player.position.y < screenY + ground->height + xx[0]) {
                             player.hp--;
                             xx[7] = 1;
                         }
                     }
                 }
 //おちるブロック2
-                if (groundType[t] == 52) {
-                    if (groundGType[t] == 0
+                if (ground->type == 52) {
+                    if (ground->gtype == 0
                             && player.position.x + player.size.width > screenX + xx[0] + 2000
-                            && player.position.x < screenX + groundWidth[t] - xx[0] - 2500
+                            && player.position.x < screenX + ground->width - xx[0] - 2500
                             && player.position.y + player.size.height > screenY - 3000) {
-                        groundGType[t] = 1;
-                        sr[t] = 0;
+                        ground->gtype = 1;
+                        ground->sr = 0;
                     }
-                    if (groundGType[t] == 1) {
-                        sr[t] += 120;
-                        if (sr[t] >= 1600) {
-                            sr[t] = 1600;
+                    if (ground->gtype == 1) {
+                        ground->sr += 120;
+                        if (ground->sr >= 1600) {
+                            ground->sr = 1600;
                         }
-                        groundY[t] += sr[t];
+                        ground->y += ground->sr;
                     }
                 }
 //通常地面
                 if (xx[7] == 0) {
                     if (player.position.x + player.size.width > screenX + xx[0]
-                            && player.position.x < screenX + groundWidth[t] - xx[0]
+                            && player.position.x < screenX + ground->width - xx[0]
                             && player.position.y + player.size.height > screenY
                             && player.position.y + player.size.height < screenY + xx[1]
                             && player.speed.y >= -100) {
-                        player.position.y = groundY[t] - fy - player.size.height + 100;
+                        player.position.y = ground->y - fy - player.size.height + 100;
                         player.speed.y = 0;
                         player.onGround = true;
                     }
                     if (player.position.x + player.size.width > screenX - xx[0]
                             && player.position.x < screenX + xx[2]
                             && player.position.y + player.size.height > screenY + xx[1] * 3 / 4
-                            && player.position.y < screenY + groundHeight[t] - xx[2]) {
+                            && player.position.y < screenY + ground->height - xx[2]) {
                         player.position.x = screenX - xx[0] - player.size.width;
                         player.speed.x = 0;
                     }
-                    if (player.position.x + player.size.width > screenX + groundWidth[t] - xx[0]
-                            && player.position.x < screenX + groundWidth[t] + xx[0]
+                    if (player.position.x + player.size.width > screenX + ground->width - xx[0]
+                            && player.position.x < screenX + ground->width + xx[0]
                             && player.position.y + player.size.height > screenY + xx[1] * 3 / 4
-                            && player.position.y < screenY + groundHeight[t] - xx[2]) {
-                        player.position.x = screenX + groundWidth[t] + xx[0];
+                            && player.position.y < screenY + ground->height - xx[2]) {
+                        player.position.x = screenX + ground->width + xx[0];
                         player.speed.x = 0;
                     }
                     if (player.position.x + player.size.width > screenX + xx[0] * 2
-                            && player.position.x < screenX + groundWidth[t] - xx[0] * 2
-                            && player.position.y > screenY + groundHeight[t] - xx[1]
-                            && player.position.y < screenY + groundHeight[t] + xx[0]) {
-                        player.position.y = screenY + groundHeight[t] + xx[0];
+                            && player.position.x < screenX + ground->width - xx[0] * 2
+                            && player.position.y > screenY + ground->height - xx[1]
+                            && player.position.y < screenY + ground->height + xx[0]) {
+                        player.position.y = screenY + ground->height + xx[0];
                         if (player.speed.y < 0) {
                             player.speed.y = -player.speed.y * 2 / 3;
                         }
@@ -1343,46 +1348,46 @@ if (player.mtm==250)end();
                 }        //xx[7]
 
 //入る土管
-                if (groundType[t] == 50) {
+                if (ground->type == 50) {
                     if (player.position.x + player.size.width > screenX + 2800
-                            && player.position.x < screenX + groundWidth[t] - 3000
+                            && player.position.x < screenX + ground->width - 3000
                             && player.position.y + player.size.height > screenY - 1000
                             && player.position.y + player.size.height < screenY + xx[1] + 3000
                             && player.onGround
                             && actaon[3] == 1 && player.type == MarioType::NORMAL) {
-                        printf("groundXType[%d] == %d", t, groundXType[t]);
+                        printf("groundXType[%p] == %d", &ground, ground->xtype);
 
-                        player.pipeId = t;
+                        player.pipe = ground;
 
 //飛び出し
-                        if (groundXType[t] == 0) {
+                        if (ground->xtype == 0) {
                             player.type = MarioType::IN_PIPE;
                             player.mtm = 0;
                             ot(oto[7]);
                             player.typeInPipe = MarioExTypeInPipe::ROCKET;
                         }
 //普通
-                        if (groundXType[t] == 1) {
+                        if (ground->xtype == 1) {
                             player.type = MarioType::IN_PIPE;
                             player.mtm = 0;
                             ot(oto[7]);
                             player.typeInPipe = MarioExTypeInPipe::NORMAL_DOWNWARDS;
                         }
 //普通
-                        if (groundXType[t] == 2) {
+                        if (ground->xtype == 2) {
                             player.type = MarioType::IN_PIPE;
                             player.mtm = 0;
                             ot(oto[7]);
                             player.typeInPipe = MarioExTypeInPipe::DIE_FIREBALL;
                         }
-                        if (groundXType[t] == 5) {
+                        if (ground->xtype == 5) {
                             player.type = MarioType::IN_PIPE;
                             player.mtm = 0;
                             ot(oto[7]);
                             player.typeInPipe = MarioExTypeInPipe::DIE_OWATA;
                         }
 // ループ
-                        if (groundXType[t] == 6) {
+                        if (ground->xtype == 6) {
                             player.type = MarioType::IN_PIPE;
                             player.mtm = 0;
                             ot(oto[7]);
@@ -1392,15 +1397,15 @@ if (player.mtm==250)end();
                 }        //50
 
 //入る土管(左から)
-                if (groundType[t] == 40) {
-                    if (player.position.x + player.size.width > screenX - 300 && player.position.x < screenX + groundWidth[t] - 1000 && player.position.y > screenY + 1000 &&
+                if (ground->type == 40) {
+                    if (player.position.x + player.size.width > screenX - 300 && player.position.x < screenX + ground->width - 1000 && player.position.y > screenY + 1000 &&
                             player.position.y + player.size.height < screenY + xx[1] + 4000 && player.onGround && actaon[4] == 1 &&
                             player.type == MarioType::NORMAL) {    //end();
 
-                        player.pipeId = t;
+                        player.pipe = ground;
 
 //飛び出し
-                        if (groundXType[t] == 0) {
+                        if (ground->xtype == 0) {
                             player.type = MarioType::_500;
                             player.mtm = 0;
                             ot(oto[7]);    //player.typeInPipe=1;
@@ -1408,14 +1413,14 @@ if (player.mtm==250)end();
                             player.typeInPipe = MarioExTypeInPipe::FLY_OUT_LEFTWARDS;
                         }
 
-                        if (groundXType[t] == 2) {
+                        if (ground->xtype == 2) {
                             player.typeInPipe = MarioExTypeInPipe::NORMAL_RIGHTWARDS;
                             player.mtm = 0;
                             ot(oto[7]);    //player.typeInPipe=1;
                             player.type = MarioType::IN_PIPE;
                         }
 // ループ
-                        if (groundXType[t] == 6) {
+                        if (ground->xtype == 6) {
                             player.type = MarioType::AFTER_SPRING;
                             player.mtm = 0;
                             ot(oto[7]);
@@ -1427,70 +1432,70 @@ if (player.mtm==250)end();
             }        //groundType
             else {
                 if (player.position.x + player.size.width > screenX + xx[0]
-                        && player.position.x < screenX + groundWidth[t] - xx[0]
+                        && player.position.x < screenX + ground->width - xx[0]
                         && player.position.y + player.size.height > screenY
-                        && player.position.y < screenY + groundHeight[t] + xx[0]) {
-                    if (groundType[t] == 100) {
-                        if (groundXType[t] == 0
-                            || groundXType[t] == 1 && blocks[1]->type != 3) {
-                            ayobi(groundX[t] + 1000, 32000, 0, 0, 0, 3, 0);
-                            groundX[t] = -800000000;
+                        && player.position.y < screenY + ground->height + xx[0]) {
+                    if (ground->type == 100) {
+                        if (ground->xtype == 0
+                            || ground->xtype == 1 && blocks[1]->type != 3) {
+                            ayobi(ground->x + 1000, 32000, 0, 0, 0, 3, 0);
+                            ground->x = -800000000;
                             ot(oto[10]);
                         }
                     }
-                    if (groundType[t] == 101) {
-                        ayobi(groundX[t] + 6000, -4000, 0, 0, 0, 3, 1);
-                        groundX[t] = -800000000;
+                    if (ground->type == 101) {
+                        ayobi(ground->x + 6000, -4000, 0, 0, 0, 3, 1);
+                        ground->x = -800000000;
                         ot(oto[10]);
                     }
-                    if (groundType[t] == 102) {
-                        if (groundXType[t] == 0) {
+                    if (ground->type == 102) {
+                        if (ground->xtype == 0) {
                             for (t3 = 0; t3 <= 3; t3++) {
-                                ayobi(groundX[t] + t3 * 3000, -3000, 0, 0, 0, 0, 0);
+                                ayobi(ground->x + t3 * 3000, -3000, 0, 0, 0, 0, 0);
                             }
                         }
-                        if (groundXType[t] == 1 && player.position.y >= 16000) {
-                            ayobi(groundX[t] + 1500, 44000, 0, -2000, 0, 4, 0);
-                        } else if (groundXType[t] == 2) {
-                            ayobi(groundX[t] + 4500, 30000, 0, -1600, 0, 5, 0);
+                        if (ground->xtype == 1 && player.position.y >= 16000) {
+                            ayobi(ground->x + 1500, 44000, 0, -2000, 0, 4, 0);
+                        } else if (ground->xtype == 2) {
+                            ayobi(ground->x + 4500, 30000, 0, -1600, 0, 5, 0);
                             ot(oto[10]);
-                            groundXType[t] = 3;
-                            groundX[t] -= 12000;
-                        } else if (groundXType[t] == 3) {
-                            groundX[t] += 12000;
-                            groundXType[t] = 4;
-                        } else if (groundXType[t] == 4) {
-                            ayobi(groundX[t] + 4500, 30000, 0, -1600, 0, 5, 0);
+                            ground->xtype = 3;
+                            ground->x -= 12000;
+                        } else if (ground->xtype == 3) {
+                            ground->x += 12000;
+                            ground->xtype = 4;
+                        } else if (ground->xtype == 4) {
+                            ayobi(ground->x + 4500, 30000, 0, -1600, 0, 5, 0);
                             ot(oto[10]);
-                            groundXType[t] = 5;
-                            groundXType[t] = 0;
-                        } else if (groundXType[t] == 7) {
+                            ground->xtype = 5;
+                            ground->xtype = 0;
+                        } else if (ground->xtype == 7) {
                             owataZone = 1;
-                        } else if (groundXType[t] == 8) {
-                            ayobi(groundX[t] - 5000 - 3000 * 1, 26000, 0, -1600, 0, 5, 0);
+                        } else if (ground->xtype == 8) {
+                            ayobi(ground->x - 5000 - 3000 * 1, 26000, 0, -1600, 0, 5, 0);
                             ot(oto[10]);
-                        } else if (groundXType[t] == 9) {
+                        } else if (ground->xtype == 9) {
                             for (t3 = 0; t3 <= 2; t3++) {
-                                ayobi(groundX[t] + t3 * 3000 + 3000, 48000, 0, -6000, 0, 3, 0);
+                                ayobi(ground->x + t3 * 3000 + 3000, 48000, 0, -6000, 0, 3, 0);
                             }
                         }
-                        if (groundXType[t] == 10) {
-                            groundX[t] -= 5 * 30 * 100;
-                            groundType[t] = 101;
+                        if (ground->xtype == 10) {
+                            ground->x -= 5 * 30 * 100;
+                            ground->type = 101;
                         }
 
-                        if (groundXType[t] == 12) {
+                        if (ground->xtype == 12) {
                             for (t3 = 1; t3 <= 3; t3++) {
-                                ayobi(groundX[t] + t3 * 3000 - 1000, 40000, 0, -2600, 0, 9, 0);
+                                ayobi(ground->x + t3 * 3000 - 1000, 40000, 0, -2600, 0, 9, 0);
                             }
                         }
 //スクロール消し
-                        if (groundXType[t] == 20) {
+                        if (ground->xtype == 20) {
                             scrollx = 0;
                         }
 //クリア
-                        if (groundXType[t] == 30) {
-                            groundX[t] = -80000000;
+                        if (ground->xtype == 30) {
+                            ground->x = -80000000;
                             player.speed.y = 0;
                             Mix_HaltMusic();
                             player.type = MarioType::WIN_AUTO;
@@ -1498,65 +1503,65 @@ if (player.mtm==250)end();
                             ot(oto[16]);
                         }
 
-                        if (groundXType[t] != 3
-                            && groundXType[t] != 4 && groundXType[t] != 10) {
-                            groundX[t] = -800000000;
+                        if (ground->xtype != 3
+                            && ground->xtype != 4 && ground->xtype != 10) {
+                            ground->x = -800000000;
                         }
                     }
 
-                    if (groundType[t] == 103) {
-                        if (groundXType[t] == 0) {
-                            ayobi(groundX[t] + 9000, groundY[t] + 2000, 0, 0, 0, 79, 0, 0, 10, 50);
-                            groundX[t] = -800000000;
+                    if (ground->type == 103) {
+                        if (ground->xtype == 0) {
+                            ayobi(ground->x + 9000, ground->y + 2000, 0, 0, 0, 79, 0, 0, 10, 50);
+                            ground->x = -800000000;
                         }
 
-                        if (groundXType[t] == 1 && blocks[6]->type <= 6) {
-                            ayobi(groundX[t] - 12000, groundY[t] + 2000, 0, 0, 0, 79, 0, 0, 10, 50);
-                            groundX[t] = -800000000;
+                        if (ground->xtype == 1 && blocks[6]->type <= 6) {
+                            ayobi(ground->x - 12000, ground->y + 2000, 0, 0, 0, 79, 0, 0, 10, 50);
+                            ground->x = -800000000;
                             blocks[9]->xtype = 500;    //blocks[9]->type=1;
                         }
                     }    //103
 
-                    if (groundType[t] == 104) {
-                        if (groundXType[t] == 0) {
-                            ayobi(groundX[t] + 12000, groundY[t] + 2000 + 3000, 0, 0, 0, 79, 0);
-                            ayobi(groundX[t] + 12000, groundY[t] + 2000 + 3000, 0, 0, 0, 79, 1);
-                            ayobi(groundX[t] + 12000, groundY[t] + 2000 + 3000, 0, 0, 0, 79, 2);
-                            ayobi(groundX[t] + 12000, groundY[t] + 2000 + 3000, 0, 0, 0, 79, 3);
-                            ayobi(groundX[t] + 12000, groundY[t] + 2000 + 3000, 0, 0, 0, 79, 4);
-                            groundX[t] = -800000000;
+                    if (ground->type == 104) {
+                        if (ground->xtype == 0) {
+                            ayobi(ground->x + 12000, ground->y + 2000 + 3000, 0, 0, 0, 79, 0);
+                            ayobi(ground->x + 12000, ground->y + 2000 + 3000, 0, 0, 0, 79, 1);
+                            ayobi(ground->x + 12000, ground->y + 2000 + 3000, 0, 0, 0, 79, 2);
+                            ayobi(ground->x + 12000, ground->y + 2000 + 3000, 0, 0, 0, 79, 3);
+                            ayobi(ground->x + 12000, ground->y + 2000 + 3000, 0, 0, 0, 79, 4);
+                            ground->x = -800000000;
                         }
                     }
 
-                    if (groundType[t] == 105 && !player.onGround && player.speed.y >= 0) {
+                    if (ground->type == 105 && !player.onGround && player.speed.y >= 0) {
                         blocks[1]->x -= 1000;
                         blocks[2]->x += 1000;
-                        groundXType[t]++;
-                        if (groundXType[t] >= 3)
-                            groundX[t] = -8000000;
+                        ground->xtype++;
+                        if (ground->xtype >= 3)
+                            ground->x = -8000000;
                     }
 
-                    if (groundType[t] == 300 && player.type == MarioType::NORMAL
-                        && player.position.y < screenY + groundHeight[t] + xx[0] - 3000 && player.hp >= 1) {
+                    if (ground->type == 300 && player.type == MarioType::NORMAL
+                        && player.position.y < screenY + ground->height + xx[0] - 3000 && player.hp >= 1) {
                         Mix_HaltMusic();
                         player.type = MarioType::_300;
                         player.mtm = 0;
-                        player.position.x = groundX[t] - fx - 2000;
+                        player.position.x = ground->x - fx - 2000;
                         ot(oto[11]);
                     }
 //中間ゲート
-                    if (groundType[t] == 500 && player.type == MarioType::NORMAL && player.hp >= 1) {
+                    if (ground->type == 500 && player.type == MarioType::NORMAL && player.hp >= 1) {
                         checkpoint += 1;
-                        groundX[t] = -80000000;
+                        ground->x = -80000000;
                     }
 
                 }
 
-                if (groundType[t] == 180) {
-                    sr[t]++;
-                    if (sr[t] >= groundGType[t]) {
-                        sr[t] = 0;
-                        ayobi(groundX[t], 30000, rand(600) - 300, -1600 - rand(900), 0, 84, 0);
+                if (ground->type == 180) {
+                    ground->sr++;
+                    if (ground->sr >= ground->gtype) {
+                        ground->sr = 0;
+                        ayobi(ground->x, 30000, rand(600) - 300, -1600 - rand(900), 0, 84, 0);
                     }
                 }
 
@@ -2134,12 +2139,12 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                 }
                 //ポール捨て
                 if (enemy.xtype == 1) {
-                    for (int i = 0; i < GROUND_MAX; i++) {
-                        if (groundType[i] == 300) {
+                    for (const auto& ground : grounds) {  // TODO use alias to find object
+                        if (ground->type == 300) {
                             //groundX[groundCounter]=xx[21]*100;groundY[groundCounter]=xx[22]*100;groundWidth[groundCounter]=3000;groundHeight[groundCounter]=(12-index)*3000;groundType[groundCounter]=300;groundCounter++;
-                            if (enemy.position.x - fx >= -8000 && enemy.position.x >= groundX[i] + 2000
-                                && enemy.position.x <= groundX[i] + 3600 && enemy.xGroundType == 1) {
-                                groundX[i] = -800000;
+                            if (enemy.position.x - fx >= -8000 && enemy.position.x >= ground->x + 2000
+                                && enemy.position.x <= ground->x + 3600 && enemy.xGroundType == 1) {
+                                ground->x = -800000;  // TODO remove that ground object
                                 enemy.timer = 100;
                             }
                         }
@@ -2149,12 +2154,13 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                         eyobi(enemy.position.x + 1200 - 1200, enemy.position.y + 3000 - 10 * 3000 - 1500,
                               0, 0, 0, 0, 1000, 10 * 3000 - 1200, 4, 20);
                         if (player.type == MarioType::_300) {
-                            player.type = MarioType::NORMAL;StopSoundMem(oto[11]);
+                            player.type = MarioType::NORMAL;
+                            StopSoundMem(oto[11]);
                             bgmchange(otom[1]);
                         }
-                        for (int i = 0; i < GROUND_MAX; i++) {
-                            if (groundType[i] == 104)
-                                groundX[i] = -80000000;
+                        for (const auto& ground : grounds) {  // TODO use alias to find object
+                            if (ground->type == 104)
+                                ground->x = -80000000;  // TODO remove that ground object
                         }
                     }
                     if (enemy.timer == 120) {
@@ -2867,7 +2873,10 @@ void processSceneInGameEnemyInstance(EnemyInstance& enemy, ListIterateHelper<Ene
                 if (enemy.type == 105) {
                     if (enemy.xtype == 0) {
                         ot(oto[4]);
-                        groundGType[26] = 6;
+                        auto g26 = getGroundByAlias("g26");
+                        if (g26 != nullptr) {
+                            g26->gtype = 6;
+                        }
                     }
                     if (enemy.xtype == 1) {
                         blocks[7]->xtype = 80;
@@ -3112,15 +3121,6 @@ void ot(Mix_Chunk *x) {
 }
 
 void stagecls() {
-    for (t = 0; t < GROUND_MAX; t++) {
-        groundX[t] = -9000000;
-        groundY[t] = 1;
-        groundWidth[t] = 1;
-        groundHeight[t] = 1;
-        groundGType[t] = 0;
-        groundType[t] = 0;
-        groundXType[t] = 0;
-    }
     //for (t=0;t<spmax;t++){spa[t]=-9000000;szyunni[t]=t;spb[t]=1;spc[t]=1;spd[t]=1;sptype[t]=0;spgtype[t]=0;}
     for (t = 0; t < LIFT_MAX; t++) {
         liftX[t] = -9000000;
@@ -3148,7 +3148,7 @@ void stagecls() {
     //for (t=0;t<vmax;t++){va[t]=-9000000;vtype[t]=0;vb[t]=0;vc[t]=1;vd[t]=1;}
     //for (t=0;t<gmax;t++){ga[t]=-9000000;gx[t]=0;gstring[t]="";}
 
-    groundCounter = 0;
+    grounds.clear();  // TODO clear alias map
     blocks.clear();
     eis.clear();
     ets.clear();
@@ -3210,16 +3210,16 @@ void stage() {
 
     if (checkpoint >= 1) {
         int xx17 = 0;  // seems like a counter, but i don't what it's for
-        for (int i = 0; i < GROUND_MAX; i++) {
-            if (groundType[i] == 500 && checkpoint >= 1) {
-                fx = groundX[i] - fxmax / 2;
+        for (const auto& ground : grounds) {
+            if (ground->type == 500 && checkpoint >= 1) {
+                fx = ground->x - fxmax / 2;
                 fzx = fx;
-                player.position.x = groundX[i] - fx;
-                player.position.y = groundY[i] - fy;
+                player.position.x = ground->x - fx;
+                player.position.y = ground->y - fy;
                 checkpoint--;
                 xx17++;
 
-                groundX[i] = -80000000;
+                ground->x = -80000000;  // TODO remove that ground object
             }
         }
         checkpoint += xx17;
@@ -3246,7 +3246,7 @@ void stagep() {
 
         //new byte stagedate[16][801]={
 
-        byte stagedatex[17][1001] = {  //   9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51
+        ::byte stagedatex[17][1001] = {  //   9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,98, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -3274,7 +3274,6 @@ void stagep() {
         createBlock(59 * 29 * 100, (9 * 29 - 12) * 100, 112);
         createBlock(67 * 29 * 100, (9 * 29 - 12) * 100, 104);
 
-        groundCounter = 0;
         syobi(20 * 29 * 100 + 500, -6000, 5000, 70000, 100);
         syobi(54 * 29 * 100 - 500, -6000, 7000, 70000, 101);
         syobi(112 * 29 * 100 + 1000, -6000, 3000, 70000, 102);
@@ -3310,7 +3309,7 @@ void stagep() {
         scrollx = 0 * 100;
         //player.position.x=3000;player.position.y=3000;
 
-        byte stagedatex[17][1001] = {
+        ::byte stagedatex[17][1001] = {
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -3338,7 +3337,6 @@ void stagep() {
         createBlock(13 * 29 * 100, (8 * 29 - 12) * 100, 114);
 
         //t=28;
-        groundCounter = 0;
         syobi(14 * 29 * 100 + 500, (9 * 29 - 12) * 100, 6000, 12000 - 200, 50, 1);
         syobi(12 * 29 * 100, (11 * 29 - 12) * 100, 3000, 6000 - 200, 40, 0);
         syobi(14 * 29 * 100 + 1000, -6000, 5000, 70000, 100, 1);
@@ -3366,7 +3364,7 @@ void stagep() {
         player.position.y = 3000;
         stagecolor = 2;
 
-	byte stagedatex[17][1001] = {
+	::byte stagedatex[17][1001] = {
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,97, 0, 0, 0, 0, 0, 0},
 	    {1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,98, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0},
 	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
@@ -3400,7 +3398,6 @@ void stagep() {
 
 //blocks[blockCounter]->typeInPipe=1;createBlock(11*29,9*29-12,114);//毒1
 
-        groundCounter = 0;
         syobi(2 * 29 * 100, (13 * 29 - 12) * 100, 3000 * 1 - 1, 3000, 52);
 //t=groundCounter;groundX[t]=19*29*100;groundY[t]=(13*29-12)*100;groundWidth[t]=3000*1-1;groundHeight[t]=3000;groundType[t]=52;groundCounter++;
         syobi(24 * 29 * 100, (13 * 29 - 12) * 100, 3000 * 1 - 1, 3000, 52);
@@ -3411,45 +3408,18 @@ void stagep() {
 
 //ブロックもどき
 
-        t = 27;
-        groundX[t] = 69 * 29 * 100;
-        groundY[t] = (1 * 29 - 12) * 100;
-        groundWidth[t] = 9000 * 2 - 1;
-        groundHeight[t] = 3000;
-        groundType[t] = 51;
-        groundXType[t] = 0;
-        groundGType[t] = 0;
-        groundCounter++;
-        t = 28;
-        groundX[t] = 66 * 29 * 100;
-        groundY[t] = (1 * 29 - 12) * 100;
-        groundWidth[t] = 9000 - 1;
-        groundHeight[t] = 3000;
-        groundType[t] = 51;
-        groundXType[t] = 1;
-        groundGType[t] = 0;
-        groundCounter++;
-        t = 29;
-        groundX[t] = 66 * 29 * 100;
-        groundY[t] = (-2 * 29 - 12) * 100;
-        groundWidth[t] = 9000 * 3 - 1;
-        groundHeight[t] = 3000;
-        groundType[t] = 51;
-        groundXType[t] = 2;
-        groundGType[t] = 0;
-        groundCounter++;
+        auto fuck = syobi(69 * 29 * 100, (1 * 29 - 12) * 100, 9000 * 2 - 1, 3000, 51, 0, 0);
+        fuck->newAlias("g27", true);
+//        syobi(69 * 29 * 100, (1 * 29 - 12) * 100, 9000 * 2 - 1, 3000, 51, 0, 0)->newAlias("g27", true);
+        syobi(66 * 29 * 100, (1 * 29 - 12) * 100, 9000 - 1, 3000, 51, 1, 0)->newAlias("g28", true);
+        syobi(66 * 29 * 100, (-2 * 29 - 12) * 100, 9000 * 3 - 1, 3000, 51, 2, 0)->newAlias("g29", true);
 
 //26 ファイアー土管
-        t = 26;
-        groundX[t] = 103 * 29 * 100 - 1500;
-        groundY[t] = (9 * 29 - 12) * 100 - 2000;
-        groundWidth[t] = 3000;
-        groundHeight[t] = 3000;
-        groundType[t] = 180;
-        groundXType[t] = 0;
-        sr[t] = 0;
-        groundGType[t] = 48;
-        groundCounter++;
+
+        auto g26 = syobi(103 * 29 * 100 - 1500, (9 * 29 - 12) * 100 - 2000, 3000, 3000, 180, 0, 48);
+        g26->sr = 0;
+        g26->newAlias("g26", true);
+
         syobi(102 * 29 * 100, (9 * 29 - 12) * 100, 6000, 12000 - 200, 50, 2);
         syobi(123 * 29 * 100, (9 * 29 - 12) * 100, 3000 * 5 - 1, 3000 * 5, 52, 1);
 
@@ -3539,7 +3509,7 @@ void stagep() {
         player.position.x = 7500;
         player.position.y = 3000 * 9;
 
-	byte stagedatex[17][1001] = {
+	::byte stagedatex[17][1001] = {
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
 	    {0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,99, 0, 0, 0, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0},
@@ -3571,13 +3541,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 
         syobi(5 * 29 * 100 + 500, -6000, 3000, 70000, 102, 8);
 //空飛ぶ土管
-        t = 28;
-        groundX[t] = 44 * 29 * 100 + 500;
-        groundY[t] = (10 * 29 - 12) * 100;
-        groundWidth[t] = 6000;
-        groundHeight[t] = 9000 - 200;
-        groundType[t] = 50;
-        groundCounter++;
+        syobi(44 * 29 * 100 + 500, (10 * 29 - 12) * 100, 6000, 9000 - 200, 50)->newAlias("g28");
 
 //ポールもどき
         ets.clear();
@@ -3607,7 +3571,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         scrollx = 3900 * 100;
 //player.position.x=3000;player.position.y=3000;
 
-	byte stagedatex[17][1001] = {	//                                                                                                                                                                                     中間
+	::byte stagedatex[17][1001] = {	//                                                                                                                                                                                     中間
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,97, 0, 0, 0, 0, 0,97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,57, 0, 0, 0,84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,51, 0, 0, 0,84, 0, 0, 0, 0, 0,99, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -3668,7 +3632,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         syobi(65 * 29 * 100 + 500, (10 * 29 - 12) * 100, 6000, 9000 - 200, 50, 1);
 //t=28;groundX[t]=65*29*100;groundY[t]=(10*29-12)*100;groundWidth[t]=6000;groundHeight[t]=9000-200;groundType[t]=50;groundCounter++;
 
-//トラップ
+//トラップ TODO this is making game crash. find the bug.
         syobi(74 * 29 * 100, (8 * 29 - 12) * 100 - 1500, 6000, 3000, 103, 1);
         syobi(96 * 29 * 100 - 3000, -6000, 9000, 70000, 102, 10);
 //ポール砲
@@ -3777,7 +3741,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         player.position.y = 6000;
         stagecolor = 2;
 
-	byte stagedatex[17][1001] = {
+	::byte stagedatex[17][1001] = {
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
 	    {1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,},
 	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,},
@@ -3822,7 +3786,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 
         stagepoint = 1;
 
-	byte stagedatex[17][1001] = {
+	::byte stagedatex[17][1001] = {
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
@@ -3841,7 +3805,6 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	};
 
-        groundCounter = 0;
         syobi(14 * 29 * 100 - 5, (11 * 29 - 12) * 100, 6000, 15000 - 200, 50, 1);
 //t=groundCounter;groundX[t]=12*29*100;groundY[t]=(11*29-12)*100;groundWidth[t]=3000;groundHeight[t]=6000-200;groundType[t]=40;groundXType[t]=0;groundCounter++;
 //t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;groundHeight[t]=70000;groundType[t]=100;groundXType[t]=1;groundCounter++;
@@ -3875,7 +3838,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         player.position.y = 6000;
         stagecolor = 4;
 
-	byte stagedatex[17][1001] = {	//                                                                                                                                                                                     中間
+	::byte stagedatex[17][1001] = {	//                                                                                                                                                                                     中間
 	    {5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	    {5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 7, 7, 7, 7, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	    {5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0},
@@ -3894,7 +3857,6 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	};
 
-        groundCounter = 0;        //groundCounter=140;
         syobi(35 * 29 * 100 - 1500 + 750, (8 * 29 - 12) * 100 - 1500, 1500, 3000, 105);
         syobi(67 * 29 * 100, (4 * 29 - 12) * 100, 9000 - 1, 3000 * 1 - 1, 51, 3, 0);
         syobi(73 * 29 * 100, (13 * 29 - 12) * 100, 3000 * 1 - 1, 3000, 52);
@@ -4013,7 +3975,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         stagecolor = 1;
         scrollx = 2900 * (113 - 19);
         //
-	byte stagedatex[17][1001] = {
+	::byte stagedatex[17][1001] = {
 	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	    {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 4, 0, 0, 4, 0, 0, 0, 0, 4, 0, 0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,99, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -4048,7 +4010,6 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
             createBlock(85 * 29 * 100, (i * 29 - 12) * 100, 4);
         }
         //
-        groundCounter = 0;
         syobi(30 * 29 * 100, (13 * 29 - 12) * 100, 12000 - 1, 3000, 52, 0);
         //
         syobi(51 * 29 * 100, (4 * 29 - 12) * 100, 9000 - 1, 3000, 51, 0);
@@ -4084,7 +4045,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         stagecolor = 1;
         scrollx = 2900 * (19 - 19);
         //
-        byte stagedatex[17][1001] = {
+        ::byte stagedatex[17][1001] = {
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0, 0},
@@ -4128,7 +4089,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         player.position.y = 9000;
         scrollx = 2900 * (137 - 19);
 //
-	byte stagedatex[17][1001] = {
+	::byte stagedatex[17][1001] = {
 	    {0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,98, 4, 4, 4, 4, 4, 4, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,98, 1},
 	    {4, 0, 0, 0, 0, 0, 0,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,10,10,10,10,10,10,10,10,10,10,10, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0,10,10,10,10,10,10,10,10,10, 0, 0, 1},
 	    {4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
@@ -4170,7 +4131,6 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         //
         createEnemyTemplate(76 * 29 * 100 - 1400, (-2 * 29 - 12) * 100 + 500, 86, 0);
         //
-        groundCounter = 0;
         syobi(2 * 29 * 100, (13 * 29 - 12) * 100, 300000 - 6001, 3000, 52, 0);
         //
         syobi(3 * 29 * 100, (7 * 29 - 12) * 100, 3000, 3000, 105, 0);
@@ -4223,7 +4183,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         player.position.x = 7500;
         player.position.y = 3000 * 9;
 //
-	byte stagedatex[17][1001] = {
+	::byte stagedatex[17][1001] = {
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	    {0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,99, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -4282,7 +4242,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         stagecolor = 1;
         scrollx = 2900 * (126 - 19);
         //
-	byte stagedatex[17][1001] = {
+	::byte stagedatex[17][1001] = {
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 7, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0,56, 0, 0, 0, 0, 0, 0, 0, 0, 4,10,10,10,10,10,10,10,10,10,10,10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,99, 0, 0, 0, 0, 0, 0, 0},
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,51, 0, 1, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0,82, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -4324,7 +4284,6 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
 	   ets[etCounter]->typeInPipe=0;
 	   etCounter += 1;
 	 */
-        groundCounter = 0;
         createEnemyTemplate((102 * 29 - 12) * 100, (10 * 29 - 12) * 100, 50, 1);
         //
         liftCounter = 0;
@@ -4394,7 +4353,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         stagecolor = 4;
         scrollx = 2900 * (40 - 19);
         //
-	byte stagedatex[17][1001] = {
+	::byte stagedatex[17][1001] = {
 	    {5, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
 	    {5, 5, 5, 5, 5, 5, 5, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,10, 0, 0, 0,10,10,10, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5},
 	    {5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7,10,10,10, 5, 5, 5, 5, 5},
@@ -4429,7 +4388,6 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         //
         createEnemyTemplate(20 * 29 * 100 + 1500, (5 * 29 - 12) * 100 + 1500, 87, 107);
         //
-        groundCounter = 0;
         syobi(17 * 29 * 100, (9 * 29 - 12) * 100, 21000 - 1, 3000 - 1, 52, 2);
         //
         syobi(27 * 29 * 100, (13 * 29 - 12) * 100, 6000, 6000, 50, 6);
@@ -4451,7 +4409,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         stagecolor = 4;
         scrollx = 2900 * (21 - 19);
         //
-        byte stagedatex[17][1001] = {
+        ::byte stagedatex[17][1001] = {
                 { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,98},
                 { 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                 { 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -4477,7 +4435,6 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         //
         createBlock(14 * 29 * 100, (13 * 29 - 12) * 100, 115, 1);
         //
-        groundCounter = 0;
         syobi(6 * 29 * 100, (6 * 29 - 12) * 100, 18000 - 1, 6000 - 1, 52, 0);
         //
         syobi(12 * 29 * 100, (8 * 29 - 12) * 100, 9000 - 1, 3000 - 1, 52, 2);
@@ -4501,7 +4458,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         stagecolor = 4;
         scrollx = 2900 * (128 - 19);
         //
-	byte stagedatex[17][1001] = {
+	::byte stagedatex[17][1001] = {
 	    {5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
 	    {5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	    {5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -4572,7 +4529,6 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         //
         createEnemyTemplate(107 * 29 * 100, (10 * 29 - 12) * 100, 30, 0);
         //
-        groundCounter = 0;
         syobi(13 * 29 * 100, (8 * 29 - 12) * 100, 33000 - 1, 3000 - 1, 52, 2);
         //
         syobi(13 * 29 * 100, (0 * 29 - 12) * 100, 33000 - 1, 3000 - 1, 51, 3);
@@ -4620,7 +4576,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         bgmchange(otom[1]);
         stagecolor = 5;
         scrollx = 2900 * (112 - 19);
-	byte stagedatex[17][1001] = {
+	::byte stagedatex[17][1001] = {
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -4647,7 +4603,6 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         //
         createBlock(64 * 29 * 100, (13 * 29 - 12) * 100, 115, 1);
         //
-        groundCounter = 0;
         syobi(13 * 29 * 100, (13 * 29 - 12) * 100, 9000 - 1, 3000, 52, 0);
         //
         syobi(84 * 29 * 100, (13 * 29 - 12) * 100, 9000 - 1, 3000, 52, 0);

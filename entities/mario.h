@@ -1,6 +1,7 @@
 #ifndef OSAFORK_MARIO_H
 #define OSAFORK_MARIO_H
 
+#include <memory>
 #include "common.h"
 
 enum class MarioType : int {
@@ -14,6 +15,7 @@ enum class MarioExTypeInPipe : int {
     ROCKET = 0, NORMAL_DOWNWARDS = 1, DIE_FIREBALL = 2, NORMAL_RIGHTWARDS = 3, DIE_OWATA = 5, LOOP = 6, FLY_OUT_LEFTWARDS = 10
 };
 
+class Ground;
 class Mario {
 public:
     Point position;
@@ -30,7 +32,7 @@ public:
     MarioExTypeInPipe typeInPipe;  // extended type info when this->type == MarioType::IN_PIPE
     int mtm;
     int mzz;
-    int pipeId;  // tmp field. the pipe in which mario is.
+    std::weak_ptr<Ground> pipe;  // tmp field. the pipe in which mario is.
 
     bool onGround;
     int mkasok;

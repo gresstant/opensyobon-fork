@@ -82,14 +82,14 @@ void ayobiInIter(ListIterateHelper<EnemyInstance>& modifier, int x, int y, int c
 
 void tekizimen(EnemyInstance& ei) {
     //壁
-    for (int i = 0; i < GROUND_MAX; i++) {
-        if (groundX[i] - fx + groundWidth[i] >= -12010 && groundX[i] - fx <= fxmax + 12100 && groundType[i] <= 99) {
+    for (const auto& ground : grounds) {
+        if (ground->x - fx + ground->width >= -12010 && ground->x - fx <= fxmax + 12100 && ground->type <= 99) {
             int xx0 = 200;
             int xx2 = 1000;
             int xx1 = 2000;    //ei.size.width
 
-            int scrGroundTop = groundY[i] - fy, scrGroundBottom = groundY[i] + groundHeight[i] - fy;
-            int scrGroundLeft = groundX[i] - fx, scrGroundRight = groundX[i] + groundWidth[i] - fx;
+            int scrGroundTop = ground->y - fy, scrGroundBottom = ground->y + ground->height - fy;
+            int scrGroundLeft = ground->x - fx, scrGroundRight = ground->x + ground->width - fx;
 
             int scrEnemyTop = ei.position.y - fy, scrEnemyBottom = ei.position.y + ei.size.height - fy;
             int scrEnemyLeft = ei.position.x - fx, scrEnemyRight = ei.position.x + ei.size.width - fx;
@@ -109,13 +109,13 @@ void tekizimen(EnemyInstance& ei) {
                 ei.faceDirection = FaceDirection::RIGHT;
             }
 
-//if (ei.position.x+ei.size.width-fx>scrGroundLeft+xx0 && ei.position.x-fx<scrGroundLeft+groundWidth[i]-xx0 && ei.position.y+ei.size.height-fy>scrGroundTop && ei.position.y+ei.size.height-fy<scrGroundTop+xx1 && ei.speed.y>=-100){ei.position.y=groundY[i]-fy-ei.size.height+100+fy;ei.speed.y=0;}//marioOnGround=1;}
+//if (ei.position.x+ei.size.width-fx>scrGroundLeft+xx0 && ei.position.x-fx<scrGroundLeft+ground->width-xx0 && ei.position.y+ei.size.height-fy>scrGroundTop && ei.position.y+ei.size.height-fy<scrGroundTop+xx1 && ei.speed.y>=-100){ei.position.y=ground->y-fy-ei.size.height+100+fy;ei.speed.y=0;}//marioOnGround=1;}
             if (scrEnemyRight > scrGroundLeft + xx0
                 && scrEnemyLeft < scrGroundRight - xx0
                 && scrEnemyBottom > scrGroundTop
                 && scrEnemyBottom < scrGroundBottom - xx1
                 && ei.speed.y >= -100) {
-                ei.position.y = groundY[i] - fy - ei.size.height + 100 + fy;
+                ei.position.y = ground->y - fy - ei.size.height + 100 + fy;
                 ei.speed.y = 0;
                 ei.xGroundType = 1;
             }
