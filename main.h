@@ -68,31 +68,40 @@ class SimpleListIterateHelper : public ListIterateHelper<T> {
     std::function<void()> ptrRemovePreviousIfExists;
     std::function<void()> ptrRemoveThis;
     std::function<void()> ptrRemoveNextIfExists;
-    std::function<void(T*)> ptrInsertAsFirst;
-    std::function<void(T*)> ptrInsertAsLast;
-    std::function<void(T*)> ptrInsertAsPrevious;
-    std::function<void(T*)> ptrInsertAsNext;
+    std::function<void(std::shared_ptr<T>)> ptrInsertAsFirst;
+    std::function<void(std::shared_ptr<T>)> ptrInsertAsLast;
+    std::function<void(std::shared_ptr<T>)> ptrInsertAsPrevious;
+    std::function<void(std::shared_ptr<T>)> ptrInsertAsNext;
 
 public:
-    virtual void removeFirst()             { if (ptrRemoveFirst)            ptrRemoveFirst();    };
-    virtual void removeLast()              { if (ptrRemoveLast)             ptrRemoveLast();     };
-    virtual void removePreviousIfExists()  { if (ptrRemovePreviousIfExists) ptrRemovePreviousIfExists(); };
-    virtual void removeThis()              { if (ptrRemoveThis)             ptrRemoveThis();             };
-    virtual void removeNextIfExists()      { if (ptrRemoveNextIfExists)     ptrRemoveNextIfExists();     };
-    virtual void insertAsFirst(T* item)    { if (ptrInsertAsFirst)          ptrInsertAsFirst(item);      };
-    virtual void insertAsLast(T* item)     { if (ptrInsertAsLast)           ptrInsertAsLast(item);       };
-    virtual void insertAsPrevious(T* item) { if (ptrInsertAsPrevious)       ptrInsertAsPrevious(item);   };
-    virtual void insertAsNext(T* item)     { if (ptrInsertAsNext)           ptrInsertAsNext(item);       };
+    virtual void removeFirst()                             { if (ptrRemoveFirst)            ptrRemoveFirst();    };
+    virtual void removeLast()                              { if (ptrRemoveLast)             ptrRemoveLast();     };
+    virtual void removePreviousIfExists()                  { if (ptrRemovePreviousIfExists) ptrRemovePreviousIfExists(); };
+    virtual void removeThis()                              { if (ptrRemoveThis)             ptrRemoveThis();             };
+    virtual void removeNextIfExists()                      { if (ptrRemoveNextIfExists)     ptrRemoveNextIfExists();     };
+    virtual void insertAsFirst(std::shared_ptr<T> item)    { if (ptrInsertAsFirst)          ptrInsertAsFirst(item);      };
+    virtual void insertAsLast(std::shared_ptr<T> item)     { if (ptrInsertAsLast)           ptrInsertAsLast(item);       };
+    virtual void insertAsPrevious(std::shared_ptr<T> item) { if (ptrInsertAsPrevious)       ptrInsertAsPrevious(item);   };
+    virtual void insertAsNext(std::shared_ptr<T> item)     { if (ptrInsertAsNext)           ptrInsertAsNext(item);       };
 
-    SimpleListIterateHelper(std::function<void()> removeFirst,            std::function<void()> removeLast,
-                            std::function<void()> removePreviousIfExists, std::function<void()> removeThis,
-                            std::function<void()> removeNextIfExists,     std::function<void(T*)> insertAsFirst,
-                            std::function<void(T*)> insertAsLast,         std::function<void(T*)> insertAsPrevious,
-                            std::function<void(T*)> insertAsNext)       : ptrRemoveFirst(removeFirst),
-                            ptrRemoveLast(removeLast),                    ptrRemovePreviousIfExists(removePreviousIfExists),
-                            ptrRemoveThis(removeThis),                    ptrRemoveNextIfExists(removeNextIfExists),
-                            ptrInsertAsFirst(insertAsFirst),              ptrInsertAsLast(insertAsLast),
-                            ptrInsertAsPrevious(insertAsPrevious),        ptrInsertAsNext(insertAsNext) {}
+    SimpleListIterateHelper(std::function<void()> removeFirst,
+                            std::function<void()> removeLast,
+                            std::function<void()> removePreviousIfExists,
+                            std::function<void()> removeThis,
+                            std::function<void()> removeNextIfExists,
+                            std::function<void(std::shared_ptr<T>)> insertAsFirst,
+                            std::function<void(std::shared_ptr<T>)> insertAsLast,
+                            std::function<void(std::shared_ptr<T>)> insertAsPrevious,
+                            std::function<void(std::shared_ptr<T>)> insertAsNext) :
+                            ptrRemoveFirst(removeFirst),
+                            ptrRemoveLast(removeLast),
+                            ptrRemovePreviousIfExists(removePreviousIfExists),
+                            ptrRemoveThis(removeThis),
+                            ptrRemoveNextIfExists(removeNextIfExists),
+                            ptrInsertAsFirst(insertAsFirst),
+                            ptrInsertAsLast(insertAsLast),
+                            ptrInsertAsPrevious(insertAsPrevious),
+                            ptrInsertAsNext(insertAsNext) {}
 };
 
 //メインプログラム

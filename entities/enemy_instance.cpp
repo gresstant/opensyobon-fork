@@ -77,7 +77,7 @@ void ayobi(int x, int y, int c, int d, int xnotm, int type, int xtype, int cfbt,
 void ayobiInIter(ListIterateHelper<EnemyInstance>& modifier, int x, int y, int c, int d,
                  int xnotm, int type, int xtype, int cfbt, int msgTimer, int msgIndex) {
     ayobiCommon(x, y, c, d, xnotm, type, xtype, cfbt, msgTimer, msgIndex,
-                [&]() { modifier.removeFirst(); }, [&](auto& item) { modifier.insertAsFirst(item.get()); });
+                [&]() { modifier.removeFirst(); }, [&](auto& item) { modifier.insertAsFirst(item); });
 }
 
 void tekizimen(EnemyInstance& ei) {

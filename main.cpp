@@ -1949,7 +1949,7 @@ if (actaon[2]==1){player.position.y-=400;player.speed.y=-1400;player.mjumptm=10;
                     } else {
                         nextIterator = eis.erase(iter + 1);  // invalidates all iterators and references
                     }
-                }, [&](EnemyInstance* item) {  // void insertAsFirst(EnemyInstance*)
+                }, [&](std::shared_ptr<EnemyInstance> item) {  // void insertAsFirst(EnemyInstance*)
                     // push_front invalidates all iterators, but doesn't invalidate any refs to the elements,
                     // so it'd be fine to simply find the valid iterator.
                     eis.push_front(std::shared_ptr<EnemyInstance>(item));
@@ -1960,7 +1960,7 @@ if (actaon[2]==1){player.position.y-=400;player.speed.y=-1400;player.mjumptm=10;
                         }
                     }
                     throw exception("Cannot find reference to original element in function insertAsFirst.");
-                }, [&](EnemyInstance* item) {  // void insertAsLast(EnemyInstance*)
+                }, [&](std::shared_ptr<EnemyInstance> item) {  // void insertAsLast(EnemyInstance*)
                     // the same as insertAsFirst
                     eis.push_back(std::shared_ptr<EnemyInstance>(item));
                     for (auto i = eis.begin(); i != eis.end(); i++) {
@@ -1970,9 +1970,9 @@ if (actaon[2]==1){player.position.y-=400;player.speed.y=-1400;player.mjumptm=10;
                         }
                     }
                     throw exception("Cannot find reference to original element in function insertAsLast.");
-                }, [&](EnemyInstance* item) {  // void insertAsPrevious(EnemyInstance*)
+                }, [&](std::shared_ptr<EnemyInstance> item) {  // void insertAsPrevious(EnemyInstance*)
                     nextIterator = eis.insert(iter, std::shared_ptr<EnemyInstance>(item)) + 1;
-                }, [&](EnemyInstance* item) {  // void insertAsNext(EnemyInstance*)
+                }, [&](std::shared_ptr<EnemyInstance> item) {  // void insertAsNext(EnemyInstance*)
                     nextIterator = eis.insert(iter + 1, std::shared_ptr<EnemyInstance>(item));
                 }
         );
@@ -3632,7 +3632,7 @@ t=groundCounter;groundX[t]=14*29*100+1000;groundY[t]=-6000;groundWidth[t]=5000;g
         syobi(65 * 29 * 100 + 500, (10 * 29 - 12) * 100, 6000, 9000 - 200, 50, 1);
 //t=28;groundX[t]=65*29*100;groundY[t]=(10*29-12)*100;groundWidth[t]=6000;groundHeight[t]=9000-200;groundType[t]=50;groundCounter++;
 
-//トラップ TODO this is making game crash. find the bug.
+//トラップ
         syobi(74 * 29 * 100, (8 * 29 - 12) * 100 - 1500, 6000, 3000, 103, 1);
         syobi(96 * 29 * 100 - 3000, -6000, 9000, 70000, 102, 10);
 //ポール砲

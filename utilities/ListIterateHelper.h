@@ -5,6 +5,8 @@
 #ifndef OSAFORK_LISTITERATEHELPER_H
 #define OSAFORK_LISTITERATEHELPER_H
 
+#include <memory>
+
 template <typename T>
 class ListIterateHelper {
 public:
@@ -13,10 +15,10 @@ public:
     virtual void removePreviousIfExists() = 0;
     virtual void removeThis() = 0;
     virtual void removeNextIfExists() = 0;
-    virtual void insertAsFirst(T* item) = 0;
-    virtual void insertAsLast(T* item) = 0;
-    virtual void insertAsPrevious(T* item) = 0;
-    virtual void insertAsNext(T* item) = 0;
+    virtual void insertAsFirst(std::shared_ptr<T> item) = 0;
+    virtual void insertAsLast(std::shared_ptr<T> item) = 0;
+    virtual void insertAsPrevious(std::shared_ptr<T> item) = 0;
+    virtual void insertAsNext(std::shared_ptr<T> item) = 0;
 };
 
 #endif //OSAFORK_LISTITERATEHELPER_H
